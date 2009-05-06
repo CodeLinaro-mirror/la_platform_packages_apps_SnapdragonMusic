@@ -594,6 +594,10 @@ public class AlbumBrowserActivity extends ListActivity
         
         @Override
         public void changeCursor(Cursor cursor) {
+            if (cursor.isClosed()) {
+                return;
+            }
+
             if (cursor != mActivity.mAlbumCursor) {
                 mActivity.mAlbumCursor = cursor;
                 getColumnIndices(cursor);
