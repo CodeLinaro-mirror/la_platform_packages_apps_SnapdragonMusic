@@ -236,7 +236,7 @@ public class TrackBrowserActivity extends ListActivity
         
         // if we didn't send the adapter off to another activity, we should
         // close the cursor
-        if (!mAdapterSent) {
+        if (!mAdapterSent && (mAdapter != null)) {
             Cursor c = mAdapter.getCursor();
             if (c != null) {
                 c.close();
@@ -882,7 +882,8 @@ public class TrackBrowserActivity extends ListActivity
                 if (resultCode == RESULT_CANCELED) {
                     finish();
                 } else {
-                    getTrackCursor(mAdapter.getQueryHandler(), null);
+                    if (mAdapter != null)
+                        getTrackCursor(mAdapter.getQueryHandler(), null);
                 }
                 break;
                 
