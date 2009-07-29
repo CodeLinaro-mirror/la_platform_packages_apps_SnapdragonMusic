@@ -977,6 +977,13 @@ public class MediaPlaybackService extends Service {
      * Starts playback of a previously opened file.
      */
     public void play() {
+
+        // If the player is not initialized, pick up the current track and start playback
+        if (!mPlayer.isInitialized())
+        {
+          openCurrent();
+        }
+
         if (mPlayer.isInitialized()) {
             mPlayer.start();
             setForeground(true);
@@ -1187,6 +1194,7 @@ public class MediaPlaybackService extends Service {
                         // all songs are already played. Go to the idle State
                         if (numUnplayed <= 0) {
                             Log.e("@@@@ Service","Songs Play list is empty so going to the idle State");
+                            stop(true); // Moving the Player to stop state, to acknowledge suspend
                             gotoIdleState();
                             return;
                         }
@@ -1195,6 +1203,7 @@ public class MediaPlaybackService extends Service {
                         }
                     } else {
                         // all done
+                        stop(true); // Moving the player to stop state, to acknowledge suspend
                         gotoIdleState();
                         return;
                     }
@@ -1218,6 +1227,7 @@ public class MediaPlaybackService extends Service {
                     // we're at the end of the list
                     if (mRepeatMode == REPEAT_NONE && !force) {
                         // all done
+                        stop(true); // Moving the player to stop state, to ack suspend
                         gotoIdleState();
                         notifyChange(PLAYBACK_COMPLETE);
                         return;
