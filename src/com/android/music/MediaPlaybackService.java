@@ -319,10 +319,11 @@ public class MediaPlaybackService extends Service {
         if (isPlaying()) {
             Log.e("MediaPlaybackService", "Service being destroyed while still playing.");
         }
-        // and for good measure, call mPlayer.stop(), which calls MediaPlayer.reset(), which
-        // releases the MediaPlayer's wake lock, if any.
-        mPlayer.stop();
-        
+
+        // release all MediaPlayer resources, including the native player and wakelocks
+        mPlayer.release();
+        mPlayer = null;
+
         if (mCursor != null) {
             mCursor.close();
             mCursor = null;
@@ -1683,6 +1684,14 @@ public class MediaPlaybackService extends Service {
         public void stop() {
             mMediaPlayer.reset();
             mIsInitialized = false;
+        }
+
+        /**
+        * You CANNOT use this player anymore after calling release()
+        */
+        public void release() {
+            stop();
+            mMediaPlayer.release();
         }
 
         public void pause() {
