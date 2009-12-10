@@ -184,7 +184,8 @@ public class MediaPlaybackService extends Service {
     };
     
     private void startAndFadeIn() {
-        mMediaplayerHandler.sendEmptyMessageDelayed(FADEIN, 10);
+        // Delay start for 500ms to allow time for post-call audio reroute.
+        mMediaplayerHandler.sendEmptyMessageDelayed(FADEIN, 500);
     }
     
     private Handler mMediaplayerHandler = new Handler() {
