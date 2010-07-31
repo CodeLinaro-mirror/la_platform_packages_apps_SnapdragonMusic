@@ -1821,7 +1821,6 @@ public class MediaPlaybackService extends Service {
                     mMediaPlayer.release();
                     mMediaPlayer = new MediaPlayer();
                     Toast.makeText(MediaPlaybackService.this, R.string.playback_failed, Toast.LENGTH_SHORT).show();
-                    next(false);
                     break;
                 }
                 return false;
