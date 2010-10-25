@@ -154,11 +154,14 @@ public class MediaPlaybackService extends Service {
     
     // interval after which we stop the service when idle
     private static final int IDLE_DELAY = 60000;
-    
+
+    private boolean mStartPlayback = false;
+
     private void startAndFadeIn() {
+        mStartPlayback = true;
         mMediaplayerHandler.sendEmptyMessageDelayed(FADEIN, 10);
     }
-    
+
     private Handler mMediaplayerHandler = new Handler() {
         float mCurrentVolume = 1.0f;
         @Override
@@ -166,7 +169,8 @@ public class MediaPlaybackService extends Service {
             MusicUtils.debugLog("mMediaplayerHandler.handleMessage " + msg.what);
             switch (msg.what) {
                 case FADEIN:
-                    if (!isPlaying()) {
+                    if (!isPlaying() && mStartPlayback) {
+                        mStartPlayback = false;
                         mCurrentVolume = 0f;
                         mPlayer.setVolume(mCurrentVolume);
                         play();
