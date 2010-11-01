@@ -169,8 +169,7 @@ public class AlbumBrowserActivity extends ListActivity
         // instead of closing the cursor directly keeps the framework from accessing
         // the closed cursor later.
         if (!mAdapterSent && mAdapter != null) {
-            // close the cursor if we didn't send it to another activity, to avoid cursor leaks
-            mAdapter.changeCursor(mAdapter.getCursor());
+            mAdapter.changeCursor(null);
         }
         // Because we pass the adapter to the next activity, we need to make
         // sure it doesn't keep a reference to this activity. We can do this
