@@ -776,6 +776,11 @@ public class MediaPlaybackActivity extends Activity implements MusicUtils.Defs,
                     if (!useDpadMusicControl()) {
                         break;
                     }
+                    mRepeatButton.setVisibility(View.VISIBLE);
+                    mShuffleButton.setVisibility(View.VISIBLE);
+                    mQueueButton.setVisibility(View.VISIBLE);
+                    setRepeatButtonImage();
+                    setShuffleButtonImage();
                     if (mService != null) {
                         if (!mSeeking && mStartSeekPos >= 0) {
                             mPauseButton.requestFocus();
@@ -797,6 +802,11 @@ public class MediaPlaybackActivity extends Activity implements MusicUtils.Defs,
                     if (!useDpadMusicControl()) {
                         break;
                     }
+                    mRepeatButton.setVisibility(View.VISIBLE);
+                    mShuffleButton.setVisibility(View.VISIBLE);
+                    mQueueButton.setVisibility(View.VISIBLE);
+                    setRepeatButtonImage();
+                    setShuffleButtonImage();
                     if (mService != null) {
                         if (!mSeeking && mStartSeekPos >= 0) {
                             mPauseButton.requestFocus();
