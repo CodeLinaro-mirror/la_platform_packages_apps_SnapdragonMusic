@@ -139,7 +139,27 @@ public class MediaPlaybackService extends Service {
     private AudioManager mAudioManager;
     private boolean mQueueIsSaveable = true;
     // used to track what type of audio focus loss caused the playback to pause
-    public static boolean mPausedByTransientLossOfFocus = false;
+    public static boolean mInternalPause = false;
+    // extending Transient Loss of focus for Bluetooth Suspend using Cause
+    public final static int PAUSE_REASON_NONE = 0;
+    public final static int PAUSE_BY_TRANSIENT_LOSS_OF_FOCUS = 1;
+    public final static int PAUSE_DUE_TO_A2DP_SUSPEND =2;
+    public static int  mPauseReason = PAUSE_REASON_NONE;
+
+    // when BluetoothA2DPService is available in Public SDK the below need not
+    // be redefined
+
+    public static final String EXTRA_SINK_STATE =
+          "android.bluetooth.a2dp.extra.SINK_STATE";
+    public static final String EXTRA_PREVIOUS_SINK_STATE =
+          "android.bluetooth.a2dp.extra.PREVIOUS_SINK_STATE";
+    public static final String ACTION_SINK_STATE_CHANGED =
+            "android.bluetooth.a2dp.action.SINK_STATE_CHANGED";
+    public static final int STATE_DISCONNECTED = 0;
+    public static final int STATE_CONNECTING   = 1;
+    public static final int STATE_CONNECTED    = 2;
+    public static final int STATE_DISCONNECTING = 3;
+    public static final int STATE_PLAYING    = 4;
 
     private SharedPreferences mPreferences;
     // We use this to distinguish between different cards when saving/restoring playlists.
@@ -197,7 +217,7 @@ public class MediaPlaybackService extends Service {
                         case AudioManager.AUDIOFOCUS_LOSS:
                             Log.v(LOGTAG, "AudioFocus: received AUDIOFOCUS_LOSS");
                             if(isPlaying()) {
-                                mPausedByTransientLossOfFocus = false;
+                                mInternalPause = false;
                             }
                             pause();
                             break;
@@ -205,14 +225,16 @@ public class MediaPlaybackService extends Service {
                         case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK:
                             Log.v(LOGTAG, "AudioFocus: received AUDIOFOCUS_LOSS_TRANSIENT");
                             if(isPlaying()) {
-                                mPausedByTransientLossOfFocus = true;
+                                mInternalPause = true;
+                                mPauseReason = PAUSE_BY_TRANSIENT_LOSS_OF_FOCUS;
                             }
                             pause();
                             break;
                         case AudioManager.AUDIOFOCUS_GAIN:
                             Log.v(LOGTAG, "AudioFocus: received AUDIOFOCUS_GAIN");
-                            if(!isPlaying() && mPausedByTransientLossOfFocus) {
-                                mPausedByTransientLossOfFocus = false;
+                            if(!isPlaying() && (mInternalPause) &&
+                               (PAUSE_BY_TRANSIENT_LOSS_OF_FOCUS == mPauseReason)) {
+                                mInternalPause = false;
                                 mCurrentVolume = 0f;
                                 mPlayer.setVolume(mCurrentVolume);
                                 play(); // also queues a fade-in
@@ -242,22 +264,52 @@ public class MediaPlaybackService extends Service {
             } else if (CMDTOGGLEPAUSE.equals(cmd) || TOGGLEPAUSE_ACTION.equals(action)) {
                 if (isPlaying()) {
                     pause();
-                    mPausedByTransientLossOfFocus = false;
+                    mInternalPause = false;
                 } else {
                     play();
                 }
             } else if (CMDPAUSE.equals(cmd) || PAUSE_ACTION.equals(action)) {
                 pause();
-                mPausedByTransientLossOfFocus = false;
+                mInternalPause = false;
             } else if (CMDSTOP.equals(cmd)) {
                 pause();
-                mPausedByTransientLossOfFocus = false;
+                mInternalPause = false;
                 seek(0);
             } else if (MediaAppWidgetProvider.CMDAPPWIDGETUPDATE.equals(cmd)) {
                 // Someone asked us to refresh a set of specific widgets, probably
                 // because they were just added.
                 int[] appWidgetIds = intent.getIntArrayExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS);
                 mAppWidgetProvider.performUpdate(MediaPlaybackService.this, appWidgetIds);
+            }
+        }
+    };
+
+    private BroadcastReceiver mA2dpUpdateReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            String action = intent.getAction();
+            float mCurrentVolume = 1.0f;
+            if( action.equals(ACTION_SINK_STATE_CHANGED) ) {
+                int curState = intent.getIntExtra(EXTRA_SINK_STATE,
+                                                  STATE_DISCONNECTED);
+                int prevState = intent.getIntExtra(EXTRA_PREVIOUS_SINK_STATE,
+                                                   STATE_DISCONNECTED);
+                if( (curState == STATE_CONNECTED) &&
+                    (prevState == STATE_PLAYING ) &&
+                    (isPlaying()) ) {
+                    mInternalPause = true;
+                    mPauseReason = PAUSE_DUE_TO_A2DP_SUSPEND;
+                    pause();
+                } else if( (curState == STATE_PLAYING) &&
+                           (prevState == STATE_CONNECTED) &&
+                           (!isPlaying()) &&
+                           (mInternalPause) &&
+                           (PAUSE_DUE_TO_A2DP_SUSPEND == mPauseReason)) {
+                    mInternalPause = false;
+                    mCurrentVolume = 0f;
+                    mPlayer.setVolume(mCurrentVolume);
+                    play(); // also queues a fade-in
+                }
             }
         }
     };
@@ -298,6 +350,12 @@ public class MediaPlaybackService extends Service {
         commandFilter.addAction(PREVIOUS_ACTION);
         registerReceiver(mIntentReceiver, commandFilter);
         
+        //handling A2DP state changes for remote suspend feature
+        IntentFilter btCommandFilter = new IntentFilter();
+        btCommandFilter.addAction(ACTION_SINK_STATE_CHANGED);
+        registerReceiver(mA2dpUpdateReceiver, btCommandFilter);
+
+
         PowerManager pm = (PowerManager)getSystemService(Context.POWER_SERVICE);
         mWakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, this.getClass().getName());
         mWakeLock.setReferenceCounted(false);
@@ -333,6 +391,7 @@ public class MediaPlaybackService extends Service {
             mCursor = null;
         }
 
+        unregisterReceiver(mA2dpUpdateReceiver);
         unregisterReceiver(mIntentReceiver);
         if (mUnmountReceiver != null) {
             unregisterReceiver(mUnmountReceiver);
@@ -600,16 +659,16 @@ public class MediaPlaybackService extends Service {
             } else if (CMDTOGGLEPAUSE.equals(cmd) || TOGGLEPAUSE_ACTION.equals(action)) {
                 if (isPlaying()) {
                     pause();
-                    mPausedByTransientLossOfFocus = false;
+                    mInternalPause = false;
                 } else {
                     play();
                 }
             } else if (CMDPAUSE.equals(cmd) || PAUSE_ACTION.equals(action)) {
                 pause();
-                mPausedByTransientLossOfFocus = false;
+                mInternalPause = false;
             } else if (CMDSTOP.equals(cmd)) {
                 pause();
-                mPausedByTransientLossOfFocus = false;
+                mInternalPause = false;
                 seek(0);
             }
         }
@@ -629,8 +688,8 @@ public class MediaPlaybackService extends Service {
         // Take a snapshot of the current playlist
         saveQueue(true);
 
-        if (isPlaying() || mPausedByTransientLossOfFocus) {
-            // something is currently playing, or will be playing once 
+        if (isPlaying() || mInternalPause) {
+            // something is currently playing, or will be playing once
             // an in-progress action requesting audio focus ends, so don't stop the service now.
             return true;
         }
@@ -653,7 +712,7 @@ public class MediaPlaybackService extends Service {
         @Override
         public void handleMessage(Message msg) {
             // Check again to make sure nothing is playing right now
-            if (isPlaying() || mPausedByTransientLossOfFocus || mServiceInUse
+            if (isPlaying() || mInternalPause || mServiceInUse
                     || mMediaplayerHandler.hasMessages(TRACK_ENDED)) {
                 return;
             }
@@ -780,7 +839,7 @@ public class MediaPlaybackService extends Service {
         // move part of list after insertion point
         int tailsize = mPlayListLen - position;
         for (int i = tailsize ; i > 0 ; i--) {
-            mPlayList[position + i] = mPlayList[position + i - addlen]; 
+            mPlayList[position + i] = mPlayList[position + i - addlen];
         }
         
         // copy list into playlist
