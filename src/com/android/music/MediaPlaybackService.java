@@ -814,17 +814,27 @@ public class MediaPlaybackService extends Service {
     private void notifyChange(String what) {
         
         Intent i = new Intent(what);
-        i.putExtra("id", Long.valueOf(getAudioId()));
+        try {
+            if (mCursor == null)
+                i.putExtra("id", -1);
+            else
+                i.putExtra("id", mCursor.getLong(mCursor.getColumnIndexOrThrow("_id")));
+
+            Cursor cu = getContentResolver().query(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
+                mCursorCols, MediaStore.Audio.Media.IS_MUSIC + "=1", null, null);
+            if (cu == null)
+                i.putExtra("ListSize", Long.valueOf(-1));
+            else
+                i.putExtra("ListSize", Long.valueOf(cu.getCount()));
+
+        } catch (Exception e) { Log.e(LOGTAG, "Exception: " + e); }
+
         i.putExtra("artist", getArtistName());
         i.putExtra("album",getAlbumName());
         i.putExtra("track", getTrackName());
         i.putExtra("playing", isPlaying());
         i.putExtra("duration", duration());
         i.putExtra("position", position());
-        if (mPlayList != null)
-            i.putExtra("ListSize", Long.valueOf(mPlayList.length));
-        else
-            i.putExtra("ListSize", Long.valueOf(mPlayListLen));
         sendStickyBroadcast(i);
         
         if (what.equals(QUEUE_CHANGED)) {
