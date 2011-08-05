@@ -771,6 +771,10 @@ public class MediaPlaybackActivity extends Activity implements MusicUtils.Defs,
                         break;
                     }
                     if (mService != null) {
+                        if (mStartSeekPos == -1 && mSeeking == false)
+                        {
+                            return true;
+                        }
                         if (!mSeeking && mStartSeekPos >= 0) {
                             mPauseButton.requestFocus();
                             if (mStartSeekPos < 1000) {
@@ -792,6 +796,10 @@ public class MediaPlaybackActivity extends Activity implements MusicUtils.Defs,
                         break;
                     }
                     if (mService != null) {
+                        if (mStartSeekPos == -1 && mSeeking == false)
+                        {
+                            return true;
+                        }
                         if (!mSeeking && mStartSeekPos >= 0) {
                             mPauseButton.requestFocus();
                             mService.next();
