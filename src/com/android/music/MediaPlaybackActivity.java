@@ -911,11 +911,16 @@ public class MediaPlaybackActivity extends Activity implements MusicUtils.Defs,
                 }
                 long newpos = mStartSeekPos - delta;
                 if (newpos < 0) {
-                    // move to previous track
-                    mService.prev();
-                    long duration = mService.duration();
-                    mStartSeekPos += duration;
-                    newpos += duration;
+                    int mode = mService.getRepeatMode();
+                    if (mode == MediaPlaybackService.REPEAT_CURRENT) {
+                        newpos = 0;
+                    }else{
+                        // move to previous track
+                        mService.prev();
+                        long duration = mService.duration();
+                        mStartSeekPos += duration;
+                        newpos += duration;
+                    }
                 }
                 if (((delta - mLastSeekEventTime) > 250) || repcnt < 0){
                     mService.seek(newpos);
@@ -951,10 +956,12 @@ public class MediaPlaybackActivity extends Activity implements MusicUtils.Defs,
                 long newpos = mStartSeekPos + delta;
                 long duration = mService.duration();
                 if (newpos >= duration) {
-                    // move to next track
-                    mService.next();
+                    int mode = mService.getRepeatMode();
+                    if (mode != MediaPlaybackService.REPEAT_CURRENT) {
+                        mService.next();
+                    }
+                    newpos = 0;
                     mStartSeekPos -= duration; // is OK to go negative
-                    newpos -= duration;
                 }
                 if (((delta - mLastSeekEventTime) > 250) || repcnt < 0){
                     mService.seek(newpos);
