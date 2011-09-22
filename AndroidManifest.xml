@@ -87,6 +87,10 @@
                 <action android:name="com.android.music.PLAYBACK_VIEWER" />
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
+            <intent-filter>
+                <action android:name="com.android.music.INTERNALPLAYBACK_VIEWER" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
         </activity>
 
         <activity android:name="AudioPreview" android:theme="@android:style/Theme.Dialog"
