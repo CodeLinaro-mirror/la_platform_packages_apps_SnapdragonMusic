@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2007 The Android Open Source Project
+ * Copyright (C) 2011, Code Aurora Forum. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -832,7 +833,7 @@ public class MediaPlaybackService extends Service {
         Intent i = new Intent(what);
         try {
             if (mCursor == null)
-                i.putExtra("id", -1);
+                i.putExtra("id", Long.valueOf(-1));
             else
                 i.putExtra("id", mCursor.getLong(mCursor.getColumnIndexOrThrow("_id")));
 
