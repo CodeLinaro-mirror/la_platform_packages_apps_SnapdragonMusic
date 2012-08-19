@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2007 The Android Open Source Project
+ * Copyright (c) 2012, Code Aurora Forum. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -845,11 +846,17 @@ public class ArtistAlbumBrowserActivity extends ExpandableListActivity
         }
 
         public Object[] getSections() {
-            return mIndexer.getSections();
+            if(mIndexer != null) {
+                return mIndexer.getSections();
+            }
+            return null;
         }
         
         public int getPositionForSection(int sectionIndex) {
-            return mIndexer.getPositionForSection(sectionIndex);
+            if(mIndexer != null) {
+                return mIndexer.getPositionForSection(sectionIndex);
+            }
+            return 0;
         }
         
         public int getSectionForPosition(int position) {

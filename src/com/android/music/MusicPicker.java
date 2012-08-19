@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2008 The Android Open Source Project
+ * Copyright (c) 2012, Code Aurora Forum. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -352,8 +353,10 @@ public class MusicPicker extends ListActivity
                 // No cursor, the section doesn't exist so just return 0
                 return 0;
             }
-            
-            return mIndexer.getPositionForSection(section);
+            if(mIndexer != null) {
+                return mIndexer.getPositionForSection(section);
+            }
+            return 0;
         }
 
         public int getSectionForPosition(int position) {
