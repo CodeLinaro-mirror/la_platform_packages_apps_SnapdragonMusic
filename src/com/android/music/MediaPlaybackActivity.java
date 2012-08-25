@@ -1287,7 +1287,6 @@ public class MediaPlaybackActivity extends Activity implements MusicUtils.Defs,
                     queueNextRefresh(next);
             }
             else if (Intent.ACTION_SCREEN_OFF.equals(intent.getAction())) {
-                paused = true;
 
                 if (!mIntentDeRegistered) {
                     mHandler.removeMessages(REFRESH);
