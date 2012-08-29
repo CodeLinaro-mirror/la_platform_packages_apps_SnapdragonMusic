@@ -1294,6 +1294,7 @@ public class MediaPlaybackActivity extends Activity implements MusicUtils.Defs,
         @Override
         public void onReceive(Context context, Intent intent) {
             if (Intent.ACTION_SCREEN_ON.equals(intent.getAction())) {
+                paused = false;
                 if (mIntentDeRegistered) {
                     IntentFilter f = new IntentFilter();
                     f.addAction(MediaPlaybackService.PLAYSTATE_CHANGED);
@@ -1310,7 +1311,7 @@ public class MediaPlaybackActivity extends Activity implements MusicUtils.Defs,
                     queueNextRefresh(next);
             }
             else if (Intent.ACTION_SCREEN_OFF.equals(intent.getAction())) {
-
+                paused = true;
                 if (!mIntentDeRegistered) {
                     mHandler.removeMessages(REFRESH);
                     unregisterReceiver(mStatusListener);
