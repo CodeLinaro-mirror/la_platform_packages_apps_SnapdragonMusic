@@ -2303,6 +2303,8 @@ public class MediaPlaybackService extends Service {
 
         public void stop() {
             mCurrentMediaPlayer.reset();
+            if(mNextMediaPlayer != null)
+               mNextMediaPlayer.reset();
             mIsInitialized = false;
         }
 
