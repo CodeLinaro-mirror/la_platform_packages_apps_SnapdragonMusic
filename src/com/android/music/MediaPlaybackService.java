@@ -101,10 +101,10 @@ public class MediaPlaybackService extends Service {
     public static final String PAUSE_ACTION = "com.android.music.musicservicecommand.pause";
     public static final String PREVIOUS_ACTION = "com.android.music.musicservicecommand.previous";
     public static final String NEXT_ACTION = "com.android.music.musicservicecommand.next";
-    private static final String PLAYSTATUS_REQUEST = "com.android.music.playstatusrequest";
-    private static final String PLAYSTATUS_RESPONSE = "com.android.music.playstatusresponse";
-    private static final String PLAYERSETTINGS_REQUEST = "com.android.music.playersettingsrequest";
-    private static final String PLAYERSETTINGS_RESPONSE = "com.android.music.playersettingsresponse";
+    private static final String PLAYSTATUS_REQUEST = "com.qualcomm.avrcp.playstatusrequest";
+    private static final String PLAYSTATUS_RESPONSE = "com.qualcomm.avrcp.playstatusresponse";
+    private static final String PLAYERSETTINGS_REQUEST = "com.qualcomm.avrcp.playersettingsrequest";
+    private static final String PLAYERSETTINGS_RESPONSE = "com.qualcomm.avrcp.playersettingsresponse";
     private static final String EXTRA_SHUFFLE_VAL = "shuffle";
     private static final String EXTRA_REPEAT_VAL = "repeat";
 
