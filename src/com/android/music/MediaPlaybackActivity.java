@@ -65,6 +65,7 @@ import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.SeekBar.OnSeekBarChangeListener;
+import android.content.ActivityNotFoundException;
 
 
 public class MediaPlaybackActivity extends Activity implements MusicUtils.Defs,
@@ -640,7 +641,12 @@ public class MediaPlaybackActivity extends Activity implements MusicUtils.Defs,
                 case EFFECTS_PANEL: {
                     Intent i = new Intent(AudioEffect.ACTION_DISPLAY_AUDIO_EFFECT_CONTROL_PANEL);
                     i.putExtra(AudioEffect.EXTRA_AUDIO_SESSION, mService.getAudioSessionId());
-                    startActivityForResult(i, EFFECTS_PANEL);
+                    try {
+                        startActivityForResult(i, EFFECTS_PANEL);
+                    } catch (ActivityNotFoundException e) {
+                        // Don't crash if activity not found
+                        Log.w("MediaPlaybackActivity", "effects panel activity start failed; intent = " + i);
+                    }
                     return true;
                 }
             }
