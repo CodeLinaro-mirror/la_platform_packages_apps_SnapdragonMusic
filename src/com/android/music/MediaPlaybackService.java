@@ -1426,11 +1426,14 @@ public class MediaPlaybackService extends Service {
             if (mShuffleMode == SHUFFLE_NORMAL) {
                 // go to previously-played track and remove it from the history
                 int histsize = mHistory.size();
-                if (histsize == 0) {
-                    // prev is a no-op
+                if (histsize == 0 || histsize == 1) {
+                    //0: prev is a no-op
+                    //1: there is only 1 track, previous track is not existent
                     return;
                 }
-                Integer pos = mHistory.remove(histsize - 1);
+                //Remove the last track, get the previous's position
+                mHistory.remove(histsize - 1);
+                Integer pos = mHistory.lastElement().intValue();
                 mPlayPos = pos.intValue();
             } else {
                 if (mPlayPos > 0) {
@@ -1464,7 +1467,10 @@ public class MediaPlaybackService extends Service {
             // Store the current file in the history, but keep the history at a
             // reasonable size
             if (mPlayPos >= 0) {
-                mHistory.add(mPlayPos);
+                //If mPlayPos equals the last value of mHistory, don't add it
+                if (mHistory.size() == 0 || mHistory.lastElement().intValue() != mPlayPos) {
+                    mHistory.add(mPlayPos);
+                }
             }
             if (mHistory.size() > MAX_HISTORY_SIZE) {
                 mHistory.removeElementAt(0);
