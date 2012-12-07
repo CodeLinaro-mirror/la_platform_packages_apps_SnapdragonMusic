@@ -73,6 +73,7 @@
                 android:launchMode="singleTask"
                 android:clearTaskOnLaunch="true"
                 android:excludeFromRecents="true"
+                android:hardwareAccelerated="true"
                 android:exported="true" >
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
