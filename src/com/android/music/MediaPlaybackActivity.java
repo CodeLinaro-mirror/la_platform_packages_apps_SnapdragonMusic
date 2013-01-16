@@ -89,6 +89,8 @@ public class MediaPlaybackActivity extends Activity implements MusicUtils.Defs,
     private ServiceToken mToken;
     private boolean mIntentDeRegistered = false;
 
+    private static final String TAG = "MediaPlaybackActivity";
+
     public MediaPlaybackActivity()
     {
     }
@@ -506,9 +508,6 @@ public class MediaPlaybackActivity extends Activity implements MusicUtils.Defs,
     public void onResume() {
         super.onResume();
         updateTrackInfo();
-        if (mIntentDeRegistered) {
-             paused = false;
-        }
         setPauseButtonImage();
     }
     
@@ -1282,9 +1281,11 @@ public class MediaPlaybackActivity extends Activity implements MusicUtils.Defs,
                     registerReceiver(mStatusListener, new IntentFilter(f));
                     mIntentDeRegistered = false;
                 }
-                    updateTrackInfo();
-                    long next = refreshNow();
-                    queueNextRefresh(next);
+                paused = false;
+
+                updateTrackInfo();
+                long next = refreshNow();
+                queueNextRefresh(next);
             }
             else if (Intent.ACTION_SCREEN_OFF.equals(intent.getAction())) {
                 paused = true;
