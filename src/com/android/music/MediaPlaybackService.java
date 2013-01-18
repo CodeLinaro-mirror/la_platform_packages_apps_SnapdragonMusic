@@ -1007,8 +1007,12 @@ public class MediaPlaybackService extends Service {
         Cursor c = getContentResolver().query(
                 MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
                 mCursorCols, "_id=" + id , null, null);
-        if (c != null) {
+        if ((c != null) && (c.getCount() > 0)) {
             c.moveToFirst();
+        }
+        else {
+            Log.d(LOGTAG, "No valid Records for the cursor !!");
+            c = null;
         }
         return c;
     }
