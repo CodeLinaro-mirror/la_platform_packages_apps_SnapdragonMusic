@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2007 The Android Open Source Project
+ * Copyright (c) 2013 The Linux Foundation. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -1132,6 +1133,8 @@ public class MediaPlaybackService extends Service {
                             mPlayPos = 0;
                         }
                     }
+                    String fileName = getTrackName();
+                    Log.e("MediaPlaybackActivity", "AUDIOFILENAME IS : " +fileName);
                 } catch (UnsupportedOperationException ex) {
                 }
             }
@@ -1158,8 +1161,8 @@ public class MediaPlaybackService extends Service {
         if (mPlayer.isInitialized()) {
             // if we are at the end of the song, go to the next song first
             long duration = mPlayer.duration();
-            if (mRepeatMode != REPEAT_CURRENT && duration > 2000 &&
-                mPlayer.position() >= duration - 2000) {
+            if (mRepeatMode != REPEAT_CURRENT && duration > 1000 &&
+                mPlayer.position() >= duration - 1000) {
                 gotoNext(true);
             }
 
