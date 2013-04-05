@@ -90,6 +90,8 @@ public class MediaPlaybackActivity extends Activity implements MusicUtils.Defs,
     private ServiceToken mToken;
     private boolean mIntentDeRegistered = false;
 
+    private static final String TAG = "MediaPlaybackActivity";
+
     public MediaPlaybackActivity()
     {
     }
@@ -508,9 +510,6 @@ public class MediaPlaybackActivity extends Activity implements MusicUtils.Defs,
     public void onResume() {
         super.onResume();
         updateTrackInfo();
-        if (mIntentDeRegistered) {
-             paused = false;
-        }
         setPauseButtonImage();
     }
     
@@ -1295,7 +1294,6 @@ public class MediaPlaybackActivity extends Activity implements MusicUtils.Defs,
         @Override
         public void onReceive(Context context, Intent intent) {
             if (Intent.ACTION_SCREEN_ON.equals(intent.getAction())) {
-                paused = false;
                 if (mIntentDeRegistered) {
                     IntentFilter f = new IntentFilter();
                     f.addAction(MediaPlaybackService.PLAYSTATE_CHANGED);
@@ -1305,11 +1303,11 @@ public class MediaPlaybackActivity extends Activity implements MusicUtils.Defs,
                     registerReceiver(mStatusListener, new IntentFilter(f));
                     mIntentDeRegistered = false;
                 }
-                    if (mPosOverride > 0)
-                        mPosOverride = -1;
-                    updateTrackInfo();
-                    long next = refreshNow();
-                    queueNextRefresh(next);
+                paused = false;
+
+                updateTrackInfo();
+                long next = refreshNow();
+                queueNextRefresh(next);
             }
             else if (Intent.ACTION_SCREEN_OFF.equals(intent.getAction())) {
                 paused = true;
