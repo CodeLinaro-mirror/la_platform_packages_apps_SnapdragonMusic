@@ -58,6 +58,7 @@ import android.widget.TabWidget;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ImageButton;
+import android.database.sqlite.SQLiteDiskIOException;
 
 
 import java.io.File;
@@ -605,6 +606,10 @@ public class MusicUtils {
             }
             return resolver.query(uri, projection, selection, selectionArgs, sortOrder);
          } catch (UnsupportedOperationException ex) {
+            return null;
+        } catch(SQLiteDiskIOException ex){
+            //add IO Exception catch if SD is unprepared
+            Log.d(TAG, "query  SQLiteDiskIOException : " + ex);    
             return null;
         }
         
