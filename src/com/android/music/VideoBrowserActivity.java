@@ -17,6 +17,7 @@
 package com.android.music;
 
 import android.app.ListActivity;
+import android.app.SearchManager;
 import android.content.ContentResolver;
 import android.content.ContentUris;
 import android.content.Intent;
@@ -24,6 +25,7 @@ import android.database.Cursor;
 import android.media.AudioManager;
 import android.os.Bundle;
 import android.provider.MediaStore;
+import android.text.TextUtils;
 import android.view.View;
 import android.widget.ListView;
 import android.widget.SimpleCursorAdapter;
@@ -32,6 +34,8 @@ import java.lang.Integer;
 
 public class VideoBrowserActivity extends ListActivity implements MusicUtils.Defs
 {
+    private String mFilterString = "";
+
     public VideoBrowserActivity()
     {
     }
@@ -42,6 +46,11 @@ public class VideoBrowserActivity extends ListActivity implements MusicUtils.Def
     {
         super.onCreate(icicle);
         setVolumeControlStream(AudioManager.STREAM_MUSIC);
+        Intent intent = getIntent();
+        if (Intent.ACTION_SEARCH.equals(intent.getAction())) {
+            mFilterString = intent.getStringExtra(SearchManager.QUERY);
+        }
+
         init();
     }
 
@@ -82,7 +91,6 @@ public class VideoBrowserActivity extends ListActivity implements MusicUtils.Def
         mCursor.moveToPosition(position);
         String type = mCursor.getString(mCursor.getColumnIndexOrThrow(MediaStore.Video.Media.MIME_TYPE));
         intent.setDataAndType(ContentUris.withAppendedId(MediaStore.Video.Media.EXTERNAL_CONTENT_URI, id), type);
-        
         startActivity(intent);
     }
 
@@ -99,7 +107,11 @@ public class VideoBrowserActivity extends ListActivity implements MusicUtils.Def
             System.out.println("resolver = null");
         } else {
             mSortOrder = MediaStore.Video.Media.TITLE + " COLLATE UNICODE";
-            mWhereClause = MediaStore.Video.Media.TITLE + " != ''";
+            if (TextUtils.isEmpty(mFilterString)){
+                mWhereClause = MediaStore.Video.Media.TITLE + " != ''";
+            }else{
+                mWhereClause = MediaStore.Video.Media.TITLE + " like '%"+mFilterString+"%'";
+            }
             mCursor = resolver.query(MediaStore.Video.Media.EXTERNAL_CONTENT_URI,
                 cols, mWhereClause , null, mSortOrder);
         }
