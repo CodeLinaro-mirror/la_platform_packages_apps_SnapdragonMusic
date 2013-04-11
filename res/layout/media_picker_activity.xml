@@ -22,7 +22,6 @@
 
     <include layout="@layout/sd_error" />
 
-    <include layout="@layout/buttonbar" />
 
     <com.android.music.TouchInterceptor
         android:id="@android:id/list"
@@ -33,6 +32,5 @@
         android:drawSelectorOnTop="false"
         android:fastScrollEnabled="true" /> 
 
-    <include layout="@layout/nowplaying" />
 
 </LinearLayout>
