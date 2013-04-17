@@ -382,10 +382,11 @@ public class AudioPreview extends Activity implements OnPreparedListener, OnErro
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
         MenuItem item = menu.findItem(OPEN_IN_MUSIC);
-        if (mMediaId >= 0) {
+        //delete , it does nothing there
+        /*if (mMediaId >= 0) {
             item.setVisible(true);
             return true;
-        }
+        }*/
         item.setVisible(false);
         return false;
     }

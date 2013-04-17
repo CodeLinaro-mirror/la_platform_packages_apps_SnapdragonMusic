@@ -56,12 +56,13 @@
             />
         </LinearLayout>
 
-        <ImageView android:id="@+id/icon"
+        <ImageButton 
+            android:id="@+id/icon"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_vertical"
             android:layout_marginLeft="16dip"
-            android:background="@drawable/indicator_ic_mp_playing_large"
+            android:background="@drawable/btn_playback_ic_pause_small"
         />
 
     </LinearLayout>

@@ -273,6 +273,9 @@ public class MediaPlaybackActivity extends Activity implements MusicUtils.Defs,
         String song;
         long audioid;
         
+        //add for refresh the backgroud color
+        view.setBackgroundColor(0);
+        view.invalidate();
         try {
             artist = mService.getArtistName();
             album = mService.getAlbumName();

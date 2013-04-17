@@ -828,6 +828,12 @@ public class MediaPlaybackService extends Service {
                         mQueueIsSaveable = false;
                         closeExternalStorageFiles(intent.getData().getPath());
                     } else if (action.equals(Intent.ACTION_MEDIA_MOUNTED)) {
+                        //when play music in background, delete file in filemanager will not effect music to play
+                    	if ( intent.getStringExtra ( "FileChange" ) != null ){
+                    	    notifyChange(QUEUE_CHANGED);
+                            notifyChange(META_CHANGED);
+                    	    return;
+                    	}
                         mMediaMountedCount++;
                         mCardId = MusicUtils.getCardId(MediaPlaybackService.this);
                         reloadQueue();

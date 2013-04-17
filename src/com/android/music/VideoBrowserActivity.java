@@ -49,7 +49,7 @@ public class VideoBrowserActivity extends ListActivity implements MusicUtils.Def
 
         // Set the layout for this activity.  You can find it
         // in assets/res/any/layout/media_picker_activity.xml
-        setContentView(R.layout.media_picker_activity);
+        setContentView(R.layout.video_picker_activity);
 
         MakeCursor();
 

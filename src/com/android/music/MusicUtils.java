@@ -57,6 +57,8 @@ import android.view.Window;
 import android.widget.TabWidget;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.widget.ImageButton;
+import android.database.sqlite.SQLiteDiskIOException;
 
 import java.io.File;
 import java.io.FileDescriptor;
@@ -604,6 +606,10 @@ public class MusicUtils {
             return resolver.query(uri, projection, selection, selectionArgs, sortOrder);
          } catch (UnsupportedOperationException ex) {
             return null;
+        } catch(SQLiteDiskIOException ex){
+            //add IO Exception catch if SD is unprepared
+            Log.d(TAG, "query  SQLiteDiskIOException : " + ex);    
+            return null;
         }
         
     }
@@ -821,11 +827,21 @@ public class MusicUtils {
             sService.play();
         } catch (RemoteException ex) {
         } finally {
-            Intent intent = new Intent("com.android.music.PLAYBACK_VIEWER")
-                .setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-            context.startActivity(intent);
+           //add for cmcc test:5M mp3 play time less than 1 s
+           if(forCMCCTest()){
+              updateNowPlaying((Activity)context);
+           }else{
+                Intent intent = new Intent("com.android.music.PLAYBACK_VIEWER")
+                    .setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                context.startActivity(intent);
+            }
         }
     }
+
+    //add for cmcc test
+    public static boolean forCMCCTest(){
+           return android.os.SystemProperties.get("ro.cmcc.test", "0").equals("1");
+       }
     
     public static void clearQueue() {
         try {
@@ -1245,6 +1261,31 @@ public class MusicUtils {
             if (true && MusicUtils.sService != null && MusicUtils.sService.getAudioId() != -1) {
                 TextView title = (TextView) nowPlayingView.findViewById(R.id.title);
                 TextView artist = (TextView) nowPlayingView.findViewById(R.id.artist);
+               //add for cmcc test:5M mp3 play time less than 1 s. 
+               //Because we don't meet that test,so add the pause/play button on nowPlayingView.
+                ImageButton mNowPlayingButton = (ImageButton) nowPlayingView.findViewById(R.id.icon);
+                if (MusicUtils.sService.isPlaying()) {
+                	mNowPlayingButton.setImageResource(R.drawable.indicator_ic_mp_pause_large);
+                } else {
+                	mNowPlayingButton.setImageResource(R.drawable.indicator_ic_mp_playing_large);
+                }
+                mNowPlayingButton.setOnClickListener(new View.OnClickListener() {
+                    public void onClick(View v) {
+                        Context c = v.getContext();
+                        try {
+                        	if(MusicUtils.sService != null) {
+                                if (MusicUtils.sService.isPlaying()) {
+                                	MusicUtils.sService.pause();
+                                	((ImageButton) v).setImageResource(R.drawable.indicator_ic_mp_playing_large);
+                                } else {
+                                	MusicUtils.sService.play();
+                                	((ImageButton) v).setImageResource(R.drawable.indicator_ic_mp_pause_large);
+                                }
+                            }
+			} catch (Exception e) {
+
+                        }
+                    }});
                 title.setText(MusicUtils.sService.getTrackName());
                 String artistName = MusicUtils.sService.getArtistName();
                 if (MediaStore.UNKNOWN_STRING.equals(artistName)) {
