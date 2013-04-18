@@ -580,7 +580,7 @@ public class TrackBrowserActivity extends ListActivity
         @Override
         public void onReceive(Context context, Intent intent) {
             getListView().invalidateViews();
-            if (!mEditMode) {
+            if (!"nowplaying".equals(mPlaylist)) {
                 MusicUtils.updateNowPlaying(TrackBrowserActivity.this);
             }
         }
