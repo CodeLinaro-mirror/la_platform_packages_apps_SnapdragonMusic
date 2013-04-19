@@ -58,6 +58,7 @@ import java.io.FileDescriptor;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.lang.ref.WeakReference;
+import java.lang.reflect.Method;
 import java.util.Random;
 import java.util.Vector;
 
@@ -1295,10 +1296,37 @@ public class MediaPlaybackService extends Service {
         }
     }
 
+    //Add function:Music can not play when in calling state 
+    public boolean phoneIsOffhook() {
+        boolean phoneOffhook = false;
+        try {
+			Class<?> c = Class.forName("android.telephony.TelephonyManager");
+			Method hideGetDefault = c.getMethod("getDefault");
+			Method hidegetCallState = c.getMethod("getCallState");
+			int callState = (Integer) hidegetCallState.invoke(hideGetDefault
+					.invoke(c));
+			if (callState != 0) {
+				phoneOffhook = true;
+			} else {
+				phoneOffhook = false;
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+        }
+        return phoneOffhook;
+    }
     /**
      * Starts playback of a previously opened file.
      */
     public void play() {
+    	//Add function:Music can not play when in calling state.
+    	boolean mPhoneOffhook = phoneIsOffhook();
+    	Log.d(LOGTAG, "mPhoneOffhook  state is  ++++++++"+mPhoneOffhook);
+        if(mPhoneOffhook) {
+            String message = getString(R.string.music_inCall);
+            Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
+            return;
+        }
         mAudioManager.requestAudioFocus(mAudioFocusListener, AudioManager.STREAM_MUSIC,
                 AudioManager.AUDIOFOCUS_GAIN);
         mAudioManager.registerMediaButtonEventReceiver(new ComponentName(this.getPackageName(),
