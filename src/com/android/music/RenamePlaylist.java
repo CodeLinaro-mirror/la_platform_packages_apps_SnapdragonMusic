@@ -18,9 +18,11 @@ package com.android.music;
 
 import android.app.Activity;
 import android.content.ContentResolver;
+import android.content.ContentUris;
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.media.AudioManager;
+import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.text.Editable;
@@ -170,6 +172,11 @@ public class RenamePlaylist extends Activity
             if (name != null && name.length() > 0) {
                 ContentResolver resolver = getContentResolver();
                 ContentValues values = new ContentValues(1);
+                int id = idForplaylist(name);
+                if (id >= 0) {
+                	Uri uri = ContentUris.withAppendedId(MediaStore.Audio.Playlists.EXTERNAL_CONTENT_URI, id);
+                	resolver.delete(uri, null, null);
+                } 
                 values.put(MediaStore.Audio.Playlists.NAME, name);
                 resolver.update(MediaStore.Audio.Playlists.EXTERNAL_CONTENT_URI,
                         values,
