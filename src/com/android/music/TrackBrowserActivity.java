@@ -793,7 +793,7 @@ public class TrackBrowserActivity extends ListActivity
     }
 
     private void removeItem() {
-        int curcount = mTrackCursor.getCount();
+        int curcount = mTrackCursor != null ? mTrackCursor.getCount() : 0;
         int curpos = mTrackList.getSelectedItemPosition();
         if (curcount == 0 || curpos < 0) {
             return;
@@ -836,7 +836,7 @@ public class TrackBrowserActivity extends ListActivity
     }
     
     private void moveItem(boolean up) {
-        int curcount = mTrackCursor.getCount(); 
+        int curcount = mTrackCursor != null ? mTrackCursor.getCount() : 0;
         int curpos = mTrackList.getSelectedItemPosition();
         if ( (up && curpos < 1) || (!up  && curpos >= curcount - 1)) {
             return;
@@ -884,7 +884,7 @@ public class TrackBrowserActivity extends ListActivity
     @Override
     protected void onListItemClick(ListView l, View v, int position, long id)
     {
-        if (mTrackCursor.getCount() == 0) {
+        if ((mTrackCursor == null) || (mTrackCursor.getCount() == 0)) {
             return;
         }
         // When selecting a track from the queue, just jump there instead of
