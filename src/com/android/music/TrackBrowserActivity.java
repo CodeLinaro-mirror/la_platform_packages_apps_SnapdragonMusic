@@ -356,6 +356,13 @@ public class TrackBrowserActivity extends ListActivity
         outcicle.putString("genre", mGenre);
         outcicle.putBoolean("editmode", mEditMode);
         super.onSaveInstanceState(outcicle);
+        //workaround to fix the illegal state exception.Put sth in outState after
+        //super.onSaveInstanceState(outcicle), it will set mStateSaved(in
+        //fragment manager) to false.
+        if (outcicle.isEmpty()) {
+            Log.d(LOGTAG, "Workaround fix");
+            outcicle.putBoolean("bug:fix", true);
+        }
     }
     
     public void init(Cursor newCursor, boolean isLimited) {
