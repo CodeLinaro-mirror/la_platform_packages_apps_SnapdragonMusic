@@ -47,6 +47,7 @@ import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.SeekBar.OnSeekBarChangeListener;
 import android.widget.Toast;
+import android.view.KeyEvent;
 
 import java.io.IOException;
 
@@ -206,6 +207,16 @@ public class AudioPreview extends Activity implements OnPreparedListener, OnErro
     public void onDestroy() {
         stopPlayback();
         super.onDestroy();
+    }
+
+    @Override
+    public boolean dispatchKeyEvent(KeyEvent event) {
+        if (event.getAction() == KeyEvent.ACTION_UP &&
+                event.getKeyCode() == KeyEvent.KEYCODE_BACK) {
+            finish();
+            return true;
+        }
+        return super.dispatchKeyEvent(event);
     }
 
     private void stopPlayback() {
