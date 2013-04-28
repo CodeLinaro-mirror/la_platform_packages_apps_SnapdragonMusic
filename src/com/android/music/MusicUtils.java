@@ -807,6 +807,10 @@ public class MusicUtils {
         try {
             if (force_shuffle) {
                 sService.setShuffleMode(MediaPlaybackService.SHUFFLE_NORMAL);
+                //"repeating current song" and "shuffle all" can not exist at the same time
+                if(sService.getRepeatMode() == MediaPlaybackService.REPEAT_CURRENT){
+                	sService.setRepeatMode(MediaPlaybackService.REPEAT_ALL);
+                }
             }
             long curid = sService.getAudioId();
             int curpos = sService.getQueuePosition();
