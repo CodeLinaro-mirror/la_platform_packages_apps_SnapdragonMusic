@@ -370,28 +370,40 @@ public class MediaPlaybackActivity extends Activity implements MusicUtils.Defs,
 
     private OnSeekBarChangeListener mSeekListener = new OnSeekBarChangeListener() {
         public void onStartTrackingTouch(SeekBar bar) {
-            mLastSeekEventTime = 0;
+            //mLastSeekEventTime = 0;
             mFromTouch = true;
         }
         public void onProgressChanged(SeekBar bar, int progress, boolean fromuser) {
             if (!fromuser || (mService == null)) return;
             long now = SystemClock.elapsedRealtime();
-            if ((now - mLastSeekEventTime) > 250) {
+            /*if ((now - mLastSeekEventTime) > 250) {
                 mLastSeekEventTime = now;
                 mPosOverride = mDuration * progress / 1000;
                 try {
                     mService.seek(mPosOverride);
                 } catch (RemoteException ex) {
-                }
+                }*/
 
                 // trackball event, allow progress updates
                 if (!mFromTouch) {
+                	mPosOverride = mDuration * progress / 1000;
+                    try {
+                        mService.seek(mPosOverride);
+                    } catch (RemoteException ex) {
+                    }
                     refreshNow();
                     mPosOverride = -1;
                 }
             }
-        }
+        //}
         public void onStopTrackingTouch(SeekBar bar) {
+        	if(mService != null){
+        		mPosOverride = mDuration * bar.getProgress() / 1000;
+                try {
+                    mService.seek(mPosOverride);
+                } catch (RemoteException ex) {
+                }
+        	}
             mPosOverride = -1;
             mFromTouch = false;
         }
@@ -1187,8 +1199,9 @@ public class MediaPlaybackActivity extends Activity implements MusicUtils.Defs,
             if ((pos >= 0) && (mDuration > 0)) {
                 mCurrentTime.setText(MusicUtils.makeTimeString(this, pos / 1000));
                 int progress = (int) (1000 * pos / mDuration);
-                mProgress.setProgress(progress);
-                
+                if(!mFromTouch){
+                	mProgress.setProgress(progress);
+                }
                 if (mService.isPlaying()) {
                     mCurrentTime.setVisibility(View.VISIBLE);
                 } else {
@@ -1199,7 +1212,9 @@ public class MediaPlaybackActivity extends Activity implements MusicUtils.Defs,
                 }
             } else {
                 mCurrentTime.setText("--:--");
-                mProgress.setProgress(1000);
+                if(!mFromTouch){
+                	mProgress.setProgress(1000);
+                }
             }
             // calculate the number of milliseconds until the next full second, so
             // the counter can be updated at just the right time
