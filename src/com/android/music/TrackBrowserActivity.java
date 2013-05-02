@@ -465,6 +465,10 @@ public class TrackBrowserActivity extends ListActivity
                     }    
                     cursor.deactivate();
                 }
+                if(null != cursor){
+                	cursor.close();
+                	cursor = null;
+                }
                 if (fancyName == null || fancyName.equals(MediaStore.UNKNOWN_STRING)) {
                     fancyName = getString(R.string.unknown_album_name);
                 }
@@ -494,6 +498,10 @@ public class TrackBrowserActivity extends ListActivity
                     }
                     cursor.deactivate();
                 }
+                if(null != cursor){
+                	cursor.close();
+                	cursor = null;
+                }
             }
         } else if (mGenre != null) {
             String [] cols = new String [] {
@@ -508,6 +516,10 @@ public class TrackBrowserActivity extends ListActivity
                     fancyName = cursor.getString(0);
                 }
                 cursor.deactivate();
+            }
+            if(null != cursor){
+            	cursor.close();
+            	cursor = null;
             }
         }
 
@@ -1109,7 +1121,10 @@ public class TrackBrowserActivity extends ListActivity
             makeNowPlayingCursor();
         }
         private void makeNowPlayingCursor() {
+        	if(null != mCurrentPlaylistCursor){
+        		mCurrentPlaylistCursor.close();
             mCurrentPlaylistCursor = null;
+        	}
             try {
                 mNowPlaying = mService.getQueue();
             } catch (RemoteException ex) {
