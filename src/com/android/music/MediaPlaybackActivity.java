@@ -187,6 +187,7 @@ public class MediaPlaybackActivity extends Activity implements MusicUtils.Defs,
         } else if (action == MotionEvent.ACTION_UP ||
                 action == MotionEvent.ACTION_CANCEL) {
             v.setBackgroundColor(0);
+            v.invalidate();
             if (mDraggingLabel) {
                 Message msg = mLabelScroller.obtainMessage(0, tv);
                 mLabelScroller.sendMessageDelayed(msg, 1000);
