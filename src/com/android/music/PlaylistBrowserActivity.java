@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2007 The Android Open Source Project
- * Copyright (c) 2012, Code Aurora Forum. All rights reserved.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -214,11 +214,6 @@ public class PlaylistBrowserActivity extends ListActivity
     public void onResume() {
         super.onResume();
 
-        IntentFilter f = new IntentFilter();
-        f.addAction(MediaPlaybackService.META_CHANGED);
-	 f.addAction(MediaPlaybackService.QUEUE_CHANGED);
-	 registerReceiver(mTrackListListener, f);
-	 mTrackListListener.onReceive(null, null);
         MusicUtils.setSpinnerState(this);
         MusicUtils.updateNowPlaying(PlaylistBrowserActivity.this);
         //When system language is changed, the name of "Recently added" is also changed
@@ -229,19 +224,9 @@ public class PlaylistBrowserActivity extends ListActivity
     }
     @Override
     public void onPause() {
-        unregisterReceiver(mTrackListListener);
         mReScanHandler.removeCallbacksAndMessages(null);
         super.onPause();
     }
-
-    private BroadcastReceiver mTrackListListener = new BroadcastReceiver() {
-	    @Override
-	    public void onReceive(Context context, Intent intent) {
-			getListView().invalidateViews();
-			MusicUtils.updateNowPlaying(PlaylistBrowserActivity.this);
-	     }
-    };
-	
     private BroadcastReceiver mScanListener = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
