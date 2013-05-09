@@ -1121,10 +1121,10 @@ public class TrackBrowserActivity extends ListActivity
             makeNowPlayingCursor();
         }
         private void makeNowPlayingCursor() {
-        	if(null != mCurrentPlaylistCursor){
-        		mCurrentPlaylistCursor.close();
-            mCurrentPlaylistCursor = null;
-        	}
+            if(null != mCurrentPlaylistCursor){
+                mCurrentPlaylistCursor.close();
+                mCurrentPlaylistCursor = null;
+            }
             try {
                 mNowPlaying = mService.getQueue();
             } catch (RemoteException ex) {

@@ -214,10 +214,24 @@ public class PlaylistBrowserActivity extends ListActivity
         super.onResume();
 
         MusicUtils.setSpinnerState(this);
-        MusicUtils.updateNowPlaying(PlaylistBrowserActivity.this);
+        IntentFilter f = new IntentFilter();
+        f.addAction(MediaPlaybackService.META_CHANGED);
+        f.addAction(MediaPlaybackService.QUEUE_CHANGED);
+        f.addAction(MediaPlaybackService.PLAYSTATE_CHANGED);
+        registerReceiver(mPlayListListener, f);
+        mPlayListListener.onReceive(null, null);
     }
+    
+    private BroadcastReceiver mPlayListListener = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+    		getListView().invalidateViews();
+            MusicUtils.updateNowPlaying(PlaylistBrowserActivity.this);
+        }
+    };
     @Override
     public void onPause() {
+    	unregisterReceiver(mPlayListListener);
         mReScanHandler.removeCallbacksAndMessages(null);
         super.onPause();
     }
