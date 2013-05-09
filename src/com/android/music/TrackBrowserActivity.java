@@ -465,6 +465,10 @@ public class TrackBrowserActivity extends ListActivity
                     }    
                     cursor.deactivate();
                 }
+                if(null != cursor){
+                	cursor.close();
+                	cursor = null;
+                }
                 if (fancyName == null || fancyName.equals(MediaStore.UNKNOWN_STRING)) {
                     fancyName = getString(R.string.unknown_album_name);
                 }
@@ -494,6 +498,10 @@ public class TrackBrowserActivity extends ListActivity
                     }
                     cursor.deactivate();
                 }
+                if(null != cursor){
+                	cursor.close();
+                	cursor = null;
+                }
             }
         } else if (mGenre != null) {
             String [] cols = new String [] {
@@ -508,6 +516,10 @@ public class TrackBrowserActivity extends ListActivity
                     fancyName = cursor.getString(0);
                 }
                 cursor.deactivate();
+            }
+            if(null != cursor){
+            	cursor.close();
+            	cursor = null;
             }
         }
 
@@ -1109,7 +1121,10 @@ public class TrackBrowserActivity extends ListActivity
             makeNowPlayingCursor();
         }
         private void makeNowPlayingCursor() {
-            mCurrentPlaylistCursor = null;
+            if(null != mCurrentPlaylistCursor){
+                mCurrentPlaylistCursor.close();
+                mCurrentPlaylistCursor = null;
+            }
             try {
                 mNowPlaying = mService.getQueue();
             } catch (RemoteException ex) {
@@ -1403,7 +1418,7 @@ public class TrackBrowserActivity extends ListActivity
             protected void onQueryComplete(int token, Object cookie, Cursor cursor) {
                 //Log.i("@@@", "query complete: " + cursor.getCount() + "   " + mActivity);
                 mActivity.init(cursor, cookie != null);
-                if (token == 0 && cookie != null && cursor != null && cursor.getCount() >= 100) {
+                if (token == 0 && cookie != null && cursor != null && !cursor.isClosed()&& cursor.getCount() >= 100) {
                     QueryArgs args = (QueryArgs) cookie;
                     startQuery(1, null, args.uri, args.projection, args.selection,
                             args.selectionArgs, args.orderBy);
