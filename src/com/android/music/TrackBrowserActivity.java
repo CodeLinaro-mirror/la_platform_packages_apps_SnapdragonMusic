@@ -393,6 +393,7 @@ public class TrackBrowserActivity extends ListActivity
         IntentFilter f = new IntentFilter();
         f.addAction(MediaPlaybackService.META_CHANGED);
         f.addAction(MediaPlaybackService.QUEUE_CHANGED);
+        f.addAction(MediaPlaybackService.PLAYSTATE_CHANGED);
         if ("nowplaying".equals(mPlaylist)) {
             try {
                 int cur = MusicUtils.sService.getQueuePosition();
