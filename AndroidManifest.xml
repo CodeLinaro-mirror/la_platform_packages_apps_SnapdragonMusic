@@ -278,6 +278,7 @@
         -->
         <activity
             android:name="com.android.music.VideoGallery"
+            android:taskAffinity="android.task.video"
             android:label="@string/videobrowserlabel"
             android:icon="@drawable/app_video" >
             <intent-filter>
