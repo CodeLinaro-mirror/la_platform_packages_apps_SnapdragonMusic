@@ -66,6 +66,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
+import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Formatter;
 import java.util.HashMap;
@@ -74,6 +75,8 @@ import java.util.Locale;
 public class MusicUtils {
 
     private static final String TAG = "MusicUtils";
+    public static final int CARD_1 = 0; //card 1 ringtone
+    public static final int CARD_2 = 1; //card 2 ringtone
 
     public interface Defs {
         public final static int OPEN_URL = 0;
@@ -90,7 +93,9 @@ public class MusicUtils {
         public final static int SCAN_DONE = 11;
         public final static int QUEUE = 12;
         public final static int EFFECTS_PANEL = 13;
-        public final static int CHILD_MENU_BASE = 14; // this should be the last item
+        public final static int CARD2_RINGTONE = 14;
+        public final static int MULTICARD_RINGTONE = 15;
+        public final static int CHILD_MENU_BASE = 16; // this should be the last item
     }
 
     public static String makeAlbumsLabel(Context context, int numalbums, int numsongs, boolean isUnknown) {
@@ -402,6 +407,16 @@ public class MusicUtils {
         }
     }
 
+    public static void makeRingtoneMenu(Context context, SubMenu sub) {
+        ContentResolver resolver = context.getContentResolver();
+        if (resolver == null) {
+            System.out.println("resolver = null");
+        } else {
+            sub.clear();
+           	sub.add(1, Defs.USE_AS_RINGTONE, 0, R.string.card1_ringtone);
+            sub.add(1, Defs.CARD2_RINGTONE, 0, R.string.card2_ringtone);
+        }
+    }
     /**
      * Fills out the given submenu with items for "new playlist" and
      * any existing playlists. When the user selects an item, the
@@ -1119,7 +1134,23 @@ public class MusicUtils {
         SharedPreferencesCompat.apply(ed);
     }
 
-    static void setRingtone(Context context, long id) {
+	static boolean isMultiCard() {
+		boolean multiCard = false;//TelephonyManager.isMultiSimEnabled();
+		try {
+			Class<?> c = Class.forName("android.telephony.TelephonyManager");
+			Method hideGetDefault = c.getMethod("getDefault");
+			Method hidegetCallState = c.getMethod("isMultiSimEnabled");
+			Boolean mState = (Boolean) hidegetCallState.invoke(hideGetDefault
+					.invoke(c));
+			if(mState){
+				multiCard = true;
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+        }
+		return multiCard;
+	}
+    static void setRingtone(Context context, long id, int mSubflag) {
         ContentResolver resolver = context.getContentResolver();
         // Set the flag in the database to mark this as a ringtone
         Uri ringUri = ContentUris.withAppendedId(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, id);
@@ -1147,8 +1178,15 @@ public class MusicUtils {
             if (cursor != null && cursor.getCount() == 1) {
                 // Set the system setting to make this the current ringtone
                 cursor.moveToFirst();
-                Settings.System.putString(resolver, Settings.System.RINGTONE, ringUri.toString());
-                String message = context.getString(R.string.ringtone_set, cursor.getString(2));
+				if (mSubflag == CARD_1) {
+					Settings.System.putString(resolver,
+							Settings.System.RINGTONE, ringUri.toString());
+				} else if (mSubflag == CARD_2) {
+					Settings.System.putString(resolver, "ringtone_2",
+							ringUri.toString());
+				}
+				String message = context.getString(R.string.ringtone_set,
+						cursor.getString(2));
                 Toast.makeText(context, message, Toast.LENGTH_SHORT).show();
             }
         } finally {

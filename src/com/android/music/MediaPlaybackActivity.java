@@ -69,7 +69,6 @@ import android.widget.SeekBar.OnSeekBarChangeListener;
 public class MediaPlaybackActivity extends Activity implements MusicUtils.Defs,
     View.OnTouchListener, View.OnLongClickListener
 {
-    private static final int USE_AS_RINGTONE = CHILD_MENU_BASE;
 
     private boolean mSeeking = false;
     private boolean mDeviceHasDpad;
@@ -549,8 +548,13 @@ public class MediaPlaybackActivity extends Activity implements MusicUtils.Defs,
                     R.string.add_to_playlist).setIcon(android.R.drawable.ic_menu_add);
             // these next two are in a separate group, so they can be shown/hidden as needed
             // based on the keyguard state
+			if(MusicUtils.isMultiCard() == false){
             menu.add(1, USE_AS_RINGTONE, 0, R.string.ringtone_menu_short)
                     .setIcon(R.drawable.ic_menu_set_as_ringtone);
+			}else{
+				SubMenu ringtonemenu = menu.addSubMenu(0, MULTICARD_RINGTONE, 0, R.string.ringtone_menu_short)
+				.setIcon(R.drawable.ic_menu_set_as_ringtone);
+			}
             menu.add(1, DELETE_ITEM, 0, R.string.delete_item)
                     .setIcon(R.drawable.ic_menu_delete);
 
@@ -584,7 +588,11 @@ public class MediaPlaybackActivity extends Activity implements MusicUtils.Defs,
             SubMenu sub = item.getSubMenu();
             MusicUtils.makePlaylistMenu(this, sub);
         }
-
+        item = menu.findItem(MULTICARD_RINGTONE);
+        if (item != null) {
+            SubMenu sub = item.getSubMenu();
+            MusicUtils.makeRingtoneMenu(this, sub);
+        }
         KeyguardManager km = (KeyguardManager) getSystemService(Context.KEYGUARD_SERVICE);
         menu.setGroupVisible(1, !km.inKeyguardRestrictedInputMode());
 
@@ -606,10 +614,15 @@ public class MediaPlaybackActivity extends Activity implements MusicUtils.Defs,
                 case USE_AS_RINGTONE: {
                     // Set the system setting to make this the current ringtone
                     if (mService != null) {
-                        MusicUtils.setRingtone(this, mService.getAudioId());
+                        MusicUtils.setRingtone(this, mService.getAudioId(),MusicUtils.CARD_1);
                     }
                     return true;
                 }
+                case CARD2_RINGTONE:
+                	if (mService != null) {
+                        MusicUtils.setRingtone(this, mService.getAudioId(),MusicUtils.CARD_2);
+                    }
+                    return true;
                 case PARTY_SHUFFLE:
                     MusicUtils.togglePartyShuffle();
                     setShuffleButtonImage();

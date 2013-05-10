@@ -393,6 +393,7 @@ public class TrackBrowserActivity extends ListActivity
         IntentFilter f = new IntentFilter();
         f.addAction(MediaPlaybackService.META_CHANGED);
         f.addAction(MediaPlaybackService.QUEUE_CHANGED);
+        f.addAction(MediaPlaybackService.PLAYSTATE_CHANGED);
         if ("nowplaying".equals(mPlaylist)) {
             try {
                 int cur = MusicUtils.sService.getQueuePosition();
@@ -664,7 +665,12 @@ public class TrackBrowserActivity extends ListActivity
         if (mEditMode) {
             menu.add(0, REMOVE, 0, R.string.remove_from_playlist);
         }
+    	if(MusicUtils.isMultiCard() == false){
         menu.add(0, USE_AS_RINGTONE, 0, R.string.ringtone_menu);
+		}else{
+			SubMenu ringtoneSub = menu.addSubMenu(0, MULTICARD_RINGTONE, 0, R.string.ringtone_menu);
+	        MusicUtils.makeRingtoneMenu(this, ringtoneSub);
+		}
         menu.add(0, DELETE_ITEM, 0, R.string.delete_item);
         AdapterContextMenuInfo mi = (AdapterContextMenuInfo) menuInfoIn;
         mSelectedPosition =  mi.position;
@@ -721,7 +727,10 @@ public class TrackBrowserActivity extends ListActivity
 
             case USE_AS_RINGTONE:
                 // Set the system setting to make this the current ringtone
-                MusicUtils.setRingtone(this, mSelectedId);
+                MusicUtils.setRingtone(this, mSelectedId, MusicUtils.CARD_1);
+                return true;
+            case CARD2_RINGTONE:
+                MusicUtils.setRingtone(this, mSelectedId, MusicUtils.CARD_2);
                 return true;
 
             case DELETE_ITEM: {

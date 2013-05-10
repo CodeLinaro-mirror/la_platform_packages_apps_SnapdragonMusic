@@ -307,7 +307,7 @@ implements MusicUtils.Defs, ServiceConnection
         switch (item.getItemId()) {
             case USE_AS_RINGTONE: {
                 // Set the system setting to make this the current ringtone
-                MusicUtils.setRingtone(this, mTrackList.getSelectedItemId());
+                MusicUtils.setRingtone(this, mTrackList.getSelectedItemId(), MusicUtils.CARD_1);
                 return true;
             }
 
