@@ -101,6 +101,7 @@ public class TrackBrowserActivity extends ListActivity
     private static int mLastListPosFine = -1;
     private boolean mUseLastListPos = false;
     private ServiceToken mToken;
+    private NowPlayingCursor mNowPlayingCursor;
 
     public TrackBrowserActivity()
     {
@@ -279,6 +280,10 @@ public class TrackBrowserActivity extends ListActivity
         // the closed cursor later.
         if (!mAdapterSent && mAdapter != null) {
             mAdapter.changeCursor(null);
+        }
+        if(null != mNowPlayingCursor){
+        	mNowPlayingCursor.close();
+        	mNowPlayingCursor = null;
         }
         // Because we pass the adapter to the next activity, we need to make
         // sure it doesn't keep a reference to this activity. We can do this
@@ -619,8 +624,14 @@ public class TrackBrowserActivity extends ListActivity
                     return;
                 }
                 if (mAdapter != null) {
+                	if(null != mNowPlayingCursor){
+                		mNowPlayingCursor.close();
+                		mNowPlayingCursor = null;
+                	}
                     Cursor c = new NowPlayingCursor(MusicUtils.sService, mCursorCols);
+                    mNowPlayingCursor = (NowPlayingCursor)c;
                     if (c.getCount() == 0) {
+                    	c.close();
                         finish();
                         return;
                     }
@@ -1049,8 +1060,14 @@ public class TrackBrowserActivity extends ListActivity
         } else if (mPlaylist != null) {
             if (mPlaylist.equals("nowplaying")) {
                 if (MusicUtils.sService != null) {
+                	if(null != mNowPlayingCursor){
+                		mNowPlayingCursor.close();
+                		mNowPlayingCursor = null;
+                	}
                     ret = new NowPlayingCursor(MusicUtils.sService, mCursorCols);
+                    mNowPlayingCursor = (NowPlayingCursor)ret;
                     if (ret.getCount() == 0) {
+                    	ret.close();
                         finish();
                     }
                 } else {
