@@ -174,7 +174,7 @@ public class RenamePlaylist extends Activity
                 ContentValues values = new ContentValues(1);
                 //Rename the playlist as the same name of other playlist,so override it.
                 int id = idForplaylist(name);
-                if (id >= 0) {
+                if (!mOriginalName.equals(name) && id >= 0) {
                 	Uri uri = ContentUris.withAppendedId(MediaStore.Audio.Playlists.EXTERNAL_CONTENT_URI, id);
                 	resolver.delete(uri, null, null);
                 } 
