@@ -1831,6 +1831,9 @@ public class MediaPlaybackService extends Service {
                 return;
             }
             mShuffleMode = shufflemode;
+             if ((mRepeatMode == REPEAT_CURRENT) && (mShuffleMode != SHUFFLE_NONE)) {
+                    mRepeatMode = REPEAT_ALL;
+            }
             notifyAttributeValues(PLAYERSETTINGS_RESPONSE,
                             supportedAttributes, NOTIFY_ATTRIBUTE_VALUES);
             if (mShuffleMode == SHUFFLE_AUTO) {
