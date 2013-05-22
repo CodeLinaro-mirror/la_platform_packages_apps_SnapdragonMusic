@@ -41,6 +41,7 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
 import android.os.RemoteException;
+import android.os.StrictMode;
 import android.provider.MediaStore;
 import android.provider.MediaStore.Audio.Playlists;
 import android.text.TextUtils;
@@ -1366,6 +1367,15 @@ public class TrackBrowserActivity extends ListActivity
             makeNowPlayingCursor();
             return true;
         }
+        @Override
+		public void close() {
+			// TODO Auto-generated method stub
+			super.close();
+			if(null != mCurrentPlaylistCursor){
+				mCurrentPlaylistCursor.close();
+				mCurrentPlaylistCursor = null;
+			}
+		}
 
         private String [] mCols;
         private Cursor mCurrentPlaylistCursor;     // updated in onMove
