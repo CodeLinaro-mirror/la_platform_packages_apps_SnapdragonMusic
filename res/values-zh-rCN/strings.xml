@@ -154,4 +154,5 @@
     <string name="widget_initial_text" msgid="3166878738860903586">"触摸可选择音乐。"</string>
     <string name="effectspanel" msgid="8804547581593509614">"音效"</string>
     <string name="music_inCall">通话中不能播放歌曲。</string>
+    <string name="nowplay_empty">正在播放列表为空。</string>
 </resources>

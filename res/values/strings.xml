@@ -313,5 +313,6 @@
     <string name="effectspanel">Sound effects</string>
     <!-- Text for try to play music when in calling state as a hint -->
     <string name="music_inCall">The phone is in calling state.</string>
+    <string name="nowplay_empty">The nowplaying list is empty.</string>
 </resources>
 

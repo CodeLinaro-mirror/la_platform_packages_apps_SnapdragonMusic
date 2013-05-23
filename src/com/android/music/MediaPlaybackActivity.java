@@ -1112,6 +1112,7 @@ public class MediaPlaybackActivity extends Activity implements MusicUtils.Defs,
                     intent.setClass(MediaPlaybackActivity.this, MusicBrowserActivity.class);
                     startActivity(intent);
                 }
+                showToast(R.string.nowplay_empty);
                 finish();
             }
             public void onServiceDisconnected(ComponentName classname) {
