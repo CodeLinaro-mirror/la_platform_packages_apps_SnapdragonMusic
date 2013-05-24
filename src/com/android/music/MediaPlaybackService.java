@@ -98,6 +98,9 @@ public class MediaPlaybackService extends Service {
     public static final String CMDGET = "get";
     public static final String CMDSET = "set";
 
+    public static final String CMDRESUME = "resume";
+    public static final String CMDALARMPAUSE = "alarmPause";
+
     public static final String TOGGLEPAUSE_ACTION = "com.android.music.musicservicecommand.togglepause";
     public static final String PAUSE_ACTION = "com.android.music.musicservicecommand.pause";
     public static final String PREVIOUS_ACTION = "com.android.music.musicservicecommand.previous";
@@ -235,6 +238,9 @@ public class MediaPlaybackService extends Service {
     private static final int IDLE_DELAY = 60000;
 
     private RemoteControlClient mRemoteControlClient;
+
+    // save the state of music that is playing or not.
+    private boolean preIsPlaying = false;
 
     private Handler mMediaplayerHandler = new Handler() {
         float mCurrentVolume = 1.0f;
@@ -385,6 +391,18 @@ public class MediaPlaybackService extends Service {
                 // because they were just added.
                 int[] appWidgetIds = intent.getIntArrayExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS);
                 mAppWidgetProvider.performUpdate(MediaPlaybackService.this, appWidgetIds);
+            } else if (CMDRESUME.equals(cmd)) {
+                // resume music
+                if (preIsPlaying) {
+                    play();
+                    preIsPlaying = false;
+                }
+            } else if (CMDALARMPAUSE.equals(cmd)) {
+                // pause if music is playing
+                if (isPlaying()) {
+                    pause();
+                    preIsPlaying = true;
+                }
             }
         }
     };
