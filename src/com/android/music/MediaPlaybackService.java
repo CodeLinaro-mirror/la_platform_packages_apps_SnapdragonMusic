@@ -1174,6 +1174,9 @@ public class MediaPlaybackService extends Service {
             }
             stop(false);
 
+            if(mPlayPos > mPlayList.length){
+            	mPlayPos = mPlayList.length -1;
+            }
             mCursor = getCursorForId(mPlayList[mPlayPos]);
             while(true) {
                 if (mCursor != null && mCursor.getCount() != 0 &&
