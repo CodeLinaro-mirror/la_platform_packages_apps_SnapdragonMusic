@@ -1174,6 +1174,9 @@ public class MediaPlaybackService extends Service {
             }
             stop(false);
 
+            if(mPlayPos > mPlayList.length){
+            	mPlayPos = mPlayList.length -1;
+            }
             mCursor = getCursorForId(mPlayList[mPlayPos]);
             while(true) {
                 if (mCursor != null && mCursor.getCount() != 0 &&
@@ -1580,10 +1583,10 @@ public class MediaPlaybackService extends Service {
 
     public void gotoNext(boolean force) {
         synchronized (this) {
-            if (mPlayListLen <= 0) {
+           /* if (mPlayListLen <= 0) {
                 Log.d(LOGTAG, "No play queue");
                 return;
-            }
+            }*/
 
             int pos = getNextPosition(force);
             if (pos < 0) {

@@ -73,6 +73,7 @@ public class CreatePlaylist extends Activity
         mPlaylist.setText(defaultname);
         mPlaylist.setSelection(defaultname.length());
         mPlaylist.addTextChangedListener(mTextWatcher);
+        mTextWatcher.onTextChanged(null, 0, 0, 0);
     }
     
     TextWatcher mTextWatcher = new TextWatcher() {

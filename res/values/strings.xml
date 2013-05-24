@@ -314,5 +314,6 @@
     <string name="card1_ringtone">Card1 ringtone</string>
     <string name="card2_ringtone">Card2 ringtone</string>
     <string name="music_inCall">The phone is in calling state.</string>
+    <string name="nowplay_empty">The nowplaying list is empty.</string>
 </resources>
 

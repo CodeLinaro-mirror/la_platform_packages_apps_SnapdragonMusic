@@ -1125,6 +1125,7 @@ public class MediaPlaybackActivity extends Activity implements MusicUtils.Defs,
                     intent.setClass(MediaPlaybackActivity.this, MusicBrowserActivity.class);
                     startActivity(intent);
                 }
+                showToast(R.string.nowplay_empty);
                 finish();
             }
             public void onServiceDisconnected(ComponentName classname) {
@@ -1211,6 +1212,9 @@ public class MediaPlaybackActivity extends Activity implements MusicUtils.Defs,
         try {
             long pos = mPosOverride < 0 ? mService.position() : mPosOverride;
             if ((pos >= 0) && (mDuration > 0)) {
+            	if(pos > mDuration){
+            		pos = mDuration;
+            	}
                 mCurrentTime.setText(MusicUtils.makeTimeString(this, pos / 1000));
                 int progress = (int) (1000 * pos / mDuration);
                 if(!mFromTouch){

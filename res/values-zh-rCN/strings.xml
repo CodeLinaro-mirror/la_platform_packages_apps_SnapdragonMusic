@@ -156,4 +156,5 @@
     <string name="card1_ringtone">卡1 铃声</string>
     <string name="card2_ringtone">卡2 铃声</string>
     <string name="music_inCall">通话中不能播放歌曲。</string>
+    <string name="nowplay_empty">正在播放列表为空。</string>
 </resources>
