@@ -68,6 +68,9 @@ public class RenamePlaylist extends Activity
         mRenameId = icicle != null ? icicle.getLong("rename")
                 : getIntent().getLongExtra("rename", -1);
         mOriginalName = nameForId(mRenameId);
+        if ("My recordings".equalsIgnoreCase(mOriginalName.toString())) {
+        	mOriginalName = this.getString(R.string.recordings);
+		}  
         String defaultname = icicle != null ? icicle.getString("defaultname") : mOriginalName;
         
         if (mRenameId < 0 || mOriginalName == null || defaultname == null) {
@@ -75,7 +78,9 @@ public class RenamePlaylist extends Activity
             finish();
             return;
         }
-        
+		if ("My recordings".equalsIgnoreCase(defaultname.toString())) {
+			defaultname = this.getString(R.string.recordings);
+		}    
         String promptformat;
         if (mOriginalName.equals(defaultname)) {
             promptformat = getString(R.string.rename_playlist_same_prompt);

@@ -311,6 +311,7 @@
 
     <!-- Menu text for the item controlling the audio effects panel [CHAR LIMIT=15] -->
     <string name="effectspanel">Sound effects</string>
+    <string name="recordings">My recordings</string>
     <!-- Text for try to play music when in calling state as a hint -->
     <string name="music_inCall">The phone is in calling state.</string>
     <string name="nowplay_empty">The nowplaying list is empty.</string>

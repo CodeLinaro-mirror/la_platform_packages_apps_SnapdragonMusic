@@ -502,6 +502,9 @@ public class TrackBrowserActivity extends ListActivity
                     if (cursor.getCount() != 0) {
                         cursor.moveToFirst();
                         fancyName = cursor.getString(0);
+                        if ("My recordings".equalsIgnoreCase(fancyName.toString())){
+                            fancyName = getText(R.string.recordings);
+                        }
                     }
                     cursor.deactivate();
                 }
