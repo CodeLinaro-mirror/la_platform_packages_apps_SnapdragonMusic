@@ -135,7 +135,7 @@ public class TrackBrowserActivity extends ListActivity
             mArtistId = intent.getStringExtra("artist");
             mPlaylist = intent.getStringExtra("playlist");
             mGenre = intent.getStringExtra("genre");
-            mEditMode = intent.getAction().equals(Intent.ACTION_EDIT);
+            mEditMode = (Intent.ACTION_EDIT).equals(intent.getAction());
         }
 
         mCursorCols = new String[] {
