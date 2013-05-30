@@ -311,6 +311,7 @@
 
     <!-- Menu text for the item controlling the audio effects panel [CHAR LIMIT=15] -->
     <string name="effectspanel">Sound effects</string>
+    <string name="recordings">My recordings</string>
     <string name="card1_ringtone">Card1 ringtone</string>
     <string name="card2_ringtone">Card2 ringtone</string>
     <string name="music_inCall">The phone is in calling state.</string>

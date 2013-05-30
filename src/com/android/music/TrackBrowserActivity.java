@@ -135,7 +135,7 @@ public class TrackBrowserActivity extends ListActivity
             mArtistId = intent.getStringExtra("artist");
             mPlaylist = intent.getStringExtra("playlist");
             mGenre = intent.getStringExtra("genre");
-            mEditMode = intent.getAction().equals(Intent.ACTION_EDIT);
+            mEditMode = (Intent.ACTION_EDIT).equals(intent.getAction());
         }
 
         mCursorCols = new String[] {
@@ -502,6 +502,9 @@ public class TrackBrowserActivity extends ListActivity
                     if (cursor.getCount() != 0) {
                         cursor.moveToFirst();
                         fancyName = cursor.getString(0);
+                        if ("My recordings".equalsIgnoreCase(fancyName.toString())){
+                            fancyName = getText(R.string.recordings);
+                        }
                     }
                     cursor.deactivate();
                 }
@@ -1593,6 +1596,9 @@ public class TrackBrowserActivity extends ListActivity
             if (mActivity.isFinishing() && cursor != null) {
                 cursor.close();
                 cursor = null;
+            }
+            if(null != cursor && cursor.isClosed()){
+            	return;
             }
             if (cursor != mActivity.mTrackCursor) {
                 mActivity.mTrackCursor = cursor;

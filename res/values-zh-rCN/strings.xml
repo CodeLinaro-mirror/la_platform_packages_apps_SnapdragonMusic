@@ -153,6 +153,7 @@
     <string name="fast_scroll_alphabet" msgid="5548732936480723311">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="widget_initial_text" msgid="3166878738860903586">"触摸可选择音乐。"</string>
     <string name="effectspanel" msgid="8804547581593509614">"音效"</string>
+    <string name="recordings">我的录音</string>
     <string name="card1_ringtone">卡1 铃声</string>
     <string name="card2_ringtone">卡2 铃声</string>
     <string name="music_inCall">通话中不能播放歌曲。</string>

@@ -606,6 +606,9 @@ public class PlaylistBrowserActivity extends ListActivity
             TextView tv = (TextView) view.findViewById(R.id.line1);
             
             String name = cursor.getString(mTitleIdx);
+            if(name.equalsIgnoreCase("My recordings")){
+            	name = mActivity.getString(R.string.recordings);
+            }
             tv.setText(name);
             
             long id = cursor.getLong(mIdIdx);
@@ -631,6 +634,9 @@ public class PlaylistBrowserActivity extends ListActivity
             if (mActivity.isFinishing() && cursor != null) {
                 cursor.close();
                 cursor = null;
+            }
+            if(null != cursor && cursor.isClosed()){
+            	return;
             }
             if (cursor != mActivity.mPlaylistCursor) {
                 mActivity.mPlaylistCursor = cursor;
