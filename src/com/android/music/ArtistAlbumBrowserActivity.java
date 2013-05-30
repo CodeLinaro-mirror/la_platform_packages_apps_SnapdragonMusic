@@ -824,6 +824,9 @@ public class ArtistAlbumBrowserActivity extends ExpandableListActivity
                 cursor.close();
                 cursor = null;
             }
+            if(null != cursor && cursor.isClosed()){
+            	return;
+            }
             if (cursor != mActivity.mArtistCursor) {
                 mActivity.mArtistCursor = cursor;
                 getColumnIndices(cursor);

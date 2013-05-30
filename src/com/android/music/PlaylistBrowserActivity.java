@@ -635,6 +635,9 @@ public class PlaylistBrowserActivity extends ListActivity
                 cursor.close();
                 cursor = null;
             }
+            if(null != cursor && cursor.isClosed()){
+            	return;
+            }
             if (cursor != mActivity.mPlaylistCursor) {
                 mActivity.mPlaylistCursor = cursor;
                 super.changeCursor(cursor);

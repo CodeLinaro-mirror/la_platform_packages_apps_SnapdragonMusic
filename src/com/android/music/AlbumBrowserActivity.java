@@ -634,6 +634,9 @@ public class AlbumBrowserActivity extends ListActivity
                 cursor.close();
                 cursor = null;
             }
+            if(null != cursor && cursor.isClosed()){
+            	return;
+            }
             if (cursor != mActivity.mAlbumCursor) {
                 mActivity.mAlbumCursor = cursor;
                 getColumnIndices(cursor);

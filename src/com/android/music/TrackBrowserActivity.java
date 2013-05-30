@@ -1589,6 +1589,9 @@ public class TrackBrowserActivity extends ListActivity
                 cursor.close();
                 cursor = null;
             }
+            if(null != cursor && cursor.isClosed()){
+            	return;
+            }
             if (cursor != mActivity.mTrackCursor) {
                 mActivity.mTrackCursor = cursor;
                 super.changeCursor(cursor);
