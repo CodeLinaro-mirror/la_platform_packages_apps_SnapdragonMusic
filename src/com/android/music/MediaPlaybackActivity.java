@@ -1003,8 +1003,8 @@ public class MediaPlaybackActivity extends Activity implements MusicUtils.Defs,
                 mService.setShuffleMode(MediaPlaybackService.SHUFFLE_NORMAL);
                 if (mService.getRepeatMode() == MediaPlaybackService.REPEAT_CURRENT) {
                     mService.setRepeatMode(MediaPlaybackService.REPEAT_ALL);
-                    setRepeatButtonImage();
-                }
+                 }
+                setRepeatButtonImage();
                 showToast(R.string.shuffle_on_notif);
             } else if (shuffle == MediaPlaybackService.SHUFFLE_NORMAL ||
                     shuffle == MediaPlaybackService.SHUFFLE_AUTO) {
