@@ -1277,10 +1277,15 @@ public class MediaPlaybackActivity extends Activity implements MusicUtils.Defs,
                      break;
                 case PREV_BUTTON:
                 	if (mService == null) return;
-                    try {
-                        mService.prev();
-                    } catch (RemoteException ex) {
-                    }
+                        try {
+                            if (mService.position() < 2000) {
+                                mService.prev();
+                            } else {
+                                mService.seek(0);
+                                mService.play();
+                            }
+                        } catch (RemoteException ex) {
+                        }
                     break;
                 case PAUSEORRESUME:
                 	doPauseResume();
