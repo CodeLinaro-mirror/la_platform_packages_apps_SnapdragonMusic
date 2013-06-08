@@ -39,6 +39,7 @@ import android.media.audiofx.AudioEffect;
 import android.media.AudioManager;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Debug;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
@@ -434,32 +435,30 @@ public class MediaPlaybackActivity extends Activity implements MusicUtils.Defs,
 
     private View.OnClickListener mPauseListener = new View.OnClickListener() {
         public void onClick(View v) {
-            doPauseResume();
+        	Log.d(TAG, "pause or resume song star ");
+        	Log.d(TAG, "time == " + System.currentTimeMillis());
+            Message mMessage = mHandler.obtainMessage(PAUSEORRESUME, null);
+            mHandler.removeMessages(PAUSEORRESUME);
+            mHandler.sendMessageDelayed(mMessage, 1);
         }
     };
 
     private View.OnClickListener mPrevListener = new View.OnClickListener() {
         public void onClick(View v) {
-            if (mService == null) return;
-            try {
-                if (mService.position() < 2000) {
-                    mService.prev();
-                } else {
-                    mService.seek(0);
-                    mService.play();
-                }
-            } catch (RemoteException ex) {
-            }
+           Log.d(TAG, "prev song star ");
+           Message mMessage = mHandler.obtainMessage(PREV_BUTTON, null);
+           mHandler.removeMessages(PREV_BUTTON);
+           mHandler.sendMessageDelayed(mMessage, 1);
         }
     };
 
     private View.OnClickListener mNextListener = new View.OnClickListener() {
         public void onClick(View v) {
-            if (mService == null) return;
-            try {
-                mService.next();
-            } catch (RemoteException ex) {
-            }
+        	Log.d(TAG, "Next song star ");
+        	Log.d(TAG, "time == " + System.currentTimeMillis());
+            Message mMessage = mHandler.obtainMessage(NEXT_BUTTON, null);
+            mHandler.removeMessages(NEXT_BUTTON);
+            mHandler.sendMessageDelayed(mMessage, 1);
         }
     };
 
@@ -1184,7 +1183,9 @@ public class MediaPlaybackActivity extends Activity implements MusicUtils.Defs,
     private static final int QUIT = 2;
     private static final int GET_ALBUM_ART = 3;
     private static final int ALBUM_ART_DECODED = 4;
-
+    private static final int PREV_BUTTON = 5;
+    private static final int NEXT_BUTTON = 6;
+    private static final int PAUSEORRESUME = 7;
     private void queueNextRefresh(long delay) {
         if (!paused) {
             Message msg = mHandler.obtainMessage(REFRESH);
@@ -1268,7 +1269,22 @@ public class MediaPlaybackActivity extends Activity implements MusicUtils.Defs,
                             .setCancelable(false)
                             .show();
                     break;
-
+                case NEXT_BUTTON:
+                     try {
+                         mService.next();
+                     } catch (RemoteException ex) {
+                     }
+                     break;
+                case PREV_BUTTON:
+                	if (mService == null) return;
+                    try {
+                        mService.prev();
+                    } catch (RemoteException ex) {
+                    }
+                    break;
+                case PAUSEORRESUME:
+                	doPauseResume();
+                	break;
                 default:
                     break;
             }
