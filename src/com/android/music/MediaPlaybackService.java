@@ -1140,6 +1140,9 @@ public class MediaPlaybackService extends Service {
                         mPlayPos++;
                 }
             }
+            if (index2 == mNextPlayPos || index1 == mNextPlayPos) {
+                setNextTrack();
+            }
             notifyChange(QUEUE_CHANGED);
         }
     }
