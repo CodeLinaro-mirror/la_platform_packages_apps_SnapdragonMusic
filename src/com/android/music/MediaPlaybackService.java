@@ -112,6 +112,7 @@ public class MediaPlaybackService extends Service {
          "com.qualcomm.music.playersettingsresponse";
     private static final String EXTRA_SHUFFLE_VAL = "shuffle";
     private static final String EXTRA_REPEAT_VAL = "repeat";
+    private static final String UPDATE_WIDGET_ACTION = "com.android.music.updatewidget";
 
     private static final int TRACK_ENDED = 1;
     private static final int RELEASE_WAKELOCK = 2;
@@ -504,6 +505,11 @@ public class MediaPlaybackService extends Service {
             unregisterReceiver(mA2dpReceiver);
             mA2dpReceiver = null;
         }
+
+        //notify music widget update state
+        //because of service is died, so can not use performUpdate
+        Intent intent = new Intent(UPDATE_WIDGET_ACTION);
+        sendBroadcast(intent);
 
         mWakeLock.release();
         super.onDestroy();
