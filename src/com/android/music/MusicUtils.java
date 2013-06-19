@@ -1318,7 +1318,11 @@ public class MusicUtils {
                                 if (MusicUtils.sService.isPlaying()) {
                                 	MusicUtils.sService.pause();
                                 	((ImageButton) v).setImageResource(R.drawable.indicator_ic_mp_playing_large);
-                                } else {
+                                }  else if(phoneIsOffhook()){
+                                        String message = c.getString(R.string.music_inCall);
+                                        Toast.makeText(c, message, Toast.LENGTH_SHORT).show();
+                                        return;
+                                }else {
                                 	MusicUtils.sService.play();
                                 	((ImageButton) v).setImageResource(R.drawable.indicator_ic_mp_pause_large);
                                 }
@@ -1349,6 +1353,26 @@ public class MusicUtils {
         nowPlayingView.setVisibility(View.GONE);
     }
 
+    //Add function:Music can not play when in calling state 
+    public static boolean phoneIsOffhook() {
+        boolean phoneOffhook = false;
+        try {
+    		Class<?> c = Class.forName("android.telephony.TelephonyManager");
+    		Method hideGetDefault = c.getMethod("getDefault");
+    		Method hidegetCallState = c.getMethod("getCallState");
+    		int callState = (Integer) hidegetCallState.invoke(hideGetDefault
+    				.invoke(c));
+    		if (callState != 0) {
+    			phoneOffhook = true;
+    		} else {
+    			phoneOffhook = false;
+    		}
+		} catch (Exception e) {
+			e.printStackTrace();
+        }
+        return phoneOffhook;
+    }
+    
     static void setBackground(View v, Bitmap bm) {
 
         if (bm == null) {
