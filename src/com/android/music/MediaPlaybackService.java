@@ -1299,31 +1299,13 @@ public class MediaPlaybackService extends Service {
         }
     }
 
-    //Add function:Music can not play when in calling state 
-    public boolean phoneIsOffhook() {
-        boolean phoneOffhook = false;
-        try {
-			Class<?> c = Class.forName("android.telephony.TelephonyManager");
-			Method hideGetDefault = c.getMethod("getDefault");
-			Method hidegetCallState = c.getMethod("getCallState");
-			int callState = (Integer) hidegetCallState.invoke(hideGetDefault
-					.invoke(c));
-			if (callState != 0) {
-				phoneOffhook = true;
-			} else {
-				phoneOffhook = false;
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-        }
-        return phoneOffhook;
-    }
+   
     /**
      * Starts playback of a previously opened file.
      */
     public void play() {
     	//Add function:Music can not play when in calling state.
-    	boolean mPhoneOffhook = phoneIsOffhook();
+    	boolean mPhoneOffhook = MusicUtils.phoneIsOffhook();
     	Log.d(LOGTAG, "mPhoneOffhook  state is  ++++++++"+mPhoneOffhook);
         if(mPhoneOffhook) {
             String message = getString(R.string.music_inCall);
