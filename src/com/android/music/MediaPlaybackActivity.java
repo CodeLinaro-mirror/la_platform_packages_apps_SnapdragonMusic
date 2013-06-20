@@ -979,7 +979,8 @@ public class MediaPlaybackActivity extends Activity implements MusicUtils.Defs,
                 } else {
                     mService.play();
                 }
-                refreshNow();
+                long next = refreshNow();
+                queueNextRefresh(next);
                 setPauseButtonImage();
             }
         } catch (RemoteException ex) {
