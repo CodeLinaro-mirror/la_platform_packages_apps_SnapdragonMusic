@@ -353,7 +353,9 @@ public class AudioPreview extends Activity implements OnPreparedListener, OnErro
             mSeekStopPosition = progress;
         }
         public void onStopTrackingTouch(SeekBar bar) {
-            mPlayer.seekTo(mSeekStopPosition);
+            if (mPlayer != null) {
+                mPlayer.seekTo(mSeekStopPosition);
+            }
             mSeeking = false;
         }
     };
