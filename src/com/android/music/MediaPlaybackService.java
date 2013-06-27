@@ -153,6 +153,7 @@ public class MediaPlaybackService extends Service {
     private final static int PODCASTCOLIDX = 8;
     private final static int BOOKMARKCOLIDX = 9;
     private BroadcastReceiver mUnmountReceiver = null;
+    private BroadcastReceiver mPowerOffReceiver = null;
     private BroadcastReceiver mA2dpReceiver = null;
     private WakeLock mWakeLock;
     private int mServiceStartId = -1;
@@ -408,6 +409,7 @@ public class MediaPlaybackService extends Service {
         
         registerExternalStorageListener();
         registerA2dpServiceListener();
+        registerPowerOffListener();
 
         // Needs to be done in this thread, since otherwise ApplicationContext.getPowerManager() crashes.
         mPlayer = new MultiPlayer();
@@ -471,7 +473,10 @@ public class MediaPlaybackService extends Service {
             unregisterReceiver(mA2dpReceiver);
             mA2dpReceiver = null;
         }
-
+        if (mPowerOffReceiver != null) {
+            unregisterReceiver(mPowerOffReceiver);
+            mPowerOffReceiver = null;
+        }
         mWakeLock.release();
         super.onDestroy();
     }
@@ -914,6 +919,20 @@ public class MediaPlaybackService extends Service {
         registerReceiver(mA2dpReceiver, iFilter);
     }
 
+    public void registerPowerOffListener() {
+        if (mPowerOffReceiver == null) {
+        	mPowerOffReceiver = new BroadcastReceiver() {
+                @Override
+                public void onReceive(Context context, Intent intent) {
+                	pause();
+                }
+            };
+            IntentFilter iFilter = new IntentFilter();
+            iFilter.addAction(Intent.ACTION_SHUTDOWN);
+            registerReceiver(mPowerOffReceiver, iFilter);
+        }
+    }
+    
     /**
      * Notify the change-receivers that something has changed.
      * The intent that is sent contains the following data

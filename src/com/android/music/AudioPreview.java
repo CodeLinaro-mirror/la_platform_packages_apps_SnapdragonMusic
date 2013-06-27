@@ -18,9 +18,11 @@ package com.android.music;
 
 import android.app.Activity;
 import android.content.AsyncQueryHandler;
+import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.database.Cursor;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
@@ -69,6 +71,7 @@ public class AudioPreview extends Activity implements OnPreparedListener, OnErro
     private static final int OPEN_IN_MUSIC = 1;
     private AudioManager mAudioManager;
     private boolean mPausedByTransientLossOfFocus;
+    private BroadcastReceiver mPowerOffReceiver = null;
 
     @Override
     public void onCreate(Bundle icicle) {
@@ -103,6 +106,7 @@ public class AudioPreview extends Activity implements OnPreparedListener, OnErro
         mProgressRefresher = new Handler();
         mAudioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
 
+        registerPowerOffListener();
         PreviewPlayer player = (PreviewPlayer) getLastNonConfigurationInstance();
         if (player == null) {
             mPlayer = new PreviewPlayer();
@@ -195,6 +199,20 @@ public class AudioPreview extends Activity implements OnPreparedListener, OnErro
         }
     }
 
+    public void registerPowerOffListener() {
+        if (mPowerOffReceiver == null) {
+        	mPowerOffReceiver = new BroadcastReceiver() {
+                @Override
+                public void onReceive(Context context, Intent intent) {
+                	stopPlayback();
+                }
+            };
+            IntentFilter iFilter = new IntentFilter();
+            iFilter.addAction(Intent.ACTION_SHUTDOWN);
+            registerReceiver(mPowerOffReceiver, iFilter);
+        }
+    }
+    
     @Override
     public Object onRetainNonConfigurationInstance() {
         PreviewPlayer player = mPlayer;
@@ -205,6 +223,10 @@ public class AudioPreview extends Activity implements OnPreparedListener, OnErro
     @Override
     public void onDestroy() {
         stopPlayback();
+        if (mPowerOffReceiver != null) {
+            unregisterReceiver(mPowerOffReceiver);
+            mPowerOffReceiver = null;
+        }
         super.onDestroy();
     }
 
