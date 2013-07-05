@@ -21,6 +21,8 @@ import android.content.AsyncQueryHandler;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
+import android.content.BroadcastReceiver;
 import android.database.Cursor;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
@@ -58,6 +60,7 @@ import java.io.IOException;
 public class AudioPreview extends Activity implements OnPreparedListener, OnErrorListener, OnCompletionListener
 {
     private final static String TAG = "AudioPreview";
+    private final static String ACTION_AUDIO_BECOMING_NOISY = "android.media.AUDIO_BECOMING_NOISY";
     private PreviewPlayer mPlayer;
     private TextView mTextLine1;
     private TextView mTextLine2;
@@ -196,7 +199,23 @@ public class AudioPreview extends Activity implements OnPreparedListener, OnErro
                 setNames();
             }
         }
+        IntentFilter f = new IntentFilter();
+        f.addAction(ACTION_AUDIO_BECOMING_NOISY);
+        registerReceiver(mAudioTrackListener, f);
     }
+
+    private BroadcastReceiver mAudioTrackListener = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            String action = intent.getAction();
+            if (ACTION_AUDIO_BECOMING_NOISY.equals(action)) {
+                if (mPlayer != null && mPlayer.isPlaying()) {
+                    mPlayer.pause();
+                    updatePlayPause();
+                }
+            }
+        }
+    };
 
     @Override
     public Object onRetainNonConfigurationInstance() {
@@ -208,6 +227,7 @@ public class AudioPreview extends Activity implements OnPreparedListener, OnErro
     @Override
     public void onDestroy() {
         stopPlayback();
+        unregisterReceiver(mAudioTrackListener);
         super.onDestroy();
     }
 
