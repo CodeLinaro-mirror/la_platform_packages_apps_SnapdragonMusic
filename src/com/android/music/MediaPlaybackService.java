@@ -1234,6 +1234,9 @@ public class MediaPlaybackService extends Service {
                 mPlayer.setNextDataSource(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI + "/" + id);
             }
         }
+        else {
+            mPlayer.setNextDataSource(null);
+        }
     }
 
     /**
