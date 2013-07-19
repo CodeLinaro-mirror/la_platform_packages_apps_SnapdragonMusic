@@ -1219,7 +1219,7 @@ public class MediaPlaybackActivity extends Activity implements MusicUtils.Defs,
             long smoothrefreshtime = mDuration / width;
 
             if (smoothrefreshtime > remaining) return remaining;
-            if (smoothrefreshtime < 20) return 20;
+            if (smoothrefreshtime < 100) return 100;
             return smoothrefreshtime;
         } catch (RemoteException ex) {
         }
