@@ -45,6 +45,7 @@ import android.os.Looper;
 import android.os.Message;
 import android.os.RemoteException;
 import android.os.SystemClock;
+import android.os.SystemProperties;
 import android.provider.MediaStore;
 import android.text.Layout;
 import android.text.TextUtils.TruncateAt;
@@ -152,6 +153,11 @@ public class MediaPlaybackActivity extends Activity implements MusicUtils.Defs,
         mRepeatButton.setOnClickListener(mRepeatListener);
         mSoundEffectButton = ((ImageButton) findViewById(R.id.sound_effect));
         mSoundEffectButton.setOnClickListener(mSoundEffectListener);
+        if(SystemProperties.getBoolean("tunnel.decode", false)) {
+            mSoundEffectButton.setVisibility(View.GONE);
+        } else {
+            mSoundEffectButton.setVisibility(View.VISIBLE);
+        }
         
         if (mProgress instanceof SeekBar) {
             SeekBar seeker = (SeekBar) mProgress;
@@ -608,7 +614,8 @@ public class MediaPlaybackActivity extends Activity implements MusicUtils.Defs,
                     .setIcon(R.drawable.ic_menu_delete);
 
             Intent i = new Intent(AudioEffect.ACTION_DISPLAY_AUDIO_EFFECT_CONTROL_PANEL);
-            if (getPackageManager().resolveActivity(i, 0) != null) {
+            if ((getPackageManager().resolveActivity(i, 0) != null ) &&
+                    (!SystemProperties.getBoolean("tunnel.decode", false))) {
                 menu.add(0, EFFECTS_PANEL, 0, R.string.effectspanel).setIcon(R.drawable.ic_menu_eq);
             }
 
