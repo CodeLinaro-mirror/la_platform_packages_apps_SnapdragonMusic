@@ -705,10 +705,10 @@ public class TrackBrowserActivity extends ListActivity
         } catch (IllegalArgumentException ex) {
             mSelectedId = mi.id;
         }
-        // only add the 'search' menu if the selected item is music
-        if (isMusic(mTrackCursor)) {
-            menu.add(0, SEARCH, 0, R.string.search_title);
-        }
+
+        // add the 'search' menu no matter whether the selected item is music or not
+        menu.add(0, SEARCH, 0, R.string.search_title);
+
         mCurrentAlbumName = mTrackCursor.getString(mTrackCursor.getColumnIndexOrThrow(
                 MediaStore.Audio.Media.ALBUM));
         mCurrentArtistNameForAlbum = mTrackCursor.getString(mTrackCursor.getColumnIndexOrThrow(
