@@ -58,6 +58,7 @@ import android.widget.ImageView;
 import android.widget.TabWidget;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.telephony.MSimTelephonyManager;
 
 import java.io.File;
 import java.io.FileDescriptor;
@@ -73,6 +74,9 @@ import java.util.Locale;
 public class MusicUtils {
 
     private static final String TAG = "MusicUtils";
+    public final static int RINGTONE_SUB_0 = 0;
+    public final static int RINGTONE_SUB_1 = 1;
+
     public static long mPlayListId;
 
     public interface Defs {
@@ -90,7 +94,8 @@ public class MusicUtils {
         public final static int SCAN_DONE = 11;
         public final static int QUEUE = 12;
         public final static int EFFECTS_PANEL = 13;
-        public final static int CHILD_MENU_BASE = 14; // this should be the last item
+        public final static int USE_AS_RINGTONE_2 = 14;
+        public final static int CHILD_MENU_BASE = 15; // this should be the last item;
     }
 
     public static String makeAlbumsLabel(Context context, int numalbums, int numsongs, boolean isUnknown) {
@@ -1117,7 +1122,7 @@ public class MusicUtils {
         SharedPreferencesCompat.apply(ed);
     }
 
-    static void setRingtone(Context context, long id) {
+    static void setRingtone(Context context, long id, int sub_id) {
         ContentResolver resolver = context.getContentResolver();
         // Set the flag in the database to mark this as a ringtone
         Uri ringUri = ContentUris.withAppendedId(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, id);
@@ -1145,8 +1150,18 @@ public class MusicUtils {
             if (cursor != null && cursor.getCount() == 1) {
                 // Set the system setting to make this the current ringtone
                 cursor.moveToFirst();
-                Settings.System.putString(resolver, Settings.System.RINGTONE, ringUri.toString());
                 String message = context.getString(R.string.ringtone_set, cursor.getString(2));
+                if (sub_id == RINGTONE_SUB_0) {
+                    Settings.System.putString(resolver, Settings.System.RINGTONE , ringUri.toString());
+                    if (MSimTelephonyManager.getDefault().isMultiSimEnabled()){
+                        message = context.getString(R.string.ringtone_set_1, cursor.getString(2));
+                    } else {
+                        message = context.getString(R.string.ringtone_set, cursor.getString(2));
+                    }
+                } else if (sub_id == RINGTONE_SUB_1) {
+                    Settings.System.putString(resolver, Settings.System.RINGTONE_2, ringUri.toString());
+                    message = context.getString(R.string.ringtone_set_2, cursor.getString(2));
+                }
                 Toast.makeText(context, message, Toast.LENGTH_SHORT).show();
             }
         } finally {
@@ -1155,7 +1170,11 @@ public class MusicUtils {
             }
         }
     }
-    
+
+    static void setRingtone(Context context, long id) {
+        setRingtone(context, id, RINGTONE_SUB_0);
+    }
+
     static int sActiveTabIndex = -1;
     
     static boolean updateButtonBar(Activity a, int highlight) {
