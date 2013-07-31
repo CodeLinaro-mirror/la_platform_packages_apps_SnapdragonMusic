@@ -277,6 +277,9 @@ public class MusicUtils {
                     sService.setShuffleMode(MediaPlaybackService.SHUFFLE_NONE);
                 } else {
                     sService.setShuffleMode(MediaPlaybackService.SHUFFLE_AUTO);
+                    if(sService.getRepeatMode() == MediaPlaybackService.REPEAT_CURRENT)
+                        sService.setRepeatMode(MediaPlaybackService.REPEAT_ALL);
+
                 }
             } catch (RemoteException ex) {
             }
