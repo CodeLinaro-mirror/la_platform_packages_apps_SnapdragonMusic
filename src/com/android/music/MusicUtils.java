@@ -74,6 +74,8 @@ import java.util.Locale;
 public class MusicUtils {
 
     private static final String TAG = "MusicUtils";
+    public static boolean mPlayAllFromMenu = false;
+
     public final static int RINGTONE_SUB_0 = 0;
     public final static int RINGTONE_SUB_1 = 1;
 
@@ -791,6 +793,7 @@ public class MusicUtils {
     }
 
     public static void playAll(Context context, Cursor cursor) {
+        mPlayAllFromMenu = true;
         playAll(context, cursor, 0, false);
     }
     
@@ -823,9 +826,13 @@ public class MusicUtils {
                 if (sService.getRepeatMode() == MediaPlaybackService.REPEAT_CURRENT) {
                     sService.setRepeatMode(MediaPlaybackService.REPEAT_ALL);
                 }
-            } else {
-                sService.setShuffleMode(MediaPlaybackService.SHUFFLE_NONE);
             }
+
+            if (mPlayAllFromMenu){
+                sService.setShuffleMode(MediaPlaybackService.SHUFFLE_NONE);
+                mPlayAllFromMenu = false;
+            }
+
             long curid = sService.getAudioId();
             int curpos = sService.getQueuePosition();
             if (position != -1 && curpos == position && curid == list[position]) {
