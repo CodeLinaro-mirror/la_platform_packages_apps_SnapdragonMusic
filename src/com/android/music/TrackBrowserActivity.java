@@ -794,7 +794,7 @@ public class TrackBrowserActivity extends ListActivity
                 // Send intent to share audio
                 long id;
                 Intent shareIntent = new Intent(Intent.ACTION_SEND);
-                shareIntent.setType("text/plain");
+                shareIntent.setType("audio/*");
                 mTrackCursor.moveToPosition(mSelectedPosition);
                 if (mEditMode && !mPlaylist.equals("nowplaying")) {
                     id = mTrackCursor.getLong(mTrackCursor.getColumnIndexOrThrow(MediaStore.Audio.Playlists.Members.AUDIO_ID));
