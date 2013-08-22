@@ -63,7 +63,7 @@ import android.widget.ExpandableListView.ExpandableListContextMenuInfo;
 import android.view.KeyEvent;
 
 import java.text.Collator;
-
+import java.util.Locale;
 
 public class ArtistAlbumBrowserActivity extends ExpandableListActivity
         implements View.OnCreateContextMenuListener, MusicUtils.Defs, ServiceConnection
@@ -293,8 +293,16 @@ public class ArtistAlbumBrowserActivity extends ExpandableListActivity
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         super.onCreateOptionsMenu(menu);
-        menu.add(0, PARTY_SHUFFLE, 0, R.string.party_shuffle); // icon will be set in onPrepareOptionsMenu()
-        menu.add(0, SHUFFLE_ALL, 0, R.string.shuffle_all).setIcon(R.drawable.ic_menu_shuffle);
+        if (TextUtils.getLayoutDirectionFromLocale(Locale.getDefault()) ==
+                View.LAYOUT_DIRECTION_RTL) {
+            // icon will be set in onPrepareOptionsMenu()
+            menu.add(0, SHUFFLE_ALL, 0, R.string.shuffle_all).setIcon(R.drawable.ic_menu_shuffle);
+            menu.add(0, PARTY_SHUFFLE, 0, R.string.party_shuffle);
+        } else {
+            // icon will be set in onPrepareOptionsMenu()
+            menu.add(0, PARTY_SHUFFLE, 0, R.string.party_shuffle);
+            menu.add(0, SHUFFLE_ALL, 0, R.string.shuffle_all).setIcon(R.drawable.ic_menu_shuffle);
+        }
         return true;
     }
     
