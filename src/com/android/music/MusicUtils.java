@@ -54,9 +54,11 @@ import android.view.MenuItem;
 import android.view.SubMenu;
 import android.view.View;
 import android.view.Window;
+import android.widget.ImageView;
 import android.widget.TabWidget;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.telephony.MSimTelephonyManager;
 
 import java.io.File;
 import java.io.FileDescriptor;
@@ -72,6 +74,11 @@ import java.util.Locale;
 public class MusicUtils {
 
     private static final String TAG = "MusicUtils";
+    public static boolean mPlayAllFromMenu = false;
+
+    public final static int RINGTONE_SUB_0 = 0;
+    public final static int RINGTONE_SUB_1 = 1;
+
     public static long mPlayListId;
 
     public interface Defs {
@@ -89,7 +96,8 @@ public class MusicUtils {
         public final static int SCAN_DONE = 11;
         public final static int QUEUE = 12;
         public final static int EFFECTS_PANEL = 13;
-        public final static int CHILD_MENU_BASE = 14; // this should be the last item
+        public final static int USE_AS_RINGTONE_2 = 14;
+        public final static int CHILD_MENU_BASE = 15; // this should be the last item;
     }
 
     public static String makeAlbumsLabel(Context context, int numalbums, int numsongs, boolean isUnknown) {
@@ -271,6 +279,9 @@ public class MusicUtils {
                     sService.setShuffleMode(MediaPlaybackService.SHUFFLE_NONE);
                 } else {
                     sService.setShuffleMode(MediaPlaybackService.SHUFFLE_AUTO);
+                    if(sService.getRepeatMode() == MediaPlaybackService.REPEAT_CURRENT)
+                        sService.setRepeatMode(MediaPlaybackService.REPEAT_ALL);
+
                 }
             } catch (RemoteException ex) {
             }
@@ -462,6 +473,24 @@ public class MusicUtils {
         context.getContentResolver().delete(uri, null, null);
         return;
     }
+
+    public static void deleteTrack(MediaPlaybackService mpbService, long mid, long artIndex) {
+        if (mpbService == null) {
+            return;
+        }
+        try {
+             mpbService.removeTrack(mid);
+             if (sArtCache != null) {
+                 synchronized(sArtCache) {
+                     sArtCache.remove(artIndex);
+                 }
+             }
+             mpbService.getApplicationContext().getContentResolver().notifyChange(Uri.parse("content://media"), null);
+        } catch (Exception e) {
+            Log.e("MusicUtils", "Error occur when deleting music");
+        }
+    }
+
     
     public static void deleteTracks(Context context, long [] list) {
         
@@ -782,6 +811,7 @@ public class MusicUtils {
     }
 
     public static void playAll(Context context, Cursor cursor) {
+        mPlayAllFromMenu = true;
         playAll(context, cursor, 0, false);
     }
     
@@ -810,13 +840,17 @@ public class MusicUtils {
         try {
             if (force_shuffle) {
                 sService.setShuffleMode(MediaPlaybackService.SHUFFLE_NORMAL);
-            } else {
+                //If the repeat mode is REPEAT_CURRENT, we should change mode to REPEAT_ALL
+                if (sService.getRepeatMode() == MediaPlaybackService.REPEAT_CURRENT) {
+                    sService.setRepeatMode(MediaPlaybackService.REPEAT_ALL);
+                }
+            }
+
+            if (mPlayAllFromMenu){
                 sService.setShuffleMode(MediaPlaybackService.SHUFFLE_NONE);
+                mPlayAllFromMenu = false;
             }
-           //If the repeat mode is REPEAT_CURRENT, we should change mode to REPEAT_ALL
-            if (sService.getRepeatMode() == MediaPlaybackService.REPEAT_CURRENT) {
-                sService.setRepeatMode(MediaPlaybackService.REPEAT_ALL);
-            }
+
             long curid = sService.getAudioId();
             int curpos = sService.getQueuePosition();
             if (position != -1 && curpos == position && curid == list[position]) {
@@ -1116,7 +1150,7 @@ public class MusicUtils {
         SharedPreferencesCompat.apply(ed);
     }
 
-    static void setRingtone(Context context, long id) {
+    static void setRingtone(Context context, long id, int sub_id) {
         ContentResolver resolver = context.getContentResolver();
         // Set the flag in the database to mark this as a ringtone
         Uri ringUri = ContentUris.withAppendedId(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, id);
@@ -1144,8 +1178,18 @@ public class MusicUtils {
             if (cursor != null && cursor.getCount() == 1) {
                 // Set the system setting to make this the current ringtone
                 cursor.moveToFirst();
-                Settings.System.putString(resolver, Settings.System.RINGTONE, ringUri.toString());
                 String message = context.getString(R.string.ringtone_set, cursor.getString(2));
+                if (sub_id == RINGTONE_SUB_0) {
+                    Settings.System.putString(resolver, Settings.System.RINGTONE , ringUri.toString());
+                    if (MSimTelephonyManager.getDefault().isMultiSimEnabled()){
+                        message = context.getString(R.string.ringtone_set_1, cursor.getString(2));
+                    } else {
+                        message = context.getString(R.string.ringtone_set, cursor.getString(2));
+                    }
+                } else if (sub_id == RINGTONE_SUB_1) {
+                    Settings.System.putString(resolver, Settings.System.RINGTONE_2, ringUri.toString());
+                    message = context.getString(R.string.ringtone_set_2, cursor.getString(2));
+                }
                 Toast.makeText(context, message, Toast.LENGTH_SHORT).show();
             }
         } finally {
@@ -1154,7 +1198,11 @@ public class MusicUtils {
             }
         }
     }
-    
+
+    static void setRingtone(Context context, long id) {
+        setRingtone(context, id, RINGTONE_SUB_0);
+    }
+
     static int sActiveTabIndex = -1;
     
     static boolean updateButtonBar(Activity a, int highlight) {
@@ -1256,6 +1304,7 @@ public class MusicUtils {
             if (true && MusicUtils.sService != null && MusicUtils.sService.getAudioId() != -1) {
                 TextView title = (TextView) nowPlayingView.findViewById(R.id.title);
                 TextView artist = (TextView) nowPlayingView.findViewById(R.id.artist);
+                ImageView image = (ImageView) nowPlayingView.findViewById(R.id.icon);
                 title.setText(MusicUtils.sService.getTrackName());
                 String artistName = MusicUtils.sService.getArtistName();
                 if (MediaStore.UNKNOWN_STRING.equals(artistName)) {
@@ -1265,6 +1314,13 @@ public class MusicUtils {
                 //mNowPlayingView.setOnFocusChangeListener(mFocuser);
                 //mNowPlayingView.setOnClickListener(this);
                 nowPlayingView.setVisibility(View.VISIBLE);
+
+                if (isPlaying()) {
+                    image.setImageResource(R.drawable.indicator_ic_mp_playing_large);
+                } else {
+                    image.setImageResource(R.drawable.indicator_ic_mp_pause_large);
+                }
+
                 nowPlayingView.setOnClickListener(new View.OnClickListener() {
 
                     public void onClick(View v) {
@@ -1371,5 +1427,39 @@ public class MusicUtils {
                 entry.dump(out);
             }
         }
+    }
+    /**
+     *
+     * @return true if one track is palying. Otherwise false
+     */
+    public static boolean isPlaying() {
+        if (sService != null) {
+            try {
+                return sService.isPlaying();
+            } catch (RemoteException ex) {
+            }
+        }
+        return false;
+    }
+
+    public static int getAudioIDFromPath(Context context,String path){
+        int id = 0;
+        String[] columns = new String[] { MediaStore.Audio.Media._ID };
+        String where = MediaStore.Audio.Media.DISPLAY_NAME + "=?";
+        String[] selectionArgs = { path };
+        Cursor c = null;
+        try {
+            c = query(context,MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
+                columns, where, selectionArgs, null);
+            if (c != null && c.moveToFirst()) {
+                int i = c.getColumnIndexOrThrow(MediaStore.Audio.Media._ID);
+                id = c.getInt(i);
+            }
+        } finally {
+            if (c != null) {
+                c.close();
+            }
+        }
+        return id;
     }
 }

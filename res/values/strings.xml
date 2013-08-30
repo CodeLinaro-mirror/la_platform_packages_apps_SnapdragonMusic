@@ -3,16 +3,16 @@
 /*
 ** Copyright 2007, The Android Open Source Project
 **
-** Licensed under the Apache License, Version 2.0 (the "License"); 
-** you may not use this file except in compliance with the License. 
-** You may obtain a copy of the License at 
+** Licensed under the Apache License, Version 2.0 (the "License");
+** you may not use this file except in compliance with the License.
+** You may obtain a copy of the License at
 **
-**     http://www.apache.org/licenses/LICENSE-2.0 
+**     http://www.apache.org/licenses/LICENSE-2.0
 **
-** Unless required by applicable law or agreed to in writing, software 
-** distributed under the License is distributed on an "AS IS" BASIS, 
-** WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. 
-** See the License for the specific language governing permissions and 
+** Unless required by applicable law or agreed to in writing, software
+** distributed under the License is distributed on an "AS IS" BASIS,
+** WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+** See the License for the specific language governing permissions and
 ** limitations under the License.
 */
 -->
@@ -67,6 +67,10 @@
     <string name="shuffle_all">Shuffle all</string>
     <!-- Menu item to play back all the songs in the currently showing list in list order -->
     <string name="play_all">Play all</string>
+    <!-- Menu item to play song in music -->
+    <string name="open_in_music">Open in music</string>
+    <!-- Menu item to share audio or video -->
+    <string name="share">Share</string>
 
     <!-- Delete confirmation dialog when deleting an entire artist -->
     <string name="delete_artist_desc">Permanently delete all songs by <xliff:g id="artist">%s</xliff:g> from the SD card?</string>
@@ -136,6 +140,11 @@
     <string name="edit_playlist_menu">Edit</string>
     <!-- Playlist context menu item to rename the selected playlist-->
     <string name="rename_playlist_menu">Rename</string>
+    <!-- Dialog box message shown when deleting a playlist-->
+    <string name="delete_playlist_message">Do you want to delete \"<xliff:g id="name">%s</xliff:g>\"?</string>
+    <!-- Dialog box button -->
+    <string name="delete_playlist_button_ok">OK</string>
+    <string name="delete_playlist_button_cancel">Cancel</string>
     <!-- Transient popup message shown after deleting a playlist -->
     <string name="playlist_deleted_message">Playlist deleted.</string>
     <!-- Transient popup message shown after renaming a playlist -->
@@ -148,6 +157,8 @@
     <string name="podcasts_listitem">Podcasts</string>
     <!-- The name of the pseudo-playlist that holds all the podcasts, shown in title bar of songs list -->
     <string name="podcasts_title">Podcasts</string>
+    <!-- all recordings will show up in the media database in a playlist with thiis name -->
+    <string name="audio_db_playlist_name">My recordings</string>
     <!-- Title of screen when no sd card is present -->
     <string name="sdcard_missing_title">No SD card</string>
     <!-- Title of screen when no sd card is present -->
@@ -192,6 +203,16 @@
     <string name="ringtone_menu_short">Use as ringtone</string>
     <!-- Toast after setting a song as phone ringtone -->
     <string name="ringtone_set">\"<xliff:g id="name" example="Alarm Bell">%s</xliff:g>\" set as phone ringtone.</string>
+    <!-- Individual song context menu item -->
+    <string name="ringtone_menu_1">Use as slot 1 ringtone</string>
+    <string name="ringtone_menu_2">Use as slot 2 ringtone</string>
+    <!-- Menu item -->
+    <string name="ringtone_menu_short_1">Use as ringtone 1</string>
+    <string name="ringtone_menu_short_2">Use as ringtone 2</string>
+    <!-- Toast after setting a song as phone ringtone -->
+    <string name="ringtone_set_1">\"<xliff:g id="name" example="Alarm Bell">%s</xliff:g>\" set as slot 1 ringtone.</string>
+    <!-- Toast after setting a song as phone ringtone -->
+    <string name="ringtone_set_2">\"<xliff:g id="name" example="Alarm Bell">%s</xliff:g>\" set as slot 2 ringtone.</string>
     <!-- Context menu item -->
     <string name="play_selection">Play</string>
     <!-- Context menu item -->
@@ -302,6 +323,7 @@
 
     <!-- Shown in the search box as a hint -->
     <string name="search_hint">Search Music</string>
+    <string name="search_hint_video" >Search Video</string>
 
     <!--The fast scroll thumb will show one character from this string depending on the position in the list -->
     <string name="fast_scroll_alphabet">\u0020ABCDEFGHIJKLMNOPQRSTUVWXYZ</string>
@@ -315,5 +337,8 @@
     <string name="duplicate_playlist_name_alert">There is already a playlist named \"<xliff:g id="name">%s</xliff:g>\". Please select a different name.</string>
     <string name="button_ok">Ok</string>
 
+
+    <!-- Shown when video is played after disable Gallery app from Settings -->
+    <string name="enable_gallery_app">Video cannot be played, please enable Gallery app from Settings.</string>
 </resources>
 

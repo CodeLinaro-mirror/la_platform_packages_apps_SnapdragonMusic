@@ -63,7 +63,7 @@ import android.widget.ExpandableListView.ExpandableListContextMenuInfo;
 import android.view.KeyEvent;
 
 import java.text.Collator;
-
+import java.util.Locale;
 
 public class ArtistAlbumBrowserActivity extends ExpandableListActivity
         implements View.OnCreateContextMenuListener, MusicUtils.Defs, ServiceConnection
@@ -283,12 +283,9 @@ public class ArtistAlbumBrowserActivity extends ExpandableListActivity
         intent.putExtra("album", mCurrentAlbumId);
         Cursor c = (Cursor) getExpandableListAdapter().getChild(groupPosition, childPosition);
         String album = c.getString(c.getColumnIndex(MediaStore.Audio.Albums.ALBUM));
-        if (album == null || album.equals(MediaStore.UNKNOWN_STRING)) {
-            // unknown album, so we should include the artist ID to limit the songs to songs only by that artist 
-            mArtistCursor.moveToPosition(groupPosition);
-            mCurrentArtistId = mArtistCursor.getString(mArtistCursor.getColumnIndex(MediaStore.Audio.Artists._ID));
-            intent.putExtra("artist", mCurrentArtistId);
-        }
+        mArtistCursor.moveToPosition(groupPosition);
+        mCurrentArtistId = mArtistCursor.getString(mArtistCursor.getColumnIndex(MediaStore.Audio.Artists._ID));
+        intent.putExtra("artist", mCurrentArtistId);
         startActivity(intent);
         return true;
     }
@@ -296,8 +293,16 @@ public class ArtistAlbumBrowserActivity extends ExpandableListActivity
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         super.onCreateOptionsMenu(menu);
-        menu.add(0, PARTY_SHUFFLE, 0, R.string.party_shuffle); // icon will be set in onPrepareOptionsMenu()
-        menu.add(0, SHUFFLE_ALL, 0, R.string.shuffle_all).setIcon(R.drawable.ic_menu_shuffle);
+        if (TextUtils.getLayoutDirectionFromLocale(Locale.getDefault()) ==
+                View.LAYOUT_DIRECTION_RTL) {
+            // icon will be set in onPrepareOptionsMenu()
+            menu.add(0, SHUFFLE_ALL, 0, R.string.shuffle_all).setIcon(R.drawable.ic_menu_shuffle);
+            menu.add(0, PARTY_SHUFFLE, 0, R.string.party_shuffle);
+        } else {
+            // icon will be set in onPrepareOptionsMenu()
+            menu.add(0, PARTY_SHUFFLE, 0, R.string.party_shuffle);
+            menu.add(0, SHUFFLE_ALL, 0, R.string.shuffle_all).setIcon(R.drawable.ic_menu_shuffle);
+        }
         return true;
     }
     
@@ -442,7 +447,8 @@ public class ArtistAlbumBrowserActivity extends ExpandableListActivity
                 if (mCurrentArtistId != null) {
                     list = MusicUtils.getSongListForArtist(this, Long.parseLong(mCurrentArtistId));
                     String f;
-                    if (android.os.Environment.isExternalStorageRemovable()) {
+                    String status = android.os.Environment.getExternalStorageState();
+                    if (status.equals(android.os.Environment.MEDIA_MOUNTED)) {
                         f = getString(R.string.delete_artist_desc);
                     } else {
                         f = getString(R.string.delete_artist_desc_nosdcard);
@@ -451,7 +457,8 @@ public class ArtistAlbumBrowserActivity extends ExpandableListActivity
                 } else {
                     list = MusicUtils.getSongListForAlbum(this, Long.parseLong(mCurrentAlbumId));
                     String f;
-                    if (android.os.Environment.isExternalStorageRemovable()) {
+                    String status = android.os.Environment.getExternalStorageState();
+                    if (status.equals(android.os.Environment.MEDIA_MOUNTED)) {
                         f = getString(R.string.delete_album_desc);
                     } else {
                         f = getString(R.string.delete_album_desc_nosdcard);
@@ -563,7 +570,7 @@ public class ArtistAlbumBrowserActivity extends ExpandableListActivity
     
     static class ArtistAlbumListAdapter extends SimpleCursorTreeAdapter implements SectionIndexer {
         
-        private final Drawable mNowPlayingOverlay;
+        private Drawable mNowPlayingOverlay;
         private final BitmapDrawable mDefaultAlbumIcon;
         private int mGroupArtistIdIdx;
         private int mGroupArtistIdx;
@@ -573,7 +580,6 @@ public class ArtistAlbumBrowserActivity extends ExpandableListActivity
         private final Resources mResources;
         private final String mAlbumSongSeparator;
         private final String mUnknownAlbum;
-        private final String mUnknownArtist;
         private final StringBuilder mBuffer = new StringBuilder();
         private final Object[] mFormatArgs = new Object[1];
         private final Object[] mFormatArgs3 = new Object[3];
@@ -581,6 +587,7 @@ public class ArtistAlbumBrowserActivity extends ExpandableListActivity
         private ArtistAlbumBrowserActivity mActivity;
         private AsyncQueryHandler mQueryHandler;
         private String mConstraint = null;
+        private String mUnknownArtist;
         private boolean mConstraintIsValid = false;
         
         static class ViewHolder {
@@ -687,6 +694,7 @@ public class ArtistAlbumBrowserActivity extends ExpandableListActivity
             String artist = cursor.getString(mGroupArtistIdx);
             String displayartist = artist;
             boolean unknown = artist == null || artist.equals(MediaStore.UNKNOWN_STRING);
+            mUnknownArtist = mResources.getString(R.string.unknown_artist_name);
             if (unknown) {
                 displayartist = mUnknownArtist;
             }
@@ -702,6 +710,14 @@ public class ArtistAlbumBrowserActivity extends ExpandableListActivity
             
             long currentartistid = MusicUtils.getCurrentArtistId();
             long artistid = cursor.getLong(mGroupArtistIdIdx);
+
+            // We set different icon according to different play state
+            if (MusicUtils.isPlaying()) {
+                mNowPlayingOverlay = mResources.getDrawable(R.drawable.indicator_ic_mp_playing_list);
+            } else {
+                mNowPlayingOverlay = mResources.getDrawable(R.drawable.indicator_ic_mp_pause_list);
+            }
+
             if (currentartistid == artistid && !isexpanded) {
                 vh.play_indicator.setImageDrawable(mNowPlayingOverlay);
             } else {
@@ -765,6 +781,15 @@ public class ArtistAlbumBrowserActivity extends ExpandableListActivity
             long currentalbumid = MusicUtils.getCurrentAlbumId();
             long aid = cursor.getLong(0);
             iv = vh.play_indicator;
+
+            // We set different icon according to different play state
+            Resources res = context.getResources();
+            if (MusicUtils.isPlaying()) {
+                mNowPlayingOverlay = res.getDrawable(R.drawable.indicator_ic_mp_playing_list);
+            } else {
+                mNowPlayingOverlay = res.getDrawable(R.drawable.indicator_ic_mp_pause_list);
+            }
+
             if (currentalbumid == aid) {
                 iv.setImageDrawable(mNowPlayingOverlay);
             } else {

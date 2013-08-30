@@ -340,7 +340,8 @@ public class AlbumBrowserActivity extends ListActivity
             case DELETE_ITEM: {
                 long [] list = MusicUtils.getSongListForAlbum(this, Long.parseLong(mCurrentAlbumId));
                 String f;
-                if (android.os.Environment.isExternalStorageRemovable()) {
+                String status = android.os.Environment.getExternalStorageState();
+                if (status.equals(android.os.Environment.MEDIA_MOUNTED)) {
                     f = getString(R.string.delete_album_desc);
                 } else {
                     f = getString(R.string.delete_album_desc_nosdcard);
@@ -505,7 +506,7 @@ public class AlbumBrowserActivity extends ListActivity
     
     static class AlbumListAdapter extends SimpleCursorAdapter implements SectionIndexer {
         
-        private final Drawable mNowPlayingOverlay;
+        private Drawable mNowPlayingOverlay;
         private final BitmapDrawable mDefaultAlbumIcon;
         private int mAlbumIdx;
         private int mArtistIdx;
@@ -635,6 +636,14 @@ public class AlbumBrowserActivity extends ListActivity
             
             long currentalbumid = MusicUtils.getCurrentAlbumId();
             iv = vh.play_indicator;
+
+            // We set different icon according to different play state
+            if (MusicUtils.isPlaying()) {
+                mNowPlayingOverlay = mResources.getDrawable(R.drawable.indicator_ic_mp_playing_list);
+            } else {
+                mNowPlayingOverlay = mResources.getDrawable(R.drawable.indicator_ic_mp_pause_list);
+            }
+
             if (currentalbumid == aid) {
                 iv.setImageDrawable(mNowPlayingOverlay);
             } else {

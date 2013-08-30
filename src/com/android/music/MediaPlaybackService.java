@@ -86,6 +86,7 @@ public class MediaPlaybackService extends Service {
     public static final String PLAYSTATE_CHANGED = "com.android.music.playstatechanged";
     public static final String META_CHANGED = "com.android.music.metachanged";
     public static final String QUEUE_CHANGED = "com.android.music.queuechanged";
+    private static final String ACTION_DELETE_MUSIC = "com.android.fileexplorer.action.DELETE_MUSIC";
 
     public static final String SERVICECMD = "com.android.music.musicservicecommand";
     public static final String CMDNAME = "command";
@@ -109,6 +110,7 @@ public class MediaPlaybackService extends Service {
          "com.qualcomm.music.playersettingsresponse";
     private static final String EXTRA_SHUFFLE_VAL = "shuffle";
     private static final String EXTRA_REPEAT_VAL = "repeat";
+    private static final String UPDATE_WIDGET_ACTION = "com.android.music.updatewidget";
 
     private static final int TRACK_ENDED = 1;
     private static final int RELEASE_WAKELOCK = 2;
@@ -401,6 +403,8 @@ public class MediaPlaybackService extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
+        // add for clear the notification when the service restart
+        stopForeground(true);
 
         mAudioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
         ComponentName rec = new ComponentName(getPackageName(),
@@ -486,6 +490,11 @@ public class MediaPlaybackService extends Service {
             unregisterReceiver(mA2dpReceiver);
             mA2dpReceiver = null;
         }
+
+        //notify music widget update state
+        //because of service is died, so can not use performUpdate
+        Intent intent = new Intent(UPDATE_WIDGET_ACTION);
+        sendBroadcast(intent);
 
         mWakeLock.release();
         super.onDestroy();
@@ -844,18 +853,38 @@ public class MediaPlaybackService extends Service {
                         mQueueIsSaveable = false;
                         closeExternalStorageFiles(intent.getData().getPath());
                     } else if (action.equals(Intent.ACTION_MEDIA_MOUNTED)) {
+                        // when play music in background, delete file in filemanager will not effect music to play
+                        if (intent.getStringExtra("FileChange") != null) {
+                            notifyChange(QUEUE_CHANGED);
+                            notifyChange(META_CHANGED);
+                            return;
+                        }
                         mMediaMountedCount++;
                         mCardId = MusicUtils.getCardId(MediaPlaybackService.this);
                         reloadQueue();
+                        if (mIsSupposedToBePlaying) {
+                            stopForeground(false);
+                            seek(0);
+                        } else {
+                            stopForeground(true);
+                            seek(0);
+                        }
                         mQueueIsSaveable = true;
                         notifyChange(QUEUE_CHANGED);
                         notifyChange(META_CHANGED);
+                    } else if (action.equals(ACTION_DELETE_MUSIC)) {
+                        long id = intent.getLongExtra("mid", -1);
+                        long artindex = intent.getLongExtra("artindex", -1);
+                        if (id != -1 && artindex != -1) {
+                             MusicUtils.deleteTrack(MediaPlaybackService.this, id, artindex);
+                        }
                     }
                 }
             };
             IntentFilter iFilter = new IntentFilter();
             iFilter.addAction(Intent.ACTION_MEDIA_EJECT);
             iFilter.addAction(Intent.ACTION_MEDIA_MOUNTED);
+            iFilter.addAction(ACTION_DELETE_MUSIC);
             iFilter.addDataScheme("file");
             registerReceiver(mUnmountReceiver, iFilter);
         }
@@ -955,6 +984,11 @@ public class MediaPlaybackService extends Service {
         if (what.equals(PLAYSTATE_CHANGED)) {
 //            mRemoteControlClient.setPlaybackState(isPlaying() ?
 //                    RemoteControlClient.PLAYSTATE_PLAYING : RemoteControlClient.PLAYSTATE_PAUSED);
+            if (mPlayer.mCurrentMediaPlayer.isPlaying()) {
+                 mIsSupposedToBePlaying = true;
+            } else {
+                 mIsSupposedToBePlaying = false;
+            }
         } else if (what.equals(META_CHANGED)) {
 //            RemoteControlClient.MetadataEditor ed = mRemoteControlClient.editMetadata(true);
 //            ed.putString(MediaMetadataRetriever.METADATA_KEY_TITLE, getTrackName());
@@ -1140,6 +1174,9 @@ public class MediaPlaybackService extends Service {
                         mPlayPos++;
                 }
             }
+            if (index2 == mNextPlayPos || index1 == mNextPlayPos) {
+                setNextTrack();
+            }
             notifyChange(QUEUE_CHANGED);
         }
     }
@@ -1165,8 +1202,10 @@ public class MediaPlaybackService extends Service {
         Cursor c = getContentResolver().query(
                 MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
                 mCursorCols, "_id=" + id , null, null);
-        if (c != null) {
+        if (c != null && c.getCount() > 0) {
             c.moveToFirst();
+        } else {
+            c = null;
         }
         return c;
     }
@@ -1184,9 +1223,9 @@ public class MediaPlaybackService extends Service {
             stop(false);
 
             mCursor = getCursorForId(mPlayList[mPlayPos]);
+            if (null == mCursor || 0 == mCursor.getCount()) return;
             while(true) {
-                if (mCursor != null && mCursor.getCount() != 0 &&
-                        open(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI + "/" +
+                if (open(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI + "/" +
                                 mCursor.getLong(IDCOLIDX))) {
                     break;
                 }
@@ -1384,6 +1423,7 @@ public class MediaPlaybackService extends Service {
         if (remove_status_icon) {
             mIsSupposedToBePlaying = false;
         }
+        notifyChange(PLAYSTATE_CHANGED);
     }
 
     /**
@@ -1470,6 +1510,13 @@ public class MediaPlaybackService extends Service {
             play();
             notifyChange(META_CHANGED);
         }
+    }
+
+    /**
+     * Get the mHistory size to decide whether to prev
+     */
+    public int getHistSize() {
+        return mHistory.size();
     }
 
     /**
@@ -2514,6 +2561,9 @@ public class MediaPlaybackService extends Service {
         }
         public void next() {
             mService.get().gotoNext(true);
+        }
+        public int getHistSize() {
+            return mService.get().getHistSize();
         }
         public String getTrackName() {
             return mService.get().getTrackName();
