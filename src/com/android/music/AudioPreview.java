@@ -31,6 +31,7 @@ import android.media.MediaPlayer.OnPreparedListener;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.SystemClock;
 import android.provider.MediaStore;
 import android.provider.OpenableColumns;
 import android.text.TextUtils;
@@ -48,6 +49,9 @@ import android.widget.TextView;
 import android.widget.SeekBar.OnSeekBarChangeListener;
 import android.widget.Toast;
 import android.view.KeyEvent;
+import android.content.BroadcastReceiver;
+import android.content.Intent;
+import android.content.IntentFilter;
 
 import java.io.IOException;
 
@@ -70,6 +74,8 @@ public class AudioPreview extends Activity implements OnPreparedListener, OnErro
     private static final int OPEN_IN_MUSIC = 1;
     private AudioManager mAudioManager;
     private boolean mPausedByTransientLossOfFocus;
+    private BroadcastReceiver mAudioTrackListener;
+    private int mSeekStopPosition;
 
     @Override
     public void onCreate(Bundle icicle) {
@@ -197,10 +203,48 @@ public class AudioPreview extends Activity implements OnPreparedListener, OnErro
     }
 
     @Override
+    protected void onStart() {
+        super.onStart();
+        IntentFilter f = new IntentFilter();
+        f.addAction(AudioManager.ACTION_AUDIO_BECOMING_NOISY);
+        mAudioTrackListener = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                String action = intent.getAction();
+                if (AudioManager.ACTION_AUDIO_BECOMING_NOISY.equals(action)) {
+                    if (mPlayer != null && mPlayer.isPlaying()) {
+                        mPlayer.pause();
+                        updatePlayPause();
+                    }
+                 }
+             }
+        };
+        registerReceiver(mAudioTrackListener, f);
+
+        IntentFilter s = new IntentFilter();
+        s.addAction(Intent.ACTION_SCREEN_ON);
+        s.addAction(Intent.ACTION_SCREEN_OFF);
+        registerReceiver(mScreenTimeoutListener, new IntentFilter(s));
+    }
+
+    @Override
     public Object onRetainNonConfigurationInstance() {
         PreviewPlayer player = mPlayer;
         mPlayer = null;
         return player;
+    }
+
+     @Override
+    protected void onStop() {
+        super.onStop();
+        if(mAudioTrackListener != null) {
+        unregisterReceiver(mAudioTrackListener);
+        mAudioTrackListener = null;
+        }
+        if (mScreenTimeoutListener != null) {
+            unregisterReceiver(mScreenTimeoutListener);
+            mScreenTimeoutListener = null;
+        }
     }
 
     @Override
@@ -315,6 +359,7 @@ public class AudioPreview extends Activity implements OnPreparedListener, OnErro
     class ProgressRefresher implements Runnable {
 
         public void run() {
+            if (mScreenOff) return;
             if (mPlayer != null && !mSeeking && mDuration != 0) {
                 int progress = mPlayer.getCurrentPosition() / mDuration;
                 mSeekBar.setProgress(mPlayer.getCurrentPosition());
@@ -324,6 +369,20 @@ public class AudioPreview extends Activity implements OnPreparedListener, OnErro
         }
     }
     
+    private boolean mScreenOff;
+    private BroadcastReceiver mScreenTimeoutListener = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (Intent.ACTION_SCREEN_ON.equals(intent.getAction())) {
+                mScreenOff = false;
+                mProgressRefresher.removeCallbacksAndMessages(null);
+                mProgressRefresher.postDelayed(new ProgressRefresher(), 200);
+            } else if (Intent.ACTION_SCREEN_OFF.equals(intent.getAction())) {
+                mScreenOff = true;
+            }
+        }
+    };
+
     private void updatePlayPause() {
         ImageButton b = (ImageButton) findViewById(R.id.playpause);
         if (b != null) {
@@ -348,9 +407,12 @@ public class AudioPreview extends Activity implements OnPreparedListener, OnErro
             if (mPlayer == null) {
                 return;
             }
-            mPlayer.seekTo(progress);
+            mSeekStopPosition = progress;
         }
         public void onStopTrackingTouch(SeekBar bar) {
+            if (mPlayer != null) {
+                mPlayer.seekTo(mSeekStopPosition);
+            }
             mSeeking = false;
         }
     };
@@ -362,6 +424,8 @@ public class AudioPreview extends Activity implements OnPreparedListener, OnErro
     }
 
     public void onCompletion(MediaPlayer mp) {
+        // Leave 100ms for mediaplayer to change state.
+        SystemClock.sleep(100);
         mSeekBar.setProgress(mDuration);
         updatePlayPause();
     }
@@ -386,7 +450,7 @@ public class AudioPreview extends Activity implements OnPreparedListener, OnErro
         // database, and we could open it in the full music app instead.
         // Ideally, we would hand off the currently running mediaplayer
         // to the music UI, which can probably be done via a public static
-        menu.add(0, OPEN_IN_MUSIC, 0, "open in music");
+        menu.add(0, OPEN_IN_MUSIC, 0, R.string.open_in_music);
         return true;
     }
 
@@ -400,7 +464,24 @@ public class AudioPreview extends Activity implements OnPreparedListener, OnErro
         item.setVisible(false);
         return false;
     }
-    
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+    // TODO Auto-generated method stub
+        switch (item.getItemId()) {
+            case OPEN_IN_MUSIC:
+                String path = mUri.getLastPathSegment();
+                int id = MusicUtils.getAudioIDFromPath(this,path);
+                Uri newUri = Uri.withAppendedPath(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
+                String.valueOf(id));
+                Intent intent = new Intent(Intent.ACTION_VIEW);
+                intent.setDataAndType(newUri, "audio/*");
+                startActivity(intent);
+                break;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         // Null pointer check here is to avoid monkey test failure.

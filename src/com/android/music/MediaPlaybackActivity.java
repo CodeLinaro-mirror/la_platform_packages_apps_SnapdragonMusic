@@ -45,6 +45,7 @@ import android.os.Looper;
 import android.os.Message;
 import android.os.RemoteException;
 import android.os.SystemClock;
+import android.os.SystemProperties;
 import android.provider.MediaStore;
 import android.text.Layout;
 import android.text.TextUtils.TruncateAt;
@@ -65,6 +66,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.SeekBar.OnSeekBarChangeListener;
 import android.view.KeyEvent;
+import android.telephony.MSimTelephonyManager;
 
 
 public class MediaPlaybackActivity extends Activity implements MusicUtils.Defs,
@@ -82,6 +84,7 @@ public class MediaPlaybackActivity extends Activity implements MusicUtils.Defs,
     private RepeatingImageButton mNextButton;
     private ImageButton mRepeatButton;
     private ImageButton mShuffleButton;
+    private ImageButton mSoundEffectButton;
     private ImageButton mQueueButton;
     private Worker mAlbumArtWorker;
     private AlbumArtHandler mAlbumArtHandler;
@@ -149,6 +152,13 @@ public class MediaPlaybackActivity extends Activity implements MusicUtils.Defs,
         mShuffleButton.setOnClickListener(mShuffleListener);
         mRepeatButton = ((ImageButton) findViewById(R.id.repeat));
         mRepeatButton.setOnClickListener(mRepeatListener);
+        mSoundEffectButton = ((ImageButton) findViewById(R.id.sound_effect));
+        mSoundEffectButton.setOnClickListener(mSoundEffectListener);
+        if(SystemProperties.getBoolean("tunnel.decode", false)) {
+            mSoundEffectButton.setVisibility(View.GONE);
+        } else {
+            mSoundEffectButton.setVisibility(View.VISIBLE);
+        }
         
         if (mProgress instanceof SeekBar) {
             SeekBar seeker = (SeekBar) mProgress;
@@ -157,6 +167,62 @@ public class MediaPlaybackActivity extends Activity implements MusicUtils.Defs,
         mProgress.setMax(1000);
 
         mTouchSlop = ViewConfiguration.get(this).getScaledTouchSlop();
+    }
+
+    public void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        mAlbumArtWorker = new Worker("album art worker");
+        mAlbumArtHandler = new AlbumArtHandler(mAlbumArtWorker.getLooper());
+
+        setContentView(R.layout.audio_player);
+        mCurrentTime = (TextView) findViewById(R.id.currenttime);
+        mTotalTime = (TextView) findViewById(R.id.totaltime);
+        mProgress = (ProgressBar) findViewById(android.R.id.progress);
+        mAlbum = (ImageView) findViewById(R.id.album);
+        mArtistName = (TextView) findViewById(R.id.artistname);
+        mAlbumName = (TextView) findViewById(R.id.albumname);
+        mTrackName = (TextView) findViewById(R.id.trackname);
+
+        View v = (View)mArtistName.getParent();
+        v.setOnTouchListener(this);
+        v.setOnLongClickListener(this);
+
+        v = (View)mAlbumName.getParent();
+        v.setOnTouchListener(this);
+        v.setOnLongClickListener(this);
+
+        v = (View)mTrackName.getParent();
+        v.setOnTouchListener(this);
+        v.setOnLongClickListener(this);
+
+        mPrevButton = (RepeatingImageButton) findViewById(R.id.prev);
+        mPrevButton.setOnClickListener(mPrevListener);
+        mPrevButton.setRepeatListener(mRewListener, 260);
+        mPauseButton = (ImageButton) findViewById(R.id.pause);
+        mPauseButton.requestFocus();
+        mPauseButton.setOnClickListener(mPauseListener);
+        mNextButton = (RepeatingImageButton) findViewById(R.id.next);
+        mNextButton.setOnClickListener(mNextListener);
+        mNextButton.setRepeatListener(mFfwdListener, 260);
+        mQueueButton = (ImageButton) findViewById(R.id.curplaylist);
+        mQueueButton.setOnClickListener(mQueueListener);
+        mShuffleButton = ((ImageButton) findViewById(R.id.shuffle));
+        mShuffleButton.setOnClickListener(mShuffleListener);
+        mRepeatButton = ((ImageButton) findViewById(R.id.repeat));
+        mRepeatButton.setOnClickListener(mRepeatListener);
+        mSoundEffectButton = ((ImageButton) findViewById(R.id.sound_effect));
+        mSoundEffectButton.setOnClickListener(mSoundEffectListener);
+        if(SystemProperties.getBoolean("tunnel.decode", false)) {
+            mSoundEffectButton.setVisibility(View.GONE);
+        } else {
+            mSoundEffectButton.setVisibility(View.VISIBLE);
+        }
+
+        SeekBar seeker = (SeekBar) mProgress;
+        seeker.setOnSeekBarChangeListener(mSeekListener);
+        mProgress.setMax(1000);
+        mTouchSlop = ViewConfiguration.get(this).getScaledTouchSlop();
+        onStart();
     }
     
     int mInitialX = -1;
@@ -187,7 +253,7 @@ public class MediaPlaybackActivity extends Activity implements MusicUtils.Defs,
             mDraggingLabel = false;
         } else if (action == MotionEvent.ACTION_UP ||
                 action == MotionEvent.ACTION_CANCEL) {
-            v.setBackgroundColor(0);
+            v.setBackgroundColor(0xff000000);
             if (mDraggingLabel) {
                 Message msg = mLabelScroller.obtainMessage(0, tv);
                 mLabelScroller.sendMessageDelayed(msg, 1000);
@@ -374,13 +440,9 @@ public class MediaPlaybackActivity extends Activity implements MusicUtils.Defs,
         public void onProgressChanged(SeekBar bar, int progress, boolean fromuser) {
             if (!fromuser || (mService == null)) return;
             long now = SystemClock.elapsedRealtime();
+            mPosOverride = mDuration * progress / 1000;
             if ((now - mLastSeekEventTime) > 10) {
                 mLastSeekEventTime = now;
-                mPosOverride = mDuration * progress / 1000;
-                try {
-                    mService.seek(mPosOverride);
-                } catch (RemoteException ex) {
-                }
 
                 // trackball event, allow progress updates
                 if (!mFromTouch) {
@@ -390,6 +452,13 @@ public class MediaPlaybackActivity extends Activity implements MusicUtils.Defs,
             }
         }
         public void onStopTrackingTouch(SeekBar bar) {
+            try {
+                if (null != mService)
+                {
+                    mService.seek(mPosOverride);
+                }
+            } catch (RemoteException ex) {
+            }
             mPosOverride = -1;
             mFromTouch = false;
         }
@@ -417,6 +486,12 @@ public class MediaPlaybackActivity extends Activity implements MusicUtils.Defs,
         }
     };
 
+    private View.OnClickListener mSoundEffectListener = new View.OnClickListener() {
+        public void onClick(View v) {
+            startSoundEffectActivity();
+        }
+    };
+
     private View.OnClickListener mPauseListener = new View.OnClickListener() {
         public void onClick(View v) {
             doPauseResume();
@@ -427,8 +502,15 @@ public class MediaPlaybackActivity extends Activity implements MusicUtils.Defs,
         public void onClick(View v) {
             if (mService == null) return;
             try {
+                int shuffle = mService.getShuffleMode();
+                int histSize = mService.getHistSize();
                 if (mService.position() < 2000) {
-                    mService.prev();
+                    if ((shuffle == MediaPlaybackService.SHUFFLE_NORMAL) && (histSize == 0 || histSize == 1)) {
+                        mService.seek(0);
+                        mService.play();
+                    } else {
+                        mService.prev();
+                    }
                 } else {
                     mService.seek(0);
                     mService.play();
@@ -534,13 +616,24 @@ public class MediaPlaybackActivity extends Activity implements MusicUtils.Defs,
                     R.string.add_to_playlist).setIcon(android.R.drawable.ic_menu_add);
             // these next two are in a separate group, so they can be shown/hidden as needed
             // based on the keyguard state
-            menu.add(1, USE_AS_RINGTONE, 0, R.string.ringtone_menu_short)
-                    .setIcon(R.drawable.ic_menu_set_as_ringtone);
+            if (MSimTelephonyManager.getDefault().isMultiSimEnabled()) {
+                int[] ringtones = { USE_AS_RINGTONE, USE_AS_RINGTONE_2 };
+                int[] menuStrings = { R.string.ringtone_menu_short_1, R.string.ringtone_menu_short_2 };
+                for (int i = 0; i < MSimTelephonyManager.getDefault().getPhoneCount(); i++) {
+                    menu.add(0, ringtones[i], 0, menuStrings[i])
+                            .setIcon(R.drawable.ic_menu_set_as_ringtone);
+                }
+            } else {
+                menu.add(1, USE_AS_RINGTONE, 0, R.string.ringtone_menu_short)
+                        .setIcon(R.drawable.ic_menu_set_as_ringtone);
+            }
+
             menu.add(1, DELETE_ITEM, 0, R.string.delete_item)
                     .setIcon(R.drawable.ic_menu_delete);
 
             Intent i = new Intent(AudioEffect.ACTION_DISPLAY_AUDIO_EFFECT_CONTROL_PANEL);
-            if (getPackageManager().resolveActivity(i, 0) != null) {
+            if ((getPackageManager().resolveActivity(i, 0) != null ) &&
+                    (!SystemProperties.getBoolean("tunnel.decode", false))) {
                 menu.add(0, EFFECTS_PANEL, 0, R.string.effectspanel).setIcon(R.drawable.ic_menu_eq);
             }
 
@@ -595,9 +688,17 @@ public class MediaPlaybackActivity extends Activity implements MusicUtils.Defs,
                     }
                     return true;
                 }
+                case USE_AS_RINGTONE_2: {
+                    // Set the system setting to make this the current ringtone for SUB_1
+                    if (mService != null) {
+                        MusicUtils.setRingtone(this, mService.getAudioId(), MusicUtils.RINGTONE_SUB_1);
+                    }
+                    return true;
+                }
                 case PARTY_SHUFFLE:
                     MusicUtils.togglePartyShuffle();
                     setShuffleButtonImage();
+                    setRepeatButtonImage();
                     break;
                     
                 case NEW_PLAYLIST: {
@@ -621,7 +722,8 @@ public class MediaPlaybackActivity extends Activity implements MusicUtils.Defs,
                         list[0] = MusicUtils.getCurrentAudioId();
                         Bundle b = new Bundle();
                         String f;
-                        if (android.os.Environment.isExternalStorageRemovable()) {
+                        String status = android.os.Environment.getExternalStorageState();
+                        if (status.equals(android.os.Environment.MEDIA_MOUNTED)) {
                             f = getString(R.string.delete_song_desc, mService.getTrackName());
                         } else {
                             f = getString(R.string.delete_song_desc_nosdcard, mService.getTrackName());
@@ -636,18 +738,24 @@ public class MediaPlaybackActivity extends Activity implements MusicUtils.Defs,
                     return true;
                 }
 
-                case EFFECTS_PANEL: {
-                    Intent i = new Intent(AudioEffect.ACTION_DISPLAY_AUDIO_EFFECT_CONTROL_PANEL);
-                    i.putExtra(AudioEffect.EXTRA_AUDIO_SESSION, mService.getAudioSessionId());
-                    startActivityForResult(i, EFFECTS_PANEL);
+                case EFFECTS_PANEL:
+                    startSoundEffectActivity();
                     return true;
-                }
             }
         } catch (RemoteException ex) {
         }
         return super.onOptionsItemSelected(item);
     }
-    
+
+    private void startSoundEffectActivity() {
+        Intent i = new Intent(AudioEffect.ACTION_DISPLAY_AUDIO_EFFECT_CONTROL_PANEL);
+        try {
+            i.putExtra(AudioEffect.EXTRA_AUDIO_SESSION, mService.getAudioSessionId());
+        } catch (RemoteException ex) {
+        }
+        startActivityForResult(i, EFFECTS_PANEL);
+    }
+
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent intent) {
         if (resultCode != RESULT_OK) {
@@ -1045,8 +1153,16 @@ public class MediaPlaybackActivity extends Activity implements MusicUtils.Defs,
             mToast = Toast.makeText(this, "", Toast.LENGTH_SHORT);
         }
         mToast.setText(resid);
+        mToastHandler.postDelayed(mRun, 600);
         mToast.show();
     }
+
+    private Handler mToastHandler = new Handler();
+    private Runnable mRun = new Runnable() {
+        public void run() {
+            mToast.cancel();
+        }
+    };
 
     private void startPlayback() {
 
@@ -1295,6 +1411,8 @@ public class MediaPlaybackActivity extends Activity implements MusicUtils.Defs,
                 }
                 paused = false;
 
+                if (mPosOverride > 0)
+                    mPosOverride = -1;
                 updateTrackInfo();
                 long next = refreshNow();
                 queueNextRefresh(next);

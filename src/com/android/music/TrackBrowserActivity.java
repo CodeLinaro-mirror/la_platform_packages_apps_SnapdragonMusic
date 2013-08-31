@@ -62,6 +62,7 @@ import android.widget.SimpleCursorAdapter;
 import android.widget.TextView;
 import android.widget.AdapterView.AdapterContextMenuInfo;
 import android.view.KeyEvent;
+import android.telephony.MSimTelephonyManager;
 
 import java.text.Collator;
 import java.util.Arrays;
@@ -76,7 +77,7 @@ public class TrackBrowserActivity extends ListActivity
     private static final int CLEAR_PLAYLIST = CHILD_MENU_BASE + 4;
     private static final int REMOVE = CHILD_MENU_BASE + 5;
     private static final int SEARCH = CHILD_MENU_BASE + 6;
-
+    private static final int SHARE = CHILD_MENU_BASE + 7; // Menu to share audio
 
     private static final String LOGTAG = "TrackBrowser";
 
@@ -311,10 +312,14 @@ public class TrackBrowserActivity extends ListActivity
             getListView().invalidateViews();
         }
         MusicUtils.setSpinnerState(this);
+        IntentFilter stateIntentfilter = new IntentFilter();
+        stateIntentfilter.addAction(MediaPlaybackService.PLAYSTATE_CHANGED);
+        registerReceiver(mStatusListener, stateIntentfilter);
     }
     @Override
     public void onPause() {
         mReScanHandler.removeCallbacksAndMessages(null);
+        unregisterReceiver(mStatusListener);
         super.onPause();
     }
     
@@ -331,6 +336,19 @@ public class TrackBrowserActivity extends ListActivity
                 MusicUtils.setSpinnerState(TrackBrowserActivity.this);
             }
             mReScanHandler.sendEmptyMessage(0);
+        }
+    };
+
+    // Receiver of PLAYSTATE_CHANGED to set the icon of play state
+    private BroadcastReceiver mStatusListener = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            String action = intent.getAction();
+            if (action.equals(MediaPlaybackService.PLAYSTATE_CHANGED)) {
+                if (null != mAdapter)
+                    getTrackCursor(mAdapter.getQueryHandler(), null,true);
+                    MusicUtils.updateNowPlaying(TrackBrowserActivity.this);
+            }
         }
     };
     
@@ -520,7 +538,11 @@ public class TrackBrowserActivity extends ListActivity
         }
 
         if (fancyName != null) {
-            setTitle(fancyName);
+            if ("My recordings".equals(fancyName)) {
+                setTitle(R.string.audio_db_playlist_name);
+            } else {
+                setTitle(fancyName);
+            }
         } else {
             setTitle(R.string.tracks_title);
         }
@@ -660,7 +682,18 @@ public class TrackBrowserActivity extends ListActivity
         if (mEditMode) {
             menu.add(0, REMOVE, 0, R.string.remove_from_playlist);
         }
-        menu.add(0, USE_AS_RINGTONE, 0, R.string.ringtone_menu);
+
+        if (MSimTelephonyManager.getDefault().isMultiSimEnabled()) {
+            int[] ringtones = { USE_AS_RINGTONE, USE_AS_RINGTONE_2 };
+            int[] menuStrings = { R.string.ringtone_menu_1,
+                                  R.string.ringtone_menu_2 };
+            for (int i = 0; i < MSimTelephonyManager.getDefault().getPhoneCount(); i++) {
+                    menu.add(0, ringtones[i], 0, menuStrings[i]);
+            }
+        } else {
+            menu.add(0, USE_AS_RINGTONE, 0, R.string.ringtone_menu);
+        }
+
         menu.add(0, DELETE_ITEM, 0, R.string.delete_item);
         AdapterContextMenuInfo mi = (AdapterContextMenuInfo) menuInfoIn;
         mSelectedPosition =  mi.position;
@@ -672,10 +705,10 @@ public class TrackBrowserActivity extends ListActivity
         } catch (IllegalArgumentException ex) {
             mSelectedId = mi.id;
         }
-        // only add the 'search' menu if the selected item is music
-        if (isMusic(mTrackCursor)) {
-            menu.add(0, SEARCH, 0, R.string.search_title);
-        }
+
+        // add the 'search' menu no matter whether the selected item is music or not
+        menu.add(0, SEARCH, 0, R.string.search_title);
+
         mCurrentAlbumName = mTrackCursor.getString(mTrackCursor.getColumnIndexOrThrow(
                 MediaStore.Audio.Media.ALBUM));
         mCurrentArtistNameForAlbum = mTrackCursor.getString(mTrackCursor.getColumnIndexOrThrow(
@@ -683,6 +716,8 @@ public class TrackBrowserActivity extends ListActivity
         mCurrentTrackName = mTrackCursor.getString(mTrackCursor.getColumnIndexOrThrow(
                 MediaStore.Audio.Media.TITLE));
         menu.setHeaderTitle(mCurrentTrackName);
+        // Menu item to share audio
+        menu.add(0, SHARE, 0, R.string.share);
     }
 
     @Override
@@ -721,12 +756,18 @@ public class TrackBrowserActivity extends ListActivity
                 MusicUtils.setRingtone(this, mSelectedId);
                 return true;
 
+				case USE_AS_RINGTONE_2:
+                // Set the system setting to make this the current ringtone for SUB_1
+                MusicUtils.setRingtone(this, mSelectedId, MusicUtils.RINGTONE_SUB_1);
+                return true;
+
             case DELETE_ITEM: {
                 long [] list = new long[1];
                 list[0] = (int) mSelectedId;
                 Bundle b = new Bundle();
                 String f;
-                if (android.os.Environment.isExternalStorageRemovable()) {
+                String status = android.os.Environment.getExternalStorageState();
+                if (status.equals(android.os.Environment.MEDIA_MOUNTED)) {
                     f = getString(R.string.delete_song_desc); 
                 } else {
                     f = getString(R.string.delete_song_desc_nosdcard); 
@@ -747,6 +788,22 @@ public class TrackBrowserActivity extends ListActivity
                 
             case SEARCH:
                 doSearch();
+                return true;
+
+            case SHARE:
+                // Send intent to share audio
+                long id;
+                Intent shareIntent = new Intent(Intent.ACTION_SEND);
+                shareIntent.setType("audio/*");
+                mTrackCursor.moveToPosition(mSelectedPosition);
+                if (mEditMode && !mPlaylist.equals("nowplaying")) {
+                    id = mTrackCursor.getLong(mTrackCursor.getColumnIndexOrThrow(MediaStore.Audio.Playlists.Members.AUDIO_ID));
+                } else {
+                    id = mTrackCursor.getLong(mTrackCursor.getColumnIndexOrThrow(MediaStore.Audio.Media._ID));
+                }
+                Uri uri = ContentUris.withAppendedId(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, id);
+                shareIntent.putExtra(Intent.EXTRA_STREAM, uri);
+                startActivity(shareIntent);
                 return true;
         }
         return super.onContextItemSelected(item);
@@ -1393,9 +1450,9 @@ public class TrackBrowserActivity extends ListActivity
                     String selection, String[] selectionArgs,
                     String orderBy, boolean async) {
                 if (async) {
-                    // Get 100 results first, which is enough to allow the user to start scrolling,
+                    // Get 500 results first, which is enough to allow the user to start scrolling,
                     // while still being very fast.
-                    Uri limituri = uri.buildUpon().appendQueryParameter("limit", "100").build();
+                    Uri limituri = uri.buildUpon().appendQueryParameter("limit", "500").build();
                     QueryArgs args = new QueryArgs();
                     args.uri = uri;
                     args.projection = projection;
@@ -1507,7 +1564,10 @@ public class TrackBrowserActivity extends ListActivity
 
             String name = cursor.getString(mArtistIdx);
             if (name == null || name.equals(MediaStore.UNKNOWN_STRING)) {
-                builder.append(mUnknownArtist);
+                // Reload the "unknown_artist_name" string in order to
+                // avoid that this string doesn't change when user
+                // changes the system language setting.
+                builder.append(context.getString(R.string.unknown_artist_name));
             } else {
                 builder.append(name);
             }
@@ -1545,7 +1605,12 @@ public class TrackBrowserActivity extends ListActivity
             // which is not really a playlist)
             if ( (mIsNowPlaying && cursor.getPosition() == id) ||
                  (!mIsNowPlaying && !mDisableNowPlayingIndicator && cursor.getLong(mAudioIdIdx) == id)) {
-                iv.setImageResource(R.drawable.indicator_ic_mp_playing_list);
+                // We set different icon according to different play state
+                if (MusicUtils.isPlaying()) {
+                    iv.setImageResource(R.drawable.indicator_ic_mp_playing_list);
+                } else {
+                    iv.setImageResource(R.drawable.indicator_ic_mp_pause_list);
+                }
                 iv.setVisibility(View.VISIBLE);
             } else {
                 iv.setVisibility(View.GONE);
