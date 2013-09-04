@@ -76,7 +76,7 @@ public class PlaylistBrowserActivity extends ListActivity
     boolean mAdapterSent;
     private static int mLastListPosCourse = -1;
     private static int mLastListPosFine = -1;
-
+    private CharSequence mTitle;
     private boolean mCreateShortcut;
     private ServiceToken mToken;
 
@@ -348,8 +348,9 @@ public class PlaylistBrowserActivity extends ListActivity
         }
 
         mPlaylistCursor.moveToPosition(mi.position);
-        menu.setHeaderTitle(mPlaylistCursor.getString(mPlaylistCursor.getColumnIndexOrThrow(
-                MediaStore.Audio.Playlists.NAME)));
+        mTitle = mPlaylistCursor.getString(mPlaylistCursor.getColumnIndexOrThrow(
+                MediaStore.Audio.Playlists.NAME));
+        menu.setHeaderTitle(mTitle);
     }
 
     @Override
@@ -373,7 +374,7 @@ public class PlaylistBrowserActivity extends ListActivity
                 // get playlist name
                 String name = mPlaylistCursor.getString(mPlaylistCursor.getColumnIndexOrThrow(
                         MediaStore.Audio.Playlists.NAME));
-                String desc = getString(R.string.delete_playlist_message, name);
+                String desc = getString(R.string.delete_playlist_message, mTitle);
                 Uri uri = ContentUris.withAppendedId(MediaStore.Audio.Playlists.EXTERNAL_CONTENT_URI, mi.id);
                 Bundle b = new Bundle();
                 b.putString("description", desc);
