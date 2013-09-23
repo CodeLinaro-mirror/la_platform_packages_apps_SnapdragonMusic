@@ -19,6 +19,7 @@ package com.android.music;
 import com.android.music.MusicUtils.ServiceToken;
 import com.android.music.QueryBrowserActivity.QueryListAdapter.QueryHandler;
 
+import android.app.Activity;
 import android.app.ExpandableListActivity;
 import android.app.SearchManager;
 import android.content.AsyncQueryHandler;
@@ -81,11 +82,13 @@ public class ArtistAlbumBrowserActivity extends ExpandableListActivity
     private static int mLastListPosCourse = -1;
     private static int mLastListPosFine = -1;
     private ServiceToken mToken;
+    private Activity mActivity;
 
     /** Called when the activity is first created. */
     @Override
     public void onCreate(Bundle icicle) {
         super.onCreate(icicle);
+        mActivity = this;
         requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         setVolumeControlStream(AudioManager.STREAM_MUSIC);
@@ -193,8 +196,11 @@ public class ArtistAlbumBrowserActivity extends ExpandableListActivity
         f.addAction(MediaPlaybackService.QUEUE_CHANGED);
         registerReceiver(mTrackListListener, f);
         mTrackListListener.onReceive(null, null);
-
-        MusicUtils.setSpinnerState(this);
+        new Thread(new Runnable() {
+            public void run() {
+                MusicUtils.setSpinnerState(mActivity);
+            }
+        }).start();
     }
 
     private BroadcastReceiver mTrackListListener = new BroadcastReceiver() {
