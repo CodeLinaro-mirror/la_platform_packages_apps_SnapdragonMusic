@@ -1411,8 +1411,9 @@ public class MediaPlaybackActivity extends Activity implements MusicUtils.Defs,
                 }
                 paused = false;
 
-                if (mPosOverride > 0)
+                if (mPosOverride > 0) {
                     mPosOverride = -1;
+                }
                 updateTrackInfo();
                 long next = refreshNow();
                 queueNextRefresh(next);
