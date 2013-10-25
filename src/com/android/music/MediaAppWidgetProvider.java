@@ -39,6 +39,7 @@ public class MediaAppWidgetProvider extends AppWidgetProvider {
 
     private static MediaAppWidgetProvider sInstance;
     
+    private static boolean mPauseState = false;
     private static boolean mNoneedperformUpdate = false;
 
     static synchronized MediaAppWidgetProvider getInstance() {
@@ -117,6 +118,10 @@ public class MediaAppWidgetProvider extends AppWidgetProvider {
         return (appWidgetIds.length > 0);
     }
 
+    void setPauseState(boolean mPaused) {
+        mPauseState = mPaused;
+    }
+
     /**
      * Handle a change notification coming over from {@link MediaPlaybackService}
      */
@@ -160,8 +165,6 @@ public class MediaAppWidgetProvider extends AppWidgetProvider {
             } else {
                 errorState = res.getText(R.string.sdcard_missing_title_nosdcard);
             }
-        } else if (titleName == null) {
-            errorState = res.getText(R.string.emptyplaylist);
         }
         
         if (errorState != null) {
@@ -181,6 +184,10 @@ public class MediaAppWidgetProvider extends AppWidgetProvider {
         if (playing) {
             views.setImageViewResource(R.id.control_play, R.drawable.ic_appwidget_music_pause);
         } else {
+            if (titleName == null && !mPauseState && (errorState == null)) {
+                views.setViewVisibility(R.id.title, View.GONE);
+                views.setTextViewText(R.id.artist, res.getText(R.string.emptyplaylist));
+            }
             views.setImageViewResource(R.id.control_play, R.drawable.ic_appwidget_music_play);
         }
 
