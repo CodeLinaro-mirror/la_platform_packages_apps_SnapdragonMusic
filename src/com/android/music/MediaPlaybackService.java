@@ -1344,6 +1344,7 @@ public class MediaPlaybackService extends Service {
                             mPlayPos = 0;
                         }
                     }
+                    notifyChange(META_CHANGED);
                 } catch (UnsupportedOperationException ex) {
                 }
             }
