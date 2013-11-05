@@ -35,6 +35,20 @@
             android:layout_marginEnd="2dip"
             android:layout_marginTop="8dip" />
 
+        <!-- DRM CHANGE START -->
+        <ImageView android:id="@+id/drm_lock"
+            android:background="#000000"
+            android:layout_width="wrap_content"
+            android:layout_marginLeft="-30dip"
+            android:layout_marginRight="2dip"
+            android:layout_marginBottom="2dip"
+            android:visibility="gone"
+            android:layout_height="wrap_content"
+            android:gravity="bottom"
+            android:layout_gravity="bottom"
+            android:src="@drawable/drm_image"/>
+        <!-- DRM CHANGE END -->
+
         <LinearLayout
             android:layout_width="0dip"
             android:layout_height="wrap_content"

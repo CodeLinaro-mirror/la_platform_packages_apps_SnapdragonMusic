@@ -98,6 +98,7 @@ public class MusicUtils {
         public final static int EFFECTS_PANEL = 13;
         public final static int USE_AS_RINGTONE_2 = 14;
         public final static int CHILD_MENU_BASE = 15; // this should be the last item;
+        public final static int DRM_LICENSE_INFO = 16; // Drm file info like rights
     }
 
     public static String makeAlbumsLabel(Context context, int numalbums, int numsongs, boolean isUnknown) {
@@ -1462,4 +1463,35 @@ public class MusicUtils {
         }
         return id;
     }
+
+    // Drm start
+    public static String getSelectAudioPath(Context context, long mSelectedId) {
+        String result = "";
+        if (null == context) {
+            return result;
+        }
+        try {
+            final String[] ccols = new String[] { MediaStore.Audio.Media.DATA };
+            String where = MediaStore.Audio.Media._ID + "='" + mSelectedId + "'";
+            Cursor cursor = query(context, MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
+                                  ccols, where, null,null);
+            if (null != cursor && 0 != cursor.getCount()) {
+                cursor.moveToFirst();
+
+                result = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DATA));
+                cursor.close();
+                return result;
+            }
+
+            if (null != cursor) {
+                cursor.close();
+                return result;
+            }
+        } catch (Exception ex) {
+        }
+
+        return result;
+    }
+    // Drm end
+
 }

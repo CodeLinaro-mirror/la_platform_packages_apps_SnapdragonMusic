@@ -37,11 +37,24 @@ import android.widget.SimpleCursorAdapter;
 import android.widget.Toast;
 import android.net.Uri;
 import android.view.KeyEvent;
-
+import android.drm.DrmManagerClient;
+import android.drm.DrmRights;
+import android.drm.DrmStore.Action;
+import android.drm.DrmStore.DrmDeliveryType;
+import android.drm.DrmStore.RightsStatus;
+import android.widget.Toast;
+import android.content.ContentValues;
+import android.util.Log;
 import java.lang.Integer;
 
 public class VideoBrowserActivity extends ListActivity implements MusicUtils.Defs
 {
+    // Drm start
+    private static final String LOGTAG = "VideoBrowser";
+
+    public static final String BUY_LICENSE="android.drmservice.intent.action.BUY_LICENSE";
+    // Drm end
+
     private String mFilterString = "";
     private int mSelectedPosition; // Position of selected view
     private static final int SHARE = 0; // Menu to share video
@@ -143,6 +156,35 @@ public class VideoBrowserActivity extends ListActivity implements MusicUtils.Def
     {
         Intent intent = new Intent(Intent.ACTION_VIEW);
         mCursor.moveToPosition(position);
+
+        //Drm Start
+        String path = mCursor.getString(mCursor.getColumnIndexOrThrow(MediaStore.Video.Media.DATA));
+        Log.i(LOGTAG, "onListItemClick, path of the file is"+path);
+        if (path.endsWith(".dcf")) {
+            DrmManagerClient drmClient = new DrmManagerClient(VideoBrowserActivity.this);
+            int status = drmClient.checkRightsStatus(path, Action.PLAY);
+            Log.i(LOGTAG, "onListItemClick:status fron drmClient.checkRightsStatus is " + Integer.toString(status));
+
+            ContentValues values = drmClient.getMetadata(path);
+
+            if (RightsStatus.RIGHTS_VALID != status) {
+                String address = values.getAsString("Rights-Issuer");
+                Intent drm_intent = new Intent(BUY_LICENSE);
+                drm_intent.putExtra("DRM_FILE_PATH", address);
+                this.sendBroadcast(drm_intent);
+                return;
+            }
+
+            int drmType = values.getAsInteger("DRM-TYPE");
+            Log.i(LOGTAG, "onListItemClick:DRM-TYPE = " + Integer.toString(drmType));
+            if (drmType > DrmDeliveryType.FORWARD_LOCK) { //Not FL
+                Toast.makeText(VideoBrowserActivity.this, R.string.action_consumes_rights,
+                        Toast.LENGTH_LONG).show();
+            }
+            if (drmClient != null) drmClient.release();
+        }
+        //Drm End
+
         String type = mCursor.getString(mCursor.getColumnIndexOrThrow(MediaStore.Video.Media.MIME_TYPE));
         intent.setDataAndType(ContentUris.withAppendedId(MediaStore.Video.Media.EXTERNAL_CONTENT_URI, id), type);
         try {

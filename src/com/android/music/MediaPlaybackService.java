@@ -53,6 +53,11 @@ import android.provider.MediaStore;
 import android.util.Log;
 import android.widget.RemoteViews;
 import android.widget.Toast;
+// DRM CHANGE START
+import android.drm.DrmManagerClient;
+import android.drm.DrmStore.Action;
+import android.drm.DrmStore.RightsStatus;
+// DRM CHANGE END
 
 import java.io.FileDescriptor;
 import java.io.IOException;
@@ -1312,7 +1317,10 @@ public class MediaPlaybackService extends Service {
             if (path == null) {
                 return false;
             }
-            
+            // Drm start
+            String actualFilePath = "";
+            int status = 0;
+            // Drm end
             // if mCursor is null, try to associate path with a database cursor
             if (mCursor == null) {
 
@@ -1347,6 +1355,25 @@ public class MediaPlaybackService extends Service {
                 } catch (UnsupportedOperationException ex) {
                 }
             }
+
+            // Drm Start
+            if (mCursor != null && (mCursor.getCount() != 0)) {
+                actualFilePath = mCursor.getString(mCursor
+                        .getColumnIndexOrThrow(MediaStore.Audio.Media.DATA));
+            }
+            if (actualFilePath != null
+                    && (actualFilePath.endsWith(".fl")
+                            || actualFilePath.endsWith(".dcf"))) {
+                DrmManagerClient drmClient = new DrmManagerClient(this);
+                status = drmClient.checkRightsStatus(actualFilePath, Action.PLAY);
+                if (RightsStatus.RIGHTS_VALID != status) {
+                    Toast.makeText(this, "Rights are expired for the previous song",
+                            Toast.LENGTH_SHORT).show();
+                }
+                if (drmClient != null) drmClient.release();
+            }
+            // Drm end
+
             mFileToPlay = path;
             mPlayer.setDataSource(mFileToPlay);
             if (mPlayer.isInitialized()) {

@@ -86,6 +86,9 @@ public class MediaPlaybackActivity extends Activity implements MusicUtils.Defs,
     private ImageButton mShuffleButton;
     private ImageButton mSoundEffectButton;
     private ImageButton mQueueButton;
+    // DRM CHANGE START
+    private ImageView mDrmIcon;
+    // DRM CHANGE END
     private Worker mAlbumArtWorker;
     private AlbumArtHandler mAlbumArtHandler;
     private Toast mToast;
@@ -154,6 +157,10 @@ public class MediaPlaybackActivity extends Activity implements MusicUtils.Defs,
         mRepeatButton.setOnClickListener(mRepeatListener);
         mSoundEffectButton = ((ImageButton) findViewById(R.id.sound_effect));
         mSoundEffectButton.setOnClickListener(mSoundEffectListener);
+        // DRM CHANGE START
+        mDrmIcon = (ImageView) findViewById(R.id.drm_lock);
+        // DRM CHANGE END
+
         if(SystemProperties.getBoolean("tunnel.decode", false)) {
             mSoundEffectButton.setVisibility(View.GONE);
         } else {
@@ -1479,6 +1486,14 @@ public class MediaPlaybackActivity extends Activity implements MusicUtils.Defs,
                 mAlbumArtHandler.removeMessages(GET_ALBUM_ART);
                 mAlbumArtHandler.obtainMessage(GET_ALBUM_ART, new AlbumSongIdWrapper(albumid, songid)).sendToTarget();
                 mAlbum.setVisibility(View.VISIBLE);
+                // DRM CHANGE START
+                String filePath = MusicUtils.getSelectAudioPath(MediaPlaybackActivity.this, songid);
+                if (mDrmIcon != null && filePath != null && (filePath.endsWith(".dcf"))) {
+                    mDrmIcon.setVisibility(View.VISIBLE);
+                } else if (mDrmIcon != null) {
+                    mDrmIcon.setVisibility(View.INVISIBLE);
+                }
+                // DRM CHANGE END
             }
             mDuration = mService.duration();
             mTotalTime.setText(MusicUtils.makeTimeString(this, mDuration / 1000));
