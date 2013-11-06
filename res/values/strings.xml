@@ -342,5 +342,10 @@
 
     <!-- Shown when video is played after disable Gallery app from Settings -->
     <string name="enable_gallery_app">Video cannot be played, please enable Gallery app from Settings.</string>
+    <!-- DRM CHANGE -->
+    <string name="no_permission_for_drm">"Sorry, DRM file cannot be shared"</string>
+    <string name="drm_license_info">Drm license info</string>
+    <string name="action_consumes_rights">Rights will be consumed for playing  this media</string>
+    <string name="rights_expired">Rights expired for the song</string>
 </resources>
 

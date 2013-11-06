@@ -50,6 +50,14 @@ import java.text.Collator;
 import java.util.Formatter;
 import java.util.Locale;
 import android.view.KeyEvent;
+// DRM CHANGE START
+import android.os.Environment;
+import android.content.ContentValues;
+import android.widget.Toast;
+import android.drm.DrmManagerClient;
+import android.drm.DrmRights;
+import android.drm.DrmStore.DrmDeliveryType;
+// DRM CHANGE END
 
 /**
  * Activity allowing the user to select a music track on the device, and
@@ -145,6 +153,8 @@ public class MusicPicker extends ListActivity
     long mSelectedId = -1;
     /** Completel Uri that the user has last selected. */
     Uri mSelectedUri;
+
+    boolean mIsAsAlarm = false;// DRM Change
     
     /** If >= 0, we are currently playing a track for preview, and this is its
      * row ID. */
@@ -408,7 +418,9 @@ public class MusicPicker extends ListActivity
         super.onCreate(icicle);
         
         requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
-        
+
+        mIsAsAlarm = getIntent().getBooleanExtra("mIsAsAlarm", false);// DRM Change
+
         int sortMode = TRACK_MENU;
         if (icicle == null) {
             mSelectedUri = getIntent().getParcelableExtra(
@@ -645,6 +657,23 @@ public class MusicPicker extends ListActivity
     void setSelected(Cursor c) {
         Uri uri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI;
         long newId = mCursor.getLong(mCursor.getColumnIndex(MediaStore.Audio.Media._ID));
+
+        // Drm start
+        String data = mCursor.getString(mCursor.getColumnIndex(MediaStore.Audio.Media.DATA));
+        if (!mIsAsAlarm && data.endsWith(".dcf")) {
+            DrmManagerClient drmClient = new DrmManagerClient(this);
+            ContentValues values = drmClient.getMetadata(data);
+            int drmType = values.getAsInteger("DRM-TYPE");
+            Log.d(TAG, "setSelected:drm type = " + Integer.toString(drmType));
+            if (drmType != DrmDeliveryType.SEPARATE_DELIVERY) { // Only SD files are sharable
+                Toast.makeText(MusicPicker.this, R.string.no_permission_for_drm,
+                        Toast.LENGTH_LONG).show();
+                return;
+            }
+            if (drmClient != null) drmClient.release();
+        }
+        // Drm end
+
         mSelectedUri = ContentUris.withAppendedId(uri, newId);
         
         mSelectedId = newId;
