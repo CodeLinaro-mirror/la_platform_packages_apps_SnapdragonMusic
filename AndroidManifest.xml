@@ -281,6 +281,8 @@
             android:theme="@android:style/Theme.Dialog" android:exported="false" />
         <activity android:name="com.android.music.DeleteItems"
             android:theme="@android:style/Theme.Dialog" android:exported="false" />
+        <activity android:name="com.android.music.DeleteVideoItems"
+            android:theme="@android:style/Theme.Dialog" android:exported="false" />
         <activity android:name="com.android.music.ScanningProgress"
             android:theme="@android:style/Theme.Dialog" android:exported="false" />
         <service android:name="com.android.music.MediaPlaybackService"

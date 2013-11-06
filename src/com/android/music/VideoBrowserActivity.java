@@ -49,6 +49,8 @@ import java.lang.Integer;
 
 public class VideoBrowserActivity extends ListActivity implements MusicUtils.Defs
 {
+    private String mCurrentVideoName;
+    private String mCurrentVideoPath;
     // Drm start
     private static final String LOGTAG = "VideoBrowser";
 
@@ -89,9 +91,15 @@ public class VideoBrowserActivity extends ListActivity implements MusicUtils.Def
             return;
         }
         mCursor.moveToPosition(mSelectedPosition);
-        String currentVideoName = mCursor.getString(mCursor.getColumnIndexOrThrow(
+        mCurrentVideoName = mCursor.getString(mCursor.getColumnIndexOrThrow(
                 MediaStore.Video.Media.TITLE));
-        menu.setHeaderTitle(currentVideoName);
+        menu.setHeaderTitle(mCurrentVideoName);
+
+        mCurrentVideoPath = mCursor.getString(mCursor.getColumnIndexOrThrow(
+                MediaStore.Video.Media.DATA));
+
+        menu.add(0, PLAY_SELECTION, 0, R.string.play_selection);
+        menu.add(0, DELETE_ITEM, 0, R.string.delete_item);
 
         // Menu item to share video
         menu.add(0, SHARE, 0, R.string.share);
@@ -100,6 +108,46 @@ public class VideoBrowserActivity extends ListActivity implements MusicUtils.Def
     @Override
     public boolean onContextItemSelected(MenuItem item) {
         switch (item.getItemId()) {
+           case PLAY_SELECTION: {
+                // play the video
+                int position = mSelectedPosition;
+                mCursor.moveToPosition(position);
+                Intent intent = new Intent(Intent.ACTION_VIEW);
+                long id = mCursor.getLong(mCursor.getColumnIndexOrThrow(MediaStore.Video.Media._ID));
+                String type = mCursor.getString(mCursor.getColumnIndexOrThrow(MediaStore.Video.Media.MIME_TYPE));
+                intent.setDataAndType(ContentUris.withAppendedId(MediaStore.Video.Media.EXTERNAL_CONTENT_URI, id), type);
+                try {
+                    startActivity(intent);
+                } catch (ActivityNotFoundException ex) {
+                    Toast.makeText(this, R.string.enable_gallery_app, Toast.LENGTH_SHORT).show();
+                }
+                return true;
+            }
+
+            case DELETE_ITEM: {
+                // delete the video
+                int position = mSelectedPosition;
+                mCursor.moveToPosition(position);
+                long id = mCursor.getLong(mCursor.getColumnIndexOrThrow(MediaStore.Video.Media._ID));
+                long [] list = new long[1];
+                list[0] = id;
+                Bundle b = new Bundle();
+                String f;
+                if (mCurrentVideoPath.contains("sdcard0")) {
+                    f = getString(R.string.delete_song_desc);
+                } else {
+                    f = getString(R.string.delete_song_desc_nosdcard);
+                }
+                String desc = String.format(f, mCurrentVideoName);
+                b.putString("description", desc);
+                b.putLongArray("items", list);
+                Intent intent = new Intent();
+                intent.setClass(this, DeleteVideoItems.class);
+                intent.putExtras(b);
+                startActivityForResult(intent, -1);
+                return true;
+            }
+
             case SHARE:
                 // Send intent to share video
                 Intent shareIntent = new Intent(Intent.ACTION_SEND);
