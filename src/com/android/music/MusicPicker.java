@@ -518,6 +518,7 @@ public class MusicPicker extends ListActivity
     @Override public void onPause() {
         super.onPause();
         stopMediaPlayer();
+        getListView().invalidateViews();
     }
     
     @Override public void onStop() {
