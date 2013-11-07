@@ -1468,6 +1468,39 @@ public class MusicUtils {
         return id;
     }
 
+    public static void deleteVideos(Context context, long [] list) {
+        String [] cols = new String [] { MediaStore.Video.Media._ID,
+                MediaStore.Video.Media.DATA};
+
+        StringBuilder where = new StringBuilder();
+        where.append(MediaStore.Video.Media._ID + " IN (");
+        for (int i = 0; i < list.length; i++) {
+            where.append(list[i]);
+            if (i < list.length - 1) {
+                where.append(",");
+            }
+        }
+        where.append(")");
+
+        Cursor c = query(context, MediaStore.Video.Media.EXTERNAL_CONTENT_URI, cols,
+                where.toString(), null, null);
+        if (c != null) {
+            // remove selected tracks from the database
+            // catch excptions caused by sdcard mount-unmount to prevent accidental exit
+            try {
+                context.getContentResolver().delete(MediaStore.Video.Media.EXTERNAL_CONTENT_URI, where.toString(), null);
+            } catch (Exception e) {
+                // make the error log refer to the under example
+                Log.e("MusicUtils", "Failed to delete file from database");
+            }
+            c.close();
+        }
+
+        // We deleted a number of tracks, which could affect any number of things
+        // in the media content domain, so update everything.
+        context.getContentResolver().notifyChange(Uri.parse("content://media"), null);
+    }
+
     // Drm start
     public static String getSelectAudioPath(Context context, long mSelectedId) {
         String result = "";
