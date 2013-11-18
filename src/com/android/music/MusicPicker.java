@@ -660,7 +660,7 @@ public class MusicPicker extends ListActivity
 
         // Drm start
         String data = mCursor.getString(mCursor.getColumnIndex(MediaStore.Audio.Media.DATA));
-        if (!mIsAsAlarm && data.endsWith(".dcf")) {
+        if (!mIsAsAlarm && (data.endsWith(".dcf") || data.endsWith(".dm"))) {
             DrmManagerClient drmClient = new DrmManagerClient(this);
             ContentValues values = drmClient.getMetadata(data);
             int drmType = values.getAsInteger("DRM-TYPE");

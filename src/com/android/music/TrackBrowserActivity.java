@@ -726,7 +726,7 @@ public class TrackBrowserActivity extends ListActivity
         }
         // Drm start
         String path = MusicUtils.getSelectAudioPath(getApplicationContext(), mSelectedId);
-        if (path.endsWith(".dcf")) {
+        if (path.endsWith(".dcf") || path.endsWith(".dm")) {
             menu.add(0, DRM_LICENSE_INFO, 0, R.string.drm_license_info);
         }
         // Drm end
@@ -859,7 +859,7 @@ public class TrackBrowserActivity extends ListActivity
                     }
                 }
 
-                if (filepath != null && filepath.endsWith(".dcf")) {
+                if (filepath != null && (filepath.endsWith(".dcf") || filepath.endsWith(".dm"))) {
                     DrmManagerClient drmClient = new DrmManagerClient(this);
                     ContentValues values = drmClient.getMetadata(filepath);
                     int drmType = values.getAsInteger("DRM-TYPE");
@@ -1054,7 +1054,7 @@ public class TrackBrowserActivity extends ListActivity
             cursor.close();
         }
         Log.d(LOGTAG, "onListItemClick:path = " + path);
-        if (path.endsWith(".dcf")) {
+        if (path.endsWith(".dcf") || path.endsWith(".dm")) {
             DrmManagerClient drmClient = new DrmManagerClient(TrackBrowserActivity.this);
             int status = drmClient.checkRightsStatus(path, Action.PLAY);
             Log.d(LOGTAG, "onListItemClick:status from checkRightsStatus is " + Integer.toString(status));
