@@ -1364,7 +1364,7 @@ public class MediaPlaybackService extends Service {
                         .getColumnIndexOrThrow(MediaStore.Audio.Media.DATA));
             }
             if (actualFilePath != null
-                    && (actualFilePath.endsWith(".fl")
+                    && (actualFilePath.endsWith(".dm")
                             || actualFilePath.endsWith(".dcf"))) {
                 DrmManagerClient drmClient = new DrmManagerClient(this);
                 status = drmClient.checkRightsStatus(actualFilePath, Action.PLAY);

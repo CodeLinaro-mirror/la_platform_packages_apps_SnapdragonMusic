@@ -208,7 +208,7 @@ public class VideoBrowserActivity extends ListActivity implements MusicUtils.Def
         //Drm Start
         String path = mCursor.getString(mCursor.getColumnIndexOrThrow(MediaStore.Video.Media.DATA));
         Log.i(LOGTAG, "onListItemClick, path of the file is"+path);
-        if (path.endsWith(".dcf")) {
+        if (path.endsWith(".dcf") || path.endsWith(".dm")) {
             DrmManagerClient drmClient = new DrmManagerClient(VideoBrowserActivity.this);
             int status = drmClient.checkRightsStatus(path, Action.PLAY);
             Log.i(LOGTAG, "onListItemClick:status fron drmClient.checkRightsStatus is " + Integer.toString(status));

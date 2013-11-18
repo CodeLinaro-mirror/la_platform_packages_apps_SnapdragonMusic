@@ -1488,7 +1488,9 @@ public class MediaPlaybackActivity extends Activity implements MusicUtils.Defs,
                 mAlbum.setVisibility(View.VISIBLE);
                 // DRM CHANGE START
                 String filePath = MusicUtils.getSelectAudioPath(MediaPlaybackActivity.this, songid);
-                if (mDrmIcon != null && filePath != null && (filePath.endsWith(".dcf"))) {
+                if (mDrmIcon != null
+                        && filePath != null
+                        && (filePath.endsWith(".dcf") || filePath.endsWith(".dm"))) {
                     mDrmIcon.setVisibility(View.VISIBLE);
                 } else if (mDrmIcon != null) {
                     mDrmIcon.setVisibility(View.INVISIBLE);
