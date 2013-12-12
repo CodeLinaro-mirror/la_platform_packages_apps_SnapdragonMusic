@@ -169,6 +169,7 @@ public class TrackBrowserActivity extends ListActivity
         if (mEditMode) {
             ((TouchInterceptor) mTrackList).setDropListener(mDropListener);
             ((TouchInterceptor) mTrackList).setRemoveListener(mRemoveListener);
+            ((TouchInterceptor) mTrackList).registerContentObserver(getApplicationContext());
             mTrackList.setDivider(null);
             mTrackList.setSelector(R.drawable.list_selector_background);
         } else {
@@ -262,6 +263,7 @@ public class TrackBrowserActivity extends ListActivity
                 // clear the listeners so we won't get any more callbacks
                 ((TouchInterceptor) lv).setDropListener(null);
                 ((TouchInterceptor) lv).setRemoveListener(null);
+                ((TouchInterceptor) lv).unregisterContentObserver(getApplicationContext());
             }
         }
 
