@@ -958,7 +958,7 @@ public class MediaPlaybackService extends Service {
             RemoteControlClient.MetadataEditor ed = mRemoteControlClient.editMetadata(true);
             ed.putString(MediaMetadataRetriever.METADATA_KEY_TITLE, getTrackName());
             ed.putString(MediaMetadataRetriever.METADATA_KEY_ALBUM, getAlbumName());
-            ed.putString(MediaMetadataRetriever.METADATA_KEY_ARTIST, getArtistName());
+            ed.putString(MediaMetadataRetriever.METADATA_KEY_ALBUMARTIST, getArtistName());
             ed.putLong(MediaMetadataRetriever.METADATA_KEY_DURATION, duration());
             Bitmap b = MusicUtils.getArtwork(this, getAudioId(), getAlbumId(), false);
             if (b != null) {
@@ -1236,7 +1236,7 @@ public class MediaPlaybackService extends Service {
     }
 
     private void setNextTrack() {
-        if(SystemProperties.getBoolean("gapless.audio.decode", false)) {
+        if(!SystemProperties.getBoolean("audio.gapless.playback.disable", false)) {
             mNextPlayPos = getNextPosition(false);
             if (mNextPlayPos >= 0) {
                 long id = mPlayList[mNextPlayPos];
