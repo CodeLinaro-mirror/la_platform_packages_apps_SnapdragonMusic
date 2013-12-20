@@ -86,6 +86,7 @@ public class MediaPlaybackService extends Service {
     public static final String PLAYSTATE_CHANGED = "com.android.music.playstatechanged";
     public static final String META_CHANGED = "com.android.music.metachanged";
     public static final String QUEUE_CHANGED = "com.android.music.queuechanged";
+    private static final String ACTION_DELETE_MUSIC = "com.android.fileexplorer.action.DELETE_MUSIC";
 
     public static final String SERVICECMD = "com.android.music.musicservicecommand";
     public static final String CMDNAME = "command";
@@ -842,6 +843,12 @@ public class MediaPlaybackService extends Service {
                         mQueueIsSaveable = false;
                         closeExternalStorageFiles(intent.getData().getPath());
                     } else if (action.equals(Intent.ACTION_MEDIA_MOUNTED)) {
+                        // when play music in background, delete file in filemanager will not effect music to play
+                        if (intent.getStringExtra("FileChange") != null) {
+                            notifyChange(QUEUE_CHANGED);
+                            notifyChange(META_CHANGED);
+                            return;
+                        }
                         mMediaMountedCount++;
                         mCardId = MusicUtils.getCardId(MediaPlaybackService.this);
                         reloadQueue();
@@ -855,12 +862,19 @@ public class MediaPlaybackService extends Service {
                         mQueueIsSaveable = true;
                         notifyChange(QUEUE_CHANGED);
                         notifyChange(META_CHANGED);
+                    } else if (action.equals(ACTION_DELETE_MUSIC)) {
+                        long id = intent.getLongExtra("mid", -1);
+                        long artindex = intent.getLongExtra("artindex", -1);
+                        if (id != -1 && artindex != -1) {
+                             MusicUtils.deleteTrack(MediaPlaybackService.this, id, artindex);
+                        }
                     }
                 }
             };
             IntentFilter iFilter = new IntentFilter();
             iFilter.addAction(Intent.ACTION_MEDIA_EJECT);
             iFilter.addAction(Intent.ACTION_MEDIA_MOUNTED);
+            iFilter.addAction(ACTION_DELETE_MUSIC);
             iFilter.addDataScheme("file");
             registerReceiver(mUnmountReceiver, iFilter);
         }
