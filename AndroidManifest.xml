@@ -148,7 +148,8 @@
                 <data android:mimeType="vnd.android.cursor.dir/nowplaying"/>
             </intent-filter>
         </activity>
-        <activity android:name="com.android.music.TrackBrowserActivity" android:exported="false" >
+        <activity android:name="com.android.music.TrackBrowserActivity" android:exported="false"
+            android:configChanges="orientation|keyboardHidden|screenSize" >
             <intent-filter>
                 <action android:name="android.intent.action.EDIT" />
                 <action android:name="android.intent.action.PICK" />
