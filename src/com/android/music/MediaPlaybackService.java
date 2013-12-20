@@ -1164,8 +1164,10 @@ public class MediaPlaybackService extends Service {
         Cursor c = getContentResolver().query(
                 MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
                 mCursorCols, "_id=" + id , null, null);
-        if (c != null) {
+        if (c != null && c.getCount() > 0) {
             c.moveToFirst();
+        } else {
+            c = null;
         }
         return c;
     }
@@ -1183,9 +1185,9 @@ public class MediaPlaybackService extends Service {
             stop(false);
 
             mCursor = getCursorForId(mPlayList[mPlayPos]);
+            if (null == mCursor || 0 == mCursor.getCount()) return;
             while(true) {
-                if (mCursor != null && mCursor.getCount() != 0 &&
-                        open(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI + "/" +
+                if (open(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI + "/" +
                                 mCursor.getLong(IDCOLIDX))) {
                     break;
                 }
