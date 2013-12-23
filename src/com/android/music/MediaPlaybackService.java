@@ -1124,10 +1124,13 @@ public class MediaPlaybackService extends Service {
             mHistory.clear();
 
             saveBookmarkIfNeeded();
+            // avoid "Selected playlist is empty" flicks in the music widget
+            mAppWidgetProvider.setPauseState(true);
             openCurrentAndNext();
             if (oldId != getAudioId()) {
                 notifyChange(META_CHANGED);
             }
+            mAppWidgetProvider.setPauseState(false);
         }
     }
     
@@ -1608,9 +1611,12 @@ public class MediaPlaybackService extends Service {
             }
             mPlayPos = pos;
             saveBookmarkIfNeeded();
+            // avoid "Selected playlist is empty" flicks in the music widget
+            mAppWidgetProvider.setPauseState(true);
             stop(false);
             mPlayPos = pos;
             openCurrentAndNext();
+            mAppWidgetProvider.setPauseState(false);
             play();
             notifyChange(META_CHANGED);
         }
