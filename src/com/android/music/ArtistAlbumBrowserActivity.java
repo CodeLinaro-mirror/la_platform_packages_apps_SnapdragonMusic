@@ -60,6 +60,7 @@ import android.widget.SectionIndexer;
 import android.widget.SimpleCursorTreeAdapter;
 import android.widget.TextView;
 import android.widget.ExpandableListView.ExpandableListContextMenuInfo;
+import android.view.KeyEvent;
 
 import java.text.Collator;
 
@@ -255,6 +256,18 @@ public class ArtistAlbumBrowserActivity extends ExpandableListActivity
         MusicUtils.updateButtonBar(this, R.id.artisttab);
         setTitle();
     }
+
+    @Override
+    public boolean dispatchKeyEvent(KeyEvent event) {
+        if (event.getAction() == KeyEvent.ACTION_UP &&
+                event.getKeyCode() == KeyEvent.KEYCODE_BACK) {
+            finish();
+            return true;
+        }
+
+        return super.dispatchKeyEvent(event);
+    }
+
 
     private void setTitle() {
         setTitle(R.string.artists_title);
