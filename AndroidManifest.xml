@@ -264,7 +264,8 @@
             </intent-filter>
         </activity>
         <activity android:name="com.android.music.CreatePlaylist"
-            android:theme="@android:style/Theme.Dialog" android:exported="false" />
+            android:theme="@android:style/Theme.Dialog" android:exported="false"
+            android:configChanges="orientation|keyboardHidden" />
         <activity android:name="com.android.music.RenamePlaylist"
             android:theme="@android:style/Theme.Dialog" android:exported="false" />
         <activity android:name="com.android.music.WeekSelector"
