@@ -1517,6 +1517,13 @@ public class MediaPlaybackService extends Service {
     }
 
     /**
+     * Get the mHistory size to decide whether to prev
+     */
+    public int getHistSize() {
+        return mHistory.size();
+    }
+
+    /**
      * Get the next position to play. Note that this may actually modify mPlayPos
      * if playback is in SHUFFLE_AUTO mode and the shuffle list window needed to
      * be adjusted. Either way, the return value is the next value that should be
@@ -2576,6 +2583,9 @@ public class MediaPlaybackService extends Service {
         }
         public void next() {
             mService.get().gotoNext(true);
+        }
+        public int getHistSize() {
+            return mService.get().getHistSize();
         }
         public String getTrackName() {
             return mService.get().getTrackName();
