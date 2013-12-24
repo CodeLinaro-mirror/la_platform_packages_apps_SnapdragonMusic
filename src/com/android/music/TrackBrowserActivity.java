@@ -707,6 +707,7 @@ public class TrackBrowserActivity extends ListActivity
             case QUEUE: {
                 long [] list = new long[] { mSelectedId };
                 MusicUtils.addToCurrentPlaylist(this, list);
+                MusicUtils.addToPlaylist(this, list, MusicUtils.getPlayListId());
                 return true;
             }
 
@@ -919,6 +920,10 @@ public class TrackBrowserActivity extends ListActivity
                 } catch (RemoteException ex) {
                 }
             }
+        }
+
+        if (mEditMode && !mPlaylist.equals("nowplaying")) {
+            MusicUtils.setPlayListId(Long.valueOf(mPlaylist));
         }
         MusicUtils.playAll(this, mTrackCursor, position);
     }
