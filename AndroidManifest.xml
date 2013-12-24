@@ -75,7 +75,8 @@
                 android:launchMode="singleTask"
                 android:clearTaskOnLaunch="true"
                 android:excludeFromRecents="true"
-                android:exported="true" >
+                android:exported="true"
+                android:configChanges="orientation|keyboardHidden" >
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
