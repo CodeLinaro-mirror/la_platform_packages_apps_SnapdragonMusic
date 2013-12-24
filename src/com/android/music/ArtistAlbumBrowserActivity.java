@@ -578,7 +578,6 @@ public class ArtistAlbumBrowserActivity extends ExpandableListActivity
         private final Resources mResources;
         private final String mAlbumSongSeparator;
         private final String mUnknownAlbum;
-        private final String mUnknownArtist;
         private final StringBuilder mBuffer = new StringBuilder();
         private final Object[] mFormatArgs = new Object[1];
         private final Object[] mFormatArgs3 = new Object[3];
@@ -586,6 +585,7 @@ public class ArtistAlbumBrowserActivity extends ExpandableListActivity
         private ArtistAlbumBrowserActivity mActivity;
         private AsyncQueryHandler mQueryHandler;
         private String mConstraint = null;
+        private String mUnknownArtist;
         private boolean mConstraintIsValid = false;
         
         static class ViewHolder {
@@ -692,6 +692,7 @@ public class ArtistAlbumBrowserActivity extends ExpandableListActivity
             String artist = cursor.getString(mGroupArtistIdx);
             String displayartist = artist;
             boolean unknown = artist == null || artist.equals(MediaStore.UNKNOWN_STRING);
+            mUnknownArtist = mResources.getString(R.string.unknown_artist_name);
             if (unknown) {
                 displayartist = mUnknownArtist;
             }
