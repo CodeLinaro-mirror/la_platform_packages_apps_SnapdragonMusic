@@ -265,6 +265,13 @@ implements MusicUtils.Defs, ServiceConnection
         }
     }
 
+    public boolean onKeyDown(int keyCode, KeyEvent event)  {
+        if (keyCode == KeyEvent.KEYCODE_MENU)  {
+            return true;
+        }
+        return super.onKeyDown(keyCode, event);
+    }
+
     @Override
     public boolean dispatchKeyEvent(KeyEvent event) {
         if (event.getAction() == KeyEvent.ACTION_UP &&
