@@ -1444,6 +1444,9 @@ public class MediaPlaybackActivity extends Activity implements MusicUtils.Defs,
             mTotalTime.setText(MusicUtils.makeTimeString(this, mDuration / 1000));
         } catch (RemoteException ex) {
             finish();
+        } catch (NullPointerException ex) {
+            // we might not actually have the service yet
+            ex.printStackTrace();
         }
     }
     
