@@ -321,5 +321,6 @@
     <string name="duplicate_playlist_name_alert">There is already a playlist named \"<xliff:g id="name">%s</xliff:g>\". Please select a different name.</string>
     <string name="button_ok">Ok</string>
 
+    <string name="list_empty">No music in the playlist.</string>
 </resources>
 
