@@ -157,4 +157,6 @@
     <string name="effectspanel" msgid="8804547581593509614">"音效"</string>
     <string name="duplicate_playlist_name_alert">已存在名为\"<xliff:g id="name">%s</xliff:g>\"的播放列表，请选择其他名称。</string>
     <string name="button_ok">确定</string>
+
+    <string name="list_empty">播放列表为空。</string>
 </resources>
