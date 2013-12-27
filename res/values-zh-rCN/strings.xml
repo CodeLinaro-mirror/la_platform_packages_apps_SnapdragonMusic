@@ -33,6 +33,7 @@
     <string name="goto_start" msgid="8979658707407220934">"音乐库"</string>
     <string name="party_shuffle" msgid="8213359225506006168">"派对随机播放"</string>
     <string name="party_shuffle_off" msgid="1828744483354711679">"关闭派对随机播放"</string>
+    <string name="clear_all_playlists">"清空播放列表"</string>
     <string name="delete_item" msgid="3363330144534750601">"删除"</string>
     <string name="shuffle_all" msgid="1388193611787878773">"全部随机播放"</string>
     <string name="play_all" msgid="6309622568869321842">"全部播放"</string>
@@ -68,6 +69,7 @@
     <string name="no_playlists_title" msgid="4456351945617594418">"无播放列表"</string>
     <string name="delete_playlist_menu" msgid="8998637685583495247">"删除"</string>
     <string name="rename_playlist_menu" msgid="3133463747389494668">"重命名"</string>
+    <string name="clear_all_playlists_message">"要删除所有播放列表吗?"</string>
     <string name="playlist_deleted_message" msgid="9008053828193961455">"播放列表已删除。"</string>
     <string name="playlist_renamed_message" msgid="7187580192703005990">"播放列表已重命名。"</string>
     <string name="recentlyadded" msgid="110978416756366953">"最近添加的歌曲"</string>
