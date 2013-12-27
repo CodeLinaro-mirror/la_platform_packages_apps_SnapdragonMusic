@@ -60,6 +60,8 @@
     <string name="party_shuffle">Party shuffle</string>
     <!-- Menu item that switches the music player out of party shuffle mode -->
     <string name="party_shuffle_off">Party shuffle off</string>
+    <!-- Menu item that clear all playlists mode -->
+    <string name="clear_all_playlists">Clear all playlists</string>
     <!-- Menu item that deletes the currently selected item, which might be a single song, or a collection of songs.
          The user will be prompted to confirm before deletion actually takes place -->
     <string name="delete_item">Delete</string>
@@ -138,6 +140,8 @@
     <string name="edit_playlist_menu">Edit</string>
     <!-- Playlist context menu item to rename the selected playlist-->
     <string name="rename_playlist_menu">Rename</string>
+    <!-- Dialog box message shown when clearing all playlists-->
+    <string name="clear_all_playlists_message">Do you want to clear all playlists?</string>
     <!-- Transient popup message shown after deleting a playlist -->
     <string name="playlist_deleted_message">Playlist deleted.</string>
     <!-- Transient popup message shown after renaming a playlist -->
