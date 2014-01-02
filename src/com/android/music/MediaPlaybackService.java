@@ -2383,6 +2383,7 @@ public class MediaPlaybackService extends Service {
         }
 
         public void setNextDataSource(String path) {
+            mIsComplete = false;
             if (mIsInitialized == false) {
                 return;
             }
