@@ -1288,7 +1288,7 @@ public class MediaPlaybackService extends Service {
     }
 
     private void setNextTrack() {
-        if(SystemProperties.getBoolean("audio.gapless.playback.disable", false)) {
+        if (!SystemProperties.getBoolean("audio.gapless.playback.disable", false)) {
             mNextPlayPos = getNextPosition(false);
             if (mNextPlayPos >= 0) {
                 long id = mPlayList[mNextPlayPos];
