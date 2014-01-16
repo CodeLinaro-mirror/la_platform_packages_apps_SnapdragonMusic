@@ -29,6 +29,8 @@ import android.view.WindowManager;
 
 public class ScanningProgress extends Activity
 {
+    private final static int MAX_RETRY_COUNTS = 10;
+    private int mRetryCounter = 0;
     private final static int CHECK = 0;
     private Handler mHandler = new Handler() {
         @Override
@@ -50,6 +52,10 @@ public class ScanningProgress extends Activity
                     // (though it may still be in the process of being filled).
                     c.close();
                     setResult(RESULT_OK);
+                    finish();
+                    return;
+                }
+                if (mRetryCounter++ > MAX_RETRY_COUNTS) {
                     finish();
                     return;
                 }
