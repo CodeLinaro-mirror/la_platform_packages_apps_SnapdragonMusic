@@ -65,6 +65,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.SeekBar.OnSeekBarChangeListener;
 import android.view.KeyEvent;
+import android.telephony.MSimTelephonyManager;
 
 
 public class MediaPlaybackActivity extends Activity implements MusicUtils.Defs,
@@ -601,8 +602,18 @@ public class MediaPlaybackActivity extends Activity implements MusicUtils.Defs,
                     R.string.add_to_playlist).setIcon(android.R.drawable.ic_menu_add);
             // these next two are in a separate group, so they can be shown/hidden as needed
             // based on the keyguard state
-            menu.add(1, USE_AS_RINGTONE, 0, R.string.ringtone_menu_short)
-                    .setIcon(R.drawable.ic_menu_set_as_ringtone);
+            if (MSimTelephonyManager.getDefault().isMultiSimEnabled()) {
+                int[] ringtones = { USE_AS_RINGTONE, USE_AS_RINGTONE_2 };
+                int[] menuStrings = { R.string.ringtone_menu_short_1, R.string.ringtone_menu_short_2 };
+                for (int i = 0; i < MSimTelephonyManager.getDefault().getPhoneCount(); i++) {
+                    menu.add(0, ringtones[i], 0, menuStrings[i])
+                            .setIcon(R.drawable.ic_menu_set_as_ringtone);
+                }
+            } else {
+                menu.add(1, USE_AS_RINGTONE, 0, R.string.ringtone_menu_short)
+                        .setIcon(R.drawable.ic_menu_set_as_ringtone);
+            }
+
             menu.add(1, DELETE_ITEM, 0, R.string.delete_item)
                     .setIcon(R.drawable.ic_menu_delete);
 
@@ -659,6 +670,13 @@ public class MediaPlaybackActivity extends Activity implements MusicUtils.Defs,
                     // Set the system setting to make this the current ringtone
                     if (mService != null) {
                         MusicUtils.setRingtone(this, mService.getAudioId());
+                    }
+                    return true;
+                }
+                case USE_AS_RINGTONE_2: {
+                    // Set the system setting to make this the current ringtone for SUB_1
+                    if (mService != null) {
+                        MusicUtils.setRingtone(this, mService.getAudioId(), MusicUtils.RINGTONE_SUB_1);
                     }
                     return true;
                 }
