@@ -886,7 +886,11 @@ public class MediaPlaybackActivity extends Activity implements MusicUtils.Defs,
     }
     
     private void scanBackward(int repcnt, long delta) {
-        if(mService == null) return;
+        if (mService == null) {
+            if (repcnt < 0)
+                mPosOverride = -1;
+            return;
+        }
         try {
             if(repcnt == 0) {
                 mStartSeekPos = mService.position();
@@ -925,7 +929,11 @@ public class MediaPlaybackActivity extends Activity implements MusicUtils.Defs,
     }
 
     private void scanForward(int repcnt, long delta) {
-        if(mService == null) return;
+        if (mService == null) {
+           if (repcnt < 0)
+               mPosOverride = -1;
+           return;
+        }
         try {
             if(repcnt == 0) {
                 mStartSeekPos = mService.position();
@@ -1372,7 +1380,7 @@ public class MediaPlaybackActivity extends Activity implements MusicUtils.Defs,
                 // while decoding the new image, show the default album art
                 Message numsg = mHandler.obtainMessage(ALBUM_ART_DECODED, null);
                 mHandler.removeMessages(ALBUM_ART_DECODED);
-                mHandler.sendMessageDelayed(numsg, 300);
+                mHandler.sendMessageDelayed(numsg, 600);
                 // Don't allow default artwork here, because we want to fall back to song-specific
                 // album art if we can't find anything for the album.
                 Bitmap bm = MusicUtils.getArtwork(MediaPlaybackActivity.this, songid, albumid, false);
