@@ -1445,6 +1445,7 @@ public class MediaPlaybackService extends Service {
         if (remove_status_icon) {
             mIsSupposedToBePlaying = false;
         }
+        notifyChange(PLAYSTATE_CHANGED);
     }
 
     /**
