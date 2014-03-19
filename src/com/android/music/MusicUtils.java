@@ -44,6 +44,7 @@ import android.net.Uri;
 import android.os.Environment;
 import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
+import android.os.SystemProperties;
 import android.provider.MediaStore;
 import android.provider.Settings;
 import android.text.TextUtils;
@@ -260,6 +261,16 @@ public class MusicUtils {
         return -1;
     }
     
+    public static String getCurrentData() {
+        if (MusicUtils.sService != null) {
+            try {
+                return sService.getData();
+            } catch (RemoteException ex) {
+            }
+        }
+        return "";
+    }
+
     public static int getCurrentShuffleMode() {
         int mode = MediaPlaybackService.SHUFFLE_NONE;
         if (sService != null) {
@@ -348,6 +359,22 @@ public class MusicUtils {
         
         if (cursor != null) {
             long [] list = getSongListForCursor(cursor);
+            cursor.close();
+            return list;
+        }
+        return sEmptyList;
+    }
+
+    public static long[] getSongListForFolder(Context context, long id) {
+        final String[] ccols = new String[] {
+                MediaStore.Audio.Media._ID
+        };
+        String where = MediaStore.Files.FileColumns.PARENT + "=" + id + " AND " +
+                MediaStore.Audio.Media.IS_MUSIC + "=1";
+        Cursor cursor = query(context, MediaStore.Files.getContentUri("external"),
+                ccols, where, null, MediaStore.Audio.Media.TRACK);
+        if (cursor != null) {
+            long[] list = getSongListForCursor(cursor);
             cursor.close();
             return list;
         }
@@ -1207,6 +1234,17 @@ public class MusicUtils {
     
     static boolean updateButtonBar(Activity a, int highlight) {
         final TabWidget ll = (TabWidget) a.findViewById(R.id.buttonbar);
+        if (SystemProperties.getBoolean("persist.env.music.folder", false)) {
+            TextView song = (TextView) a.findViewById(R.id.songtab);
+            if (song != null) {
+                song.setVisibility(View.GONE);
+            }
+        } else {
+            TextView folder = (TextView) a.findViewById(R.id.foldertab);
+            if (folder != null) {
+                folder.setVisibility(View.GONE);
+            }
+        }
         boolean withtabs = false;
         Intent intent = a.getIntent();
         if (intent != null) {
@@ -1275,6 +1313,9 @@ public class MusicUtils {
                 break;
             case R.id.songtab:
                 intent.setDataAndType(Uri.EMPTY, "vnd.android.cursor.dir/track");
+                break;
+            case R.id.foldertab:
+                intent.setDataAndType(Uri.EMPTY, "vnd.android.cursor.dir/folder");
                 break;
             case R.id.playlisttab:
                 intent.setDataAndType(Uri.EMPTY, MediaStore.Audio.Playlists.CONTENT_TYPE);
