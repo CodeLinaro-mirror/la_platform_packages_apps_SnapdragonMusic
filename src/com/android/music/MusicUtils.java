@@ -74,7 +74,6 @@ import java.util.Locale;
 public class MusicUtils {
 
     private static final String TAG = "MusicUtils";
-    public static final String RINGTONE_2 = "ringtone_2";
 
     public static boolean mPlayAllFromMenu = false;
 
@@ -1216,7 +1215,7 @@ public class MusicUtils {
                         message = context.getString(R.string.ringtone_set, cursor.getString(2));
                     }
                 } else if (sub_id == RINGTONE_SUB_1) {
-                    Settings.System.putString(resolver, RINGTONE_2, ringUri.toString());
+                    Settings.System.putString(resolver, Settings.System.RINGTONE_2, ringUri.toString());
                     message = context.getString(R.string.ringtone_set_2, cursor.getString(2));
                 }
                 Toast.makeText(context, message, Toast.LENGTH_SHORT).show();
