@@ -2522,6 +2522,7 @@ public class MediaPlaybackService extends Service {
                         mHandler.sendMessageDelayed(mHandler.obtainMessage(ERROR),0);
                         return true;
                     }
+                    mHandler.sendMessageDelayed(mHandler.obtainMessage(ERROR),0);
                     break;
                 }
                 return false;
