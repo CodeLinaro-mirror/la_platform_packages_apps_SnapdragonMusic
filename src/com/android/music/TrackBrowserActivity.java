@@ -627,9 +627,7 @@ public class TrackBrowserActivity extends ListActivity
         @Override
         public void onReceive(Context context, Intent intent) {
             getListView().invalidateViews();
-            if (!mEditMode) {
-                MusicUtils.updateNowPlaying(TrackBrowserActivity.this);
-            }
+            MusicUtils.updateNowPlaying(TrackBrowserActivity.this);
         }
     };
 
@@ -638,6 +636,7 @@ public class TrackBrowserActivity extends ListActivity
         public void onReceive(Context context, Intent intent) {
             if (intent.getAction().equals(MediaPlaybackService.META_CHANGED)) {
                 getListView().invalidateViews();
+                MusicUtils.updateNowPlaying(TrackBrowserActivity.this);
             } else if (intent.getAction().equals(MediaPlaybackService.QUEUE_CHANGED)) {
                 if (mDeletedOneRow) {
                     // This is the notification for a single row that was
