@@ -74,7 +74,6 @@ import java.util.Locale;
 public class MusicUtils {
 
     private static final String TAG = "MusicUtils";
-    public static final String RINGTONE_2 = "ringtone_2";
 
     public static boolean mPlayAllFromMenu = false;
 
@@ -261,7 +260,17 @@ public class MusicUtils {
         }
         return -1;
     }
-    
+
+    public static String getCurrentData() {
+        if (MusicUtils.sService != null) {
+            try {
+                return sService.getData();
+            } catch (RemoteException ex) {
+            }
+        }
+        return "";
+    }
+
     public static int getCurrentShuffleMode() {
         int mode = MediaPlaybackService.SHUFFLE_NONE;
         if (sService != null) {
@@ -273,6 +282,22 @@ public class MusicUtils {
         return mode;
     }
     
+    public static long[] getSongListForFolder(Context context, long id) {
+        final String[] ccols = new String[] {
+                MediaStore.Audio.Media._ID
+        };
+        String where = MediaStore.Files.FileColumns.PARENT + "=" + id + " AND " +
+                MediaStore.Audio.Media.IS_MUSIC + "=1";
+        Cursor cursor = query(context, MediaStore.Files.getContentUri("external"),
+                ccols, where, null, MediaStore.Audio.Media.TRACK);
+        if (cursor != null) {
+            long[] list = getSongListForCursor(cursor);
+            cursor.close();
+            return list;
+        }
+        return sEmptyList;
+    }
+
     public static void togglePartyShuffle() {
         if (sService != null) {
             int shuffle = getCurrentShuffleMode();
@@ -1190,7 +1215,7 @@ public class MusicUtils {
                         message = context.getString(R.string.ringtone_set, cursor.getString(2));
                     }
                 } else if (sub_id == RINGTONE_SUB_1) {
-                    Settings.System.putString(resolver, RINGTONE_2, ringUri.toString());
+                    Settings.System.putString(resolver, Settings.System.RINGTONE_2, ringUri.toString());
                     message = context.getString(R.string.ringtone_set_2, cursor.getString(2));
                 }
                 Toast.makeText(context, message, Toast.LENGTH_SHORT).show();
@@ -1210,6 +1235,17 @@ public class MusicUtils {
     
     static boolean updateButtonBar(Activity a, int highlight) {
         final TabWidget ll = (TabWidget) a.findViewById(R.id.buttonbar);
+        if (a.getApplicationContext().getResources().getBoolean(R.bool.group_by_folder)) {
+            TextView song = (TextView) a.findViewById(R.id.songtab);
+            if (song != null) {
+                song.setVisibility(View.GONE);
+            }
+        } else {
+            TextView folder = (TextView) a.findViewById(R.id.foldertab);
+            if (folder != null) {
+                folder.setVisibility(View.GONE);
+            }
+        }
         boolean withtabs = false;
         Intent intent = a.getIntent();
         if (intent != null) {
@@ -1278,6 +1314,9 @@ public class MusicUtils {
                 break;
             case R.id.songtab:
                 intent.setDataAndType(Uri.EMPTY, "vnd.android.cursor.dir/track");
+                break;
+            case R.id.foldertab:
+                intent.setDataAndType(Uri.EMPTY, "vnd.android.cursor.dir/folder");
                 break;
             case R.id.playlisttab:
                 intent.setDataAndType(Uri.EMPTY, MediaStore.Audio.Playlists.CONTENT_TYPE);
