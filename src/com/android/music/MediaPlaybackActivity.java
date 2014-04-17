@@ -485,6 +485,8 @@ public class MediaPlaybackActivity extends Activity implements MusicUtils.Defs,
         IntentFilter f = new IntentFilter();
         f.addAction(MediaPlaybackService.PLAYSTATE_CHANGED);
         f.addAction(MediaPlaybackService.META_CHANGED);
+        f.addAction(MediaPlaybackService.SHUFFLE_CHANGED);
+        f.addAction(MediaPlaybackService.REPEAT_CHANGED);
         registerReceiver(mStatusListener, f);
 
         IntentFilter s = new IntentFilter();
@@ -1273,6 +1275,10 @@ public class MediaPlaybackActivity extends Activity implements MusicUtils.Defs,
                 queueNextRefresh(1);
             } else if (action.equals(MediaPlaybackService.PLAYSTATE_CHANGED)) {
                 setPauseButtonImage();
+            } else if (action.equals(MediaPlaybackService.SHUFFLE_CHANGED)) {
+                setShuffleButtonImage();
+            } else if (action.equals(MediaPlaybackService.REPEAT_CHANGED)) {
+                setRepeatButtonImage();
             }
         }
     };
@@ -1285,6 +1291,8 @@ public class MediaPlaybackActivity extends Activity implements MusicUtils.Defs,
                     IntentFilter f = new IntentFilter();
                     f.addAction(MediaPlaybackService.PLAYSTATE_CHANGED);
                     f.addAction(MediaPlaybackService.META_CHANGED);
+                    f.addAction(MediaPlaybackService.SHUFFLE_CHANGED);
+                    f.addAction(MediaPlaybackService.REPEAT_CHANGED);
                     registerReceiver(mStatusListener, f);
                     mReceiverUnregistered = false;
                 }
