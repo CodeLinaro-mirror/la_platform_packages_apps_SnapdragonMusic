@@ -396,9 +396,11 @@ public class FolderBrowserActivity extends ListActivity
 
     public static String getRootPath(String path) {
         if (path != null) {
-            String root;
+            String root = "";
             int pos = path.lastIndexOf("/");
-            root = path.substring(0, pos);
+            if (pos >= 0) {
+                root = path.substring(0, pos);
+            }
             return root;
         } else {
             return "";
