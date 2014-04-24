@@ -76,6 +76,7 @@ public class MusicUtils {
     private static final String TAG = "MusicUtils";
 
     public static boolean mPlayAllFromMenu = false;
+    private static boolean mGroupByFolder = false;
 
     public final static int RINGTONE_SUB_0 = 0;
     public final static int RINGTONE_SUB_1 = 1;
@@ -1237,6 +1238,7 @@ public class MusicUtils {
         final TabWidget ll = (TabWidget) a.findViewById(R.id.buttonbar);
         if (a.getApplicationContext().getResources().getBoolean(R.bool.group_by_folder)) {
             TextView song = (TextView) a.findViewById(R.id.songtab);
+            mGroupByFolder = true;
             if (song != null) {
                 song.setVisibility(View.GONE);
             }
@@ -1508,5 +1510,9 @@ public class MusicUtils {
             }
         }
         return false;
+    }
+
+    public static boolean isGroupByFolder() {
+        return mGroupByFolder;
     }
 }
