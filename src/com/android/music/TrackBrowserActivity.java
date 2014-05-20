@@ -1217,7 +1217,11 @@ public class TrackBrowserActivity extends ListActivity
             mService  = service;
             makeNowPlayingCursor();
         }
+
         private void makeNowPlayingCursor() {
+            if (mCurrentPlaylistCursor != null) {
+                mCurrentPlaylistCursor.close();
+            }
             mCurrentPlaylistCursor = null;
             try {
                 mNowPlaying = mService.getQueue();
@@ -1433,6 +1437,15 @@ public class TrackBrowserActivity extends ListActivity
         {
             makeNowPlayingCursor();
             return true;
+        }
+
+        @Override
+        public void close() {
+            super.close();
+            if (mCurrentPlaylistCursor != null) {
+                mCurrentPlaylistCursor.close();
+                mCurrentPlaylistCursor = null;
+            }
         }
 
         private String [] mCols;
