@@ -30,7 +30,7 @@
     </ImageView>
 
     <LinearLayout
-        android:layout_width="match_parent"
+        android:layout_width="100dip"
         android:layout_height="wrap_content"
         android:orientation="vertical">
 
@@ -51,5 +51,19 @@
             android:ellipsize="end"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content" />
+
     </LinearLayout>
+
+    <ImageButton
+        android:id="@+id/prev"
+        style="@android:style/MediaButton.Previous" />
+
+    <ImageButton
+        android:id="@+id/pause"
+        style="@android:style/MediaButton.Pause" />
+
+    <ImageButton
+        android:id="@+id/next"
+        style="@android:style/MediaButton.Next" />
+
 </LinearLayout>
