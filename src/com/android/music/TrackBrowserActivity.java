@@ -63,6 +63,7 @@ import android.widget.TextView;
 import android.widget.AdapterView.AdapterContextMenuInfo;
 import android.view.KeyEvent;
 import android.telephony.MSimTelephonyManager;
+import com.android.music.SysApplication;
 
 import java.text.Collator;
 import java.util.Arrays;
@@ -200,6 +201,7 @@ public class TrackBrowserActivity extends ListActivity
                 setAlbumArtBackground();
             }
         });
+        SysApplication.getInstance().addActivity(this);
     }
 
     public void onServiceConnected(ComponentName name, IBinder service)
@@ -1023,6 +1025,7 @@ public class TrackBrowserActivity extends ListActivity
                 menu.add(0, CLEAR_PLAYLIST, 0, R.string.clear_playlist).setIcon(R.drawable.ic_menu_clear_playlist);
             }
         }
+        menu.add(0, CLOSE, 0, R.string.close_music).setIcon(R.drawable.quick_panel_music_close);
         return true;
     }
 
@@ -1075,6 +1078,16 @@ public class TrackBrowserActivity extends ListActivity
                             Long.valueOf(mPlaylist));
                     getContentResolver().delete(uri, null, null);
                 }
+                return true;
+
+            case CLOSE:
+                try {
+                    if (MusicUtils.sService != null) {
+                        MusicUtils.sService.stop();
+                    }
+                } catch (RemoteException ex) {
+                }
+                SysApplication.getInstance().exit();
                 return true;
         }
         return super.onOptionsItemSelected(item);
