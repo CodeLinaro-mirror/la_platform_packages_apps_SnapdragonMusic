@@ -1446,7 +1446,7 @@ public class MediaPlaybackService extends Service {
             setShuffleMode(SHUFFLE_AUTO);
         }
 
-        if (status != null && mControlInStatusBar) {
+        if (views != null && status != null && mControlInStatusBar) {
             // Reset notification play function to pause function
             views.setImageViewResource(R.id.pause, android.R.drawable.ic_media_pause);
             Intent pauseIntent = new Intent(PAUSE_ACTION);
