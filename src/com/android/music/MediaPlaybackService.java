@@ -1756,6 +1756,15 @@ public class MediaPlaybackService extends Service {
                     mIsSupposedToBePlaying = false;
                     notifyChange(PLAYSTATE_CHANGED);
                 }
+                if (views != null && status != null && mControlInStatusBar) {
+                    // Reset notification pause function to play function
+                    views.setImageViewResource(R.id.pause, android.R.drawable.ic_media_play);
+                    Intent playIntent = new Intent(TOGGLEPAUSE_ACTION);
+                    PendingIntent playPendingIntent = PendingIntent.getBroadcast(this,
+                            0 /* no requestCode */, playIntent, 0 /* no flags */);
+                    views.setOnClickPendingIntent(R.id.pause, playPendingIntent);
+                    startForeground(PLAYBACKSERVICE_STATUS, status);
+                }
                 return;
             }
             mPlayPos = pos;
