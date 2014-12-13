@@ -1253,6 +1253,7 @@ public class MediaPlaybackService extends Service {
                         mPlayPos++;
                 }
             }
+            setNextTrack();
             notifyChange(QUEUE_CHANGED);
         }
     }
