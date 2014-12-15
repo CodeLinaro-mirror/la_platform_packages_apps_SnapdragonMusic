@@ -1934,7 +1934,7 @@ public class MediaPlaybackService extends Service {
             return last - first + 1;
         }
     }
-    
+
     /**
      * Removes all instances of the track with the given id
      * from the playlist.
@@ -1956,15 +1956,15 @@ public class MediaPlaybackService extends Service {
         }
         return numremoved;
     }
-    
+
     public void setShuffleMode(int shufflemode) {
         synchronized(this) {
+            mShuffleMode = shufflemode;
             notifyAttributeValues(PLAYERSETTINGS_RESPONSE,
                             mAttributePairs, SET_ATTRIBUTE_VALUES);
             if (mShuffleMode == shufflemode && mPlayListLen > 0) {
                 return;
             }
-            mShuffleMode = shufflemode;
             if (mShuffleMode == SHUFFLE_AUTO) {
                 if (makeAutoShuffleList()) {
                     mPlayListLen = 0;
