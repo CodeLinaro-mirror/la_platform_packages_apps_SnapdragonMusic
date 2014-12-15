@@ -360,5 +360,9 @@
     <string name="close_music">"End"</string>
     <string name="delete_video_item_message">Do you want to delete \"<xliff:g id="name">%s</xliff:g>\"?</string>
     <string name="video_deleted_message">Video file deleted.</string>
+    <!--gesture control playback status-->
+    <string name="music_gesture_play">"Play/pause audio"</string>
+    <string name="music_gesture_prev">"Play previous track"</string>
+    <string name="music_gesture_next">"Play next track"</string>
 </resources>
 
