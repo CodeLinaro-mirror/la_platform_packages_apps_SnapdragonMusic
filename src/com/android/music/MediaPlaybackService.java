@@ -1545,9 +1545,6 @@ public class MediaPlaybackService extends Service {
         } else {
             stopForeground(false);
         }
-        if (remove_status_icon) {
-            mIsSupposedToBePlaying = false;
-        }
     }
 
     /**
