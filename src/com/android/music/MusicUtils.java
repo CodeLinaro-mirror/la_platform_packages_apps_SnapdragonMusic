@@ -1125,6 +1125,8 @@ public class MusicUtils {
                     bm = getDefaultArtwork(context);
                 }
                 return bm;
+            } catch (OutOfMemoryError ex) {
+                return null;
             } finally {
                 try {
                     if (in != null) {
