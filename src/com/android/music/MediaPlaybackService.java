@@ -1417,10 +1417,12 @@ public class MediaPlaybackService extends Service {
                 }
             }
             mFileToPlay = path;
-            mPlayer.setDataSource(mFileToPlay);
-            if (mPlayer.isInitialized()) {
-                mOpenFailedCounter = 0;
-                return true;
+            if(mPlayer != null){
+                mPlayer.setDataSource(mFileToPlay);
+                if (mPlayer.isInitialized()) {
+                    mOpenFailedCounter = 0;
+                    return true;
+                }
             }
             stop(true);
             return false;
