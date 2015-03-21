@@ -79,6 +79,7 @@ public class MusicUtils {
 
     public static boolean mPlayAllFromMenu = false;
     private static boolean mGroupByFolder = false;
+    private static boolean mDisableAnimation;
 
     public final static int RINGTONE_SUB_0 = 0;
     public final static int RINGTONE_SUB_1 = 1;
@@ -919,6 +920,11 @@ public class MusicUtils {
             Intent intent = new Intent("com.android.music.PLAYBACK_VIEWER")
                 .setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
             context.startActivity(intent);
+            mDisableAnimation = context.getResources().getBoolean(R.bool.disable_animation);
+            if (mDisableAnimation) {
+                Activity curactivity = (Activity) context;
+                curactivity.overridePendingTransition(0, 0);
+            }
         }
     }
     
