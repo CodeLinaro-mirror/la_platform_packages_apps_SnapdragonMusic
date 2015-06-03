@@ -33,6 +33,11 @@ import android.content.ServiceConnection;
 import android.database.AbstractCursor;
 import android.database.CharArrayBuffer;
 import android.database.Cursor;
+import android.drm.DrmHelper;
+import android.drm.DrmManagerClientWrapper;
+import android.drm.DrmStore.Action;
+import android.drm.DrmStore.DrmDeliveryType;
+import android.drm.DrmStore.RightsStatus;
 import android.graphics.Bitmap;
 import android.media.AudioManager;
 import android.net.Uri;
@@ -68,6 +73,7 @@ import java.util.Arrays;
 public class TrackBrowserActivity extends ListActivity
         implements View.OnCreateContextMenuListener, MusicUtils.Defs, ServiceConnection
 {
+    public static final String BUY_LICENSE = "android.drmservice.intent.action.BUY_LICENSE";
     private static final int Q_SELECTED = CHILD_MENU_BASE;
     private static final int Q_ALL = CHILD_MENU_BASE + 1;
     private static final int SAVE_AS_PLAYLIST = CHILD_MENU_BASE + 2;
@@ -664,6 +670,12 @@ public class TrackBrowserActivity extends ListActivity
         } catch (IllegalArgumentException ex) {
             mSelectedId = mi.id;
         }
+
+        String path = MusicUtils.getSelectAudioPath(getApplicationContext(), mSelectedId);
+        if (path.endsWith(".dcf") || path.endsWith(".dm")) {
+            menu.add(0, DRM_LICENSE_INFO, 0, R.string.drm_license_info);
+        }
+
         // only add the 'search' menu if the selected item is music
         if (isMusic(mTrackCursor)) {
             menu.add(0, SEARCH, 0, R.string.search_title);
@@ -735,7 +747,17 @@ public class TrackBrowserActivity extends ListActivity
             case REMOVE:
                 removePlaylistItem(mSelectedPosition);
                 return true;
-                
+
+            case DRM_LICENSE_INFO:
+                String path = MusicUtils.getSelectAudioPath(getApplicationContext(), mSelectedId);
+                path = path.replace("/storage/emulated/0", "/storage/emulated/legacy");
+                Intent intent = new Intent("android.drmservice.intent.action.SHOW_PROPERTIES");
+                intent.putExtra("DRM_FILE_PATH", path);
+                intent.putExtra("DRM_TYPE", "OMAV1");
+                Log.d(LOGTAG, "onContextItemSelected:------filepath===" + path);
+                this.sendBroadcast(intent);
+                return true;
+
             case SEARCH:
                 doSearch();
                 return true;
@@ -887,6 +909,43 @@ public class TrackBrowserActivity extends ListActivity
         if (mTrackCursor.getCount() == 0) {
             return;
         }
+
+        long [] list = MusicUtils.getSongListForCursor(mTrackCursor);
+        long songid = list[position];
+        String sUri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI + "/" + songid;
+        String path = null;
+        String mime = null;
+        final String[] ccols = new String[] { MediaStore.Audio.Media.DATA, MediaStore.Audio.Media.MIME_TYPE };
+        String where = MediaStore.Audio.Media._ID + "='" + songid + "'";
+        ContentResolver resolver = getApplicationContext().getContentResolver();
+        Cursor cursor = resolver.query(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, ccols, where, null, null);
+        if (null != cursor) {
+            if (0 != cursor.getCount()) {
+                cursor.moveToFirst();
+                path = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DATA));
+                mime = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.MIME_TYPE));
+           }
+           cursor.close();
+        }
+        Log.d(LOGTAG, "onListItemClick:path = " + path);
+        if (path.endsWith(".dcf") || path.endsWith(".dm")) {
+            DrmManagerClientWrapper drmClient = new DrmManagerClientWrapper(TrackBrowserActivity.this);
+            path = path.replace("/storage/emulated/0", "/storage/emulated/legacy");
+            int status = drmClient.checkRightsStatus(path, Action.PLAY);
+            Log.d(LOGTAG, "onListItemClick:status from checkRightsStatus is " + Integer.toString(status));
+            if (RightsStatus.RIGHTS_VALID != status) {
+                ContentValues values = drmClient.getMetadata(path);
+                String address = values.getAsString("Rights-Issuer");
+                Log.d(LOGTAG, "onListItemClick:address = " + address);
+                Intent intent = new Intent(BUY_LICENSE);
+                intent.putExtra("DRM_FILE_PATH", address);
+                this.sendBroadcast(intent);
+                return;
+            }
+
+            if (drmClient != null) drmClient.release();
+        }
+
         // When selecting a track from the queue, just jump there instead of
         // reloading the queue. This is both faster, and prevents accidentally
         // dropping out of party shuffle.
@@ -1335,6 +1394,7 @@ public class TrackBrowserActivity extends ListActivity
         int mArtistIdx;
         int mDurationIdx;
         int mAudioIdIdx;
+        int mDataIdx = -1;
 
         private final StringBuilder mBuilder = new StringBuilder();
         private final String mUnknownArtist;
@@ -1354,6 +1414,7 @@ public class TrackBrowserActivity extends ListActivity
             ImageView play_indicator;
             CharArrayBuffer buffer1;
             char [] buffer2;
+            ImageView drm_icon;
         }
 
         class TrackQueryHandler extends AsyncQueryHandler {
@@ -1445,6 +1506,11 @@ public class TrackBrowserActivity extends ListActivity
                 
                     mIndexer = new MusicAlphabetIndexer(cursor, mTitleIdx, alpha);
                 }
+                try {
+                    mDataIdx = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DATA);
+                } catch (IllegalArgumentException ex) {
+                    Log.w(LOGTAG, "_data column not found. Exception : " + ex);
+                }
             }
         }
 
@@ -1461,6 +1527,7 @@ public class TrackBrowserActivity extends ListActivity
             vh.play_indicator = (ImageView) v.findViewById(R.id.play_indicator);
             vh.buffer1 = new CharArrayBuffer(100);
             vh.buffer2 = new char[200];
+            vh.drm_icon = (ImageView) v.findViewById(R.id.drm_icon);
             v.setTag(vh);
             return v;
         }
@@ -1495,6 +1562,19 @@ public class TrackBrowserActivity extends ListActivity
             }
             builder.getChars(0, len, vh.buffer2, 0);
             vh.line2.setText(vh.buffer2, 0, len);
+            vh.line2.setTextColor(0xffbebebe);
+
+            // Show DRM lock icon on track list
+            if (mDataIdx != -1) {
+                String data = cursor.getString(mDataIdx);
+                boolean isDrm = !TextUtils.isEmpty(data)
+                        && (data.endsWith(".dm") || data.endsWith(".dcf"));
+                if (isDrm) {
+                    vh.drm_icon.setVisibility(View.VISIBLE);
+                } else {
+                    vh.drm_icon.setVisibility(View.GONE);
+                }
+            }
 
             ImageView iv = vh.play_indicator;
             long id = -1;

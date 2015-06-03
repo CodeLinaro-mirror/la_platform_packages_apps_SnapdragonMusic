@@ -19,19 +19,29 @@ package com.android.music;
 import android.app.ListActivity;
 import android.content.ContentResolver;
 import android.content.ContentUris;
+import android.content.ContentValues;
 import android.content.Intent;
 import android.database.Cursor;
+import android.drm.DrmManagerClientWrapper;
+import android.drm.DrmRights;
+import android.drm.DrmStore.Action;
+import android.drm.DrmStore.DrmDeliveryType;
+import android.drm.DrmStore.RightsStatus;
 import android.media.AudioManager;
 import android.os.Bundle;
 import android.provider.MediaStore;
+import android.util.Log;
 import android.view.View;
 import android.widget.ListView;
 import android.widget.SimpleCursorAdapter;
+import android.widget.Toast;
 
 import java.lang.Integer;
 
 public class VideoBrowserActivity extends ListActivity implements MusicUtils.Defs
 {
+    private static final String LOGTAG = "VideoBrowser";
+    public static final String BUY_LICENSE = "android.drmservice.intent.action.BUY_LICENSE";
     public VideoBrowserActivity()
     {
     }
@@ -81,6 +91,24 @@ public class VideoBrowserActivity extends ListActivity implements MusicUtils.Def
         Intent intent = new Intent(Intent.ACTION_VIEW);
         mCursor.moveToPosition(position);
         String type = mCursor.getString(mCursor.getColumnIndexOrThrow(MediaStore.Video.Media.MIME_TYPE));
+        String path = mCursor.getString(mCursor.getColumnIndexOrThrow(MediaStore.Video.Media.DATA));
+        Log.i(LOGTAG, "onListItemClick, path of the file is"+path);
+        if (path.endsWith(".dcf") || path.endsWith(".dm")) {
+            DrmManagerClientWrapper drmClient = new DrmManagerClientWrapper(VideoBrowserActivity.this);
+            path = path.replace("/storage/emulated/0", "/storage/emulated/legacy");
+            int status = drmClient.checkRightsStatus(path, Action.PLAY);
+            Log.i(LOGTAG, "onListItemClick:status fron drmClient.checkRightsStatus is " + Integer.toString(status));
+            if (RightsStatus.RIGHTS_VALID != status) {
+                ContentValues values = drmClient.getMetadata(path);
+                String address = values.getAsString("Rights-Issuer");
+                Intent drm_intent = new Intent(BUY_LICENSE);
+                drm_intent.putExtra("DRM_FILE_PATH", address);
+                this.sendBroadcast(drm_intent);
+                return;
+            }
+
+            if (drmClient != null) drmClient.release();
+        }
         intent.setDataAndType(ContentUris.withAppendedId(MediaStore.Video.Media.EXTERNAL_CONTENT_URI, id), type);
         
         startActivity(intent);

@@ -192,6 +192,10 @@
     <string name="ringtone_menu_short">Use as ringtone</string>
     <!-- Toast after setting a song as phone ringtone -->
     <string name="ringtone_set">\"<xliff:g id="name" example="Alarm Bell">%s</xliff:g>\" set as phone ringtone.</string>
+    <!-- Toast after setting a song as phone ringtone -->
+    <string name="ringtone_set_1">\"<xliff:g id="name" example="Alarm Bell">%s</xliff:g>\" set as slot 1 ringtone.</string>
+    <!-- Toast after setting a song as phone ringtone -->
+    <string name="ringtone_set_2">\"<xliff:g id="name" example="Alarm Bell">%s</xliff:g>\" set as slot 2 ringtone.</string>
     <!-- Context menu item -->
     <string name="play_selection">Play</string>
     <!-- Context menu item -->
@@ -311,5 +315,11 @@
 
     <!-- Menu text for the item controlling the audio effects panel [CHAR LIMIT=15] -->
     <string name="effectspanel">Sound effects</string>
+
+    <!-- DRM Related Strings -->
+    <string name="no_permission_for_drm">"Sorry, Drm file can not be shared"</string>
+    <string name="drm_license_info">Drm license info</string>
+    <string name="drm_ringtone_error">Cannot set CD/SD files as ringtone</string>
+    <string name="drm_right_expired">DRM rights expired</string>
 </resources>
 
