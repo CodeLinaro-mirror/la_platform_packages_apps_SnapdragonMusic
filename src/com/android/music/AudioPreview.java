@@ -20,8 +20,11 @@ import android.app.Activity;
 import android.content.AsyncQueryHandler;
 import android.content.ContentResolver;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
+import android.drm.DrmManagerClient;
+import android.drm.OmaDrmHelper;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.media.AudioManager.OnAudioFocusChangeListener;
@@ -55,6 +58,7 @@ import android.content.BroadcastReceiver;
 import android.content.Intent;
 import android.content.IntentFilter;
 
+import java.io.File;
 import java.io.IOException;
 
 /**
@@ -84,6 +88,17 @@ public class AudioPreview extends Activity implements OnPreparedListener, OnErro
     private Uri mMediaUri = null;
     private static AudioPreview mAudioPreview;
     private ImageView mImageViewDrmIcon;
+
+    /**
+     * Used to finish activity when DRM error found.
+     */
+    private final DialogInterface.OnClickListener mDrmErrorDialogButtonListener = new DialogInterface.OnClickListener() {
+
+        @Override
+        public void onClick(DialogInterface dialog, int which) {
+            finish();
+        }
+    };
 
     @Override
     public void onCreate(Bundle icicle) {
@@ -132,6 +147,18 @@ public class AudioPreview extends Activity implements OnPreparedListener, OnErro
                 // an http URI, and there are different exceptions associated
                 // with failure to open each of those.
                 Log.d(TAG, "Failed to open file: " + ex);
+
+                // check DRM error
+                String filepath = OmaDrmHelper.getFilePath(this,
+                        getIntent().getData());
+                if (OmaDrmHelper.isDrmFile(filepath)) {
+                    if (!OmaDrmHelper.validateLicense(this,
+                            filepath, null, mDrmErrorDialogButtonListener,
+                            mDrmErrorDialogButtonListener)) {
+                        return;
+                    }
+                }
+
                 Toast.makeText(this, R.string.playback_failed, Toast.LENGTH_SHORT).show();
                 finish();
                 return;
@@ -181,17 +208,8 @@ public class AudioPreview extends Activity implements OnPreparedListener, OnErro
                 }
 
                 // Show DRM lock icon on audio preview screen
-                String data = "";
-                try {
-                    int dataIdx = cursor
-                            .getColumnIndexOrThrow(MediaStore.Audio.Media.DATA);
-                    data = cursor.getString(dataIdx);
-                } catch (Exception e) {
-                    Log.i(TAG, "_data column not found");
-                }
-                boolean isDrm = !TextUtils.isEmpty(data)
-                        && (data.endsWith(".dm") || data.endsWith(".dcf"));
-                if (isDrm) {
+                if (OmaDrmHelper.isDrmFile(OmaDrmHelper.getFilePath(
+                        AudioPreview.this, cursor))) {
                     mImageViewDrmIcon.setVisibility(View.VISIBLE);
                 } else {
                     mImageViewDrmIcon.setVisibility(View.GONE);
@@ -468,6 +486,19 @@ public class AudioPreview extends Activity implements OnPreparedListener, OnErro
     };
 
     public boolean onError(MediaPlayer mp, int what, int extra) {
+        // check DRM error
+        if (!isFinishing()) {
+            String filepath = OmaDrmHelper.getFilePath(this,
+                    getIntent().getData());
+            if (OmaDrmHelper.isDrmFile(filepath)) {
+                if (!OmaDrmHelper.validateLicense(this,
+                        filepath, null, mDrmErrorDialogButtonListener,
+                        mDrmErrorDialogButtonListener)) {
+                    return true;
+                }
+            }
+        }
+
         Toast.makeText(this, R.string.playback_failed, Toast.LENGTH_SHORT).show();
         finish();
         return true;
@@ -598,6 +629,18 @@ public class AudioPreview extends Activity implements OnPreparedListener, OnErro
 
         public void setDataSourceAndPrepare(Uri uri) throws IllegalArgumentException,
                         SecurityException, IllegalStateException, IOException {
+
+            String path = OmaDrmHelper.getFilePath(mActivity, uri);
+            if (OmaDrmHelper.isDrmFile(path)) {
+                // Special treatment to play midi drm file
+                String mime = OmaDrmHelper.getOriginalMimeType(mActivity, path);
+                if (OmaDrmHelper.isDrmMidiFile(mActivity, path, mime)) {
+                    path = OmaDrmHelper.getDrmMidiFilePath(mActivity, path,
+                            mActivity.getFilesDir().getAbsolutePath(), mime);
+                    uri = Uri.fromFile(new File(path));
+                }
+            }
+
             setDataSource(mActivity,uri);
             prepareAsync();
         }

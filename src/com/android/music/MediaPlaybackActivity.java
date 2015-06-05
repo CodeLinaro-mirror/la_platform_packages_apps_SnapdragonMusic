@@ -1673,8 +1673,6 @@ public class MediaPlaybackActivity extends Activity implements MusicUtils.Defs,
                         new AlbumSongIdWrapper(albumid, songid)).sendToTarget();
                 mAlbum.setVisibility(View.VISIBLE);
 
-                String filePath = MusicUtils.getSelectAudioPath(
-                        MediaPlaybackActivity.this, songid);
             }
 
             // fetch clip duration from media database if available
