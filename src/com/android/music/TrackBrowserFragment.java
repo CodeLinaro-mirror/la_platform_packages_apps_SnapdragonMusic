@@ -793,8 +793,6 @@ public class TrackBrowserFragment extends Fragment implements
                     if (c.getCount() == 0) {
                         if (MusicBrowserActivity.isPanelExpanded) {
                             mParentActivity.getSlidingPanelLayout()
-                                    .setHookState(BoardState.COLLAPSED);
-                            mParentActivity.getSlidingPanelLayout()
                                     .setHookState(BoardState.HIDDEN);
                             MusicBrowserActivity.isPanelExpanded = false;
                             mParentActivity.getNowPlayingView().setVisibility(
@@ -1934,7 +1932,16 @@ public class TrackBrowserFragment extends Fragment implements
             builder.delete(0, builder.length());
             String name = cursor.getString(mArtistIdx);
             long aid = cursor.getLong(mAlbumIdx);
-            new MusicUtils.AlbumBitmapDownloadThread(mParentActivity, aid, mDefaultAlbumIcon, vh.icon, null).start();
+            final Drawable d = MusicUtils.getCachedArtwork(context, aid,
+                    mDefaultAlbumIcon);
+            if (d != null) {
+                vh.icon.setImageDrawable(d);
+            } else {
+                vh.icon.setImageDrawable(mDefaultAlbumIcon);
+                new MusicUtils.AlbumBitmapDownloadThread(mParentActivity, aid,
+                        mDefaultAlbumIcon, vh.icon, null).start();
+            }
+
             if (name == null || name.equals(MediaStore.UNKNOWN_STRING)) {
                 // Reload the "unknown_artist_name" string in order to
                 // avoid that this string doesn't change when user

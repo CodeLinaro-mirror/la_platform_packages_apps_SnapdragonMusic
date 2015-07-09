@@ -1677,7 +1677,7 @@ public class MediaPlaybackService extends Service {
     private void updateNotification() {
         views = new RemoteViews(getPackageName(), R.layout.statusbar);
         Bitmap icon = MusicUtils.getArtwork(this, getAudioId(), getAlbumId(),
-                false);
+                true);
         views.setImageViewBitmap(R.id.icon, icon);
         Intent prevIntent = new Intent(PREVIOUS_ACTION);
         PendingIntent prevPendingIntent = PendingIntent.getBroadcast(this,
