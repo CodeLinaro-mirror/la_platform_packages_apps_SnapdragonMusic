@@ -183,7 +183,7 @@ public class FolderBrowserActivity extends ListActivity
         @Override
         public void onReceive(Context context, Intent intent) {
             getListView().invalidateViews();
-            MusicUtils.updateNowPlaying(FolderBrowserActivity.this, false);
+            MusicUtils.updateNowPlaying(FolderBrowserActivity.this);
         }
     };
     private BroadcastReceiver mScanListener = new BroadcastReceiver() {
@@ -579,7 +579,7 @@ public class FolderBrowserActivity extends ListActivity
     }
 
     public void onServiceConnected(ComponentName name, IBinder service) {
-        MusicUtils.updateNowPlaying(this, false);
+        MusicUtils.updateNowPlaying(this);
     }
 
     public void onServiceDisconnected(ComponentName name) {
