@@ -148,6 +148,7 @@ public class TrackBrowserFragment extends Fragment implements
     private TextView mSdErrorMessageView;
     private View mSdErrorMessageIcon;
     private RelativeLayout mShuffleLayout;
+    private static AnimationDrawable mCurrPlayAnimation;
 
     public TrackBrowserFragment() {
     }
@@ -444,6 +445,7 @@ public class TrackBrowserFragment extends Fragment implements
     public void onPause() {
         mReScanHandler.removeCallbacksAndMessages(null);
         mParentActivity.unregisterReceiver(mStatusListener);
+        stopAnimation();
         super.onPause();
     }
 
@@ -1338,7 +1340,7 @@ public class TrackBrowserFragment extends Fragment implements
         if (prevV != null) {
             ViewHolder vh1 = (ViewHolder) prevV.getTag();
             if (vh1.mMusicAnimation.isRunning())
-                vh1.mMusicAnimation.stop();
+               stopAnimation();
             vh1.anim_icon.setVisibility(View.INVISIBLE);
 
         }
@@ -1346,10 +1348,24 @@ public class TrackBrowserFragment extends Fragment implements
         vh.anim_icon.setVisibility(View.VISIBLE);
         vh.anim_icon.setBackgroundResource(R.drawable.animation_list);
         vh.mMusicAnimation = (AnimationDrawable) vh.anim_icon.getBackground();
-        vh.mMusicAnimation.start();
+        setCurrPlayAnimation(vh.mMusicAnimation);
+        startAnimation();
         vh.mMusicAnimation.setVisible(true, true);
         prevV = view;
+    }
 
+    private static void setCurrPlayAnimation(AnimationDrawable anim) {
+        stopAnimation();
+        mCurrPlayAnimation = anim;
+    }
+
+    private static void startAnimation() {
+        mCurrPlayAnimation.start();
+    }
+
+    private static void stopAnimation() {
+        if (mCurrPlayAnimation != null && mCurrPlayAnimation.isRunning())
+            mCurrPlayAnimation.stop();
     }
 
     @Override
@@ -2053,13 +2069,14 @@ public class TrackBrowserFragment extends Fragment implements
                     iv1.setBackgroundResource(R.drawable.animation_list);
                     vh.mMusicAnimation = (AnimationDrawable) iv1
                             .getBackground();
-                    vh.mMusicAnimation.start();
+                    setCurrPlayAnimation(vh.mMusicAnimation);
+                    startAnimation();
                     vh.mMusicAnimation.setVisible(true, true);
                 } else {
                     iv1.setBackgroundResource(R.drawable.wave_stop);
                     if (vh.mMusicAnimation != null
                             && vh.mMusicAnimation.isRunning())
-                        vh.mMusicAnimation.stop();
+                       stopAnimation();
                 }
             } else {
                 iv1.setVisibility(View.INVISIBLE);
