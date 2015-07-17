@@ -139,6 +139,8 @@ public class TrackBrowserActivityFragment extends Fragment
     private boolean mIsparentActivityFInishing;
     private BitmapDrawable mDefaultAlbumIcon;
     private static AnimationDrawable mCurrPlayAnimation;
+    private static ImageView mAnimView;
+    private static boolean mPause = false;
 
     public TrackBrowserActivityFragment()
     {
@@ -493,6 +495,7 @@ public class TrackBrowserActivityFragment extends Fragment
     @Override
     public void onResume() {
         super.onResume();
+        mPause = false;
         if (mTrackCursor != null) {
             getListView().invalidateViews();
         }
@@ -514,6 +517,7 @@ public class TrackBrowserActivityFragment extends Fragment
     public void onPause() {
         mReScanHandler.removeCallbacksAndMessages(null);
         mParentActivity.unregisterReceiver(mStatusListener);
+        mPause = true;
         stopAnimation();
         super.onPause();
     }
@@ -1254,8 +1258,17 @@ public class TrackBrowserActivityFragment extends Fragment
     }
 
     private static void stopAnimation() {
-        if (mCurrPlayAnimation != null && mCurrPlayAnimation.isRunning())
+        if (mAnimView != null) {
+            mAnimView.clearAnimation();
+            if (mPause) {
+                mAnimView.setBackgroundDrawable(null);
+            }
+        }
+
+        if (mCurrPlayAnimation != null && mCurrPlayAnimation.isRunning()) {
             mCurrPlayAnimation.stop();
+            mCurrPlayAnimation = null;
+        }
     }
 
     private boolean onCreateOptionsMenu(PopupMenu menu) {
@@ -1958,7 +1971,7 @@ public class TrackBrowserActivityFragment extends Fragment
                 }
             }
 
-            ImageView iv = vh.animation;
+            mAnimView = vh.animation;
 
             // Determining whether and where to show the "now playing indicator
             // is tricky, because we don't actually keep track of where the songs
@@ -1975,22 +1988,37 @@ public class TrackBrowserActivityFragment extends Fragment
                  (!mIsNowPlaying && !mDisableNowPlayingIndicator && cursor.getLong(mAudioIdIdx) == id)) {
                 // We set different icon according to different play state
                 if (MusicUtils.isPlaying()) {
-                    iv.setVisibility(View.VISIBLE);
-                    iv.setBackgroundResource(R.drawable.animation_list);
-                    vh.mMusicAnimation = (AnimationDrawable) iv.getBackground();
+                    mAnimView.setVisibility(View.VISIBLE);
+                    clearAnimation();
+
+                    mAnimView.setBackgroundResource(R.drawable.animation_list);
+                    vh.mMusicAnimation = (AnimationDrawable) mAnimView
+                            .getBackground();
                     setCurrPlayAnimation(vh.mMusicAnimation);
                     startAnimation();
                     vh.mMusicAnimation.setVisible(true, true);
                 } else {
-                    iv.setBackgroundResource(R.drawable.wave_stop);
-                    if(vh.mMusicAnimation!=null && vh.mMusicAnimation.isRunning())
-                       stopAnimation();
+                    mAnimView.setBackgroundDrawable(null);
+                    mAnimView.setBackgroundResource(R.drawable.wave_stop);
+                    mAnimView.clearAnimation();
+
+                    if (vh.mMusicAnimation != null
+                            && vh.mMusicAnimation.isRunning()) {
+                        stopAnimation();
+                    }
                 }
             } else {
-                iv.setVisibility(View.INVISIBLE);
+                clearAnimation();
+                mAnimView.setVisibility(View.INVISIBLE);
             }
         }
 
+        private void clearAnimation() {
+            if (mAnimView != null) {
+                mAnimView.clearAnimation();
+                mAnimView.setBackgroundDrawable(null);
+            }
+        }
 
         @Override
         public void changeCursor(Cursor cursor) {
