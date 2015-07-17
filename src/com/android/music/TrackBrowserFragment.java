@@ -149,6 +149,8 @@ public class TrackBrowserFragment extends Fragment implements
     private View mSdErrorMessageIcon;
     private RelativeLayout mShuffleLayout;
     private static AnimationDrawable mCurrPlayAnimation;
+    private static ImageView mAnimView;
+    private static boolean mPause = false;
 
     public TrackBrowserFragment() {
     }
@@ -434,6 +436,7 @@ public class TrackBrowserFragment extends Fragment implements
         if (mTrackCursor != null) {
             mTrackList.invalidateViews();
         }
+        mPause = false;
         MusicUtils.setSpinnerState(mParentActivity);
         IntentFilter stateIntentfilter = new IntentFilter();
         stateIntentfilter.addAction(MediaPlaybackService.PLAYSTATE_CHANGED);
@@ -445,6 +448,7 @@ public class TrackBrowserFragment extends Fragment implements
     public void onPause() {
         mReScanHandler.removeCallbacksAndMessages(null);
         mParentActivity.unregisterReceiver(mStatusListener);
+        mPause = true;
         stopAnimation();
         super.onPause();
     }
@@ -1364,8 +1368,17 @@ public class TrackBrowserFragment extends Fragment implements
     }
 
     private static void stopAnimation() {
-        if (mCurrPlayAnimation != null && mCurrPlayAnimation.isRunning())
+        if (mAnimView != null) {
+            mAnimView.clearAnimation();
+            if (mPause) {
+                mAnimView.setBackgroundDrawable(null);
+            }
+        }
+
+        if (mCurrPlayAnimation != null && mCurrPlayAnimation.isRunning()) {
             mCurrPlayAnimation.stop();
+            mCurrPlayAnimation = null;
+        }
     }
 
     @Override
@@ -2042,7 +2055,7 @@ public class TrackBrowserFragment extends Fragment implements
                 }
             }
 
-            ImageView iv1 = vh.anim_icon;
+            mAnimView = vh.anim_icon;
 
             // Determining whether and where to show the "now playing indicator
             // is tricky, because we don't actually keep track of where the
@@ -2065,21 +2078,35 @@ public class TrackBrowserFragment extends Fragment implements
                     || (!mIsNowPlaying && cursor.getLong(mAudioIdIdx) == id)) {
                 // We set different icon according to different play state
                 if (MusicUtils.isPlaying()) {
-                    iv1.setVisibility(View.VISIBLE);
-                    iv1.setBackgroundResource(R.drawable.animation_list);
-                    vh.mMusicAnimation = (AnimationDrawable) iv1
+                    mAnimView.setVisibility(View.VISIBLE);
+                    clearAnimation();
+
+                    mAnimView.setBackgroundResource(R.drawable.animation_list);
+                    vh.mMusicAnimation = (AnimationDrawable) mAnimView
                             .getBackground();
                     setCurrPlayAnimation(vh.mMusicAnimation);
                     startAnimation();
                     vh.mMusicAnimation.setVisible(true, true);
                 } else {
-                    iv1.setBackgroundResource(R.drawable.wave_stop);
+                    mAnimView.setBackgroundDrawable(null);
+                    mAnimView.setBackgroundResource(R.drawable.wave_stop);
+                    mAnimView.clearAnimation();
+
                     if (vh.mMusicAnimation != null
-                            && vh.mMusicAnimation.isRunning())
-                       stopAnimation();
+                            && vh.mMusicAnimation.isRunning()) {
+                        stopAnimation();
+                    }
                 }
             } else {
-                iv1.setVisibility(View.INVISIBLE);
+                clearAnimation();
+                mAnimView.setVisibility(View.INVISIBLE);
+            }
+        }
+
+        private void clearAnimation() {
+            if (mAnimView != null) {
+                mAnimView.clearAnimation();
+                mAnimView.setBackgroundDrawable(null);
             }
         }
 
