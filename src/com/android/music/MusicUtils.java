@@ -163,21 +163,29 @@ public class MusicUtils {
         // "N Album(s)" - used for known albums
         StringBuilder songs_albums = new StringBuilder();
         Resources r = context.getResources();
-        if (isUnknown) {
-            if (numsongs == 1) {
-                songs_albums.append(context.getString(R.string.onesong));
-            } else {
-                String f = r.getQuantityText(R.plurals.Nsongs, numsongs).toString();
-                sFormatBuilder.setLength(0);
-                sFormatter.format(f, Integer.valueOf(numsongs));
-                songs_albums.append(sFormatBuilder);
-            }
+        String f = r.getQuantityText(R.plurals.Nalbums, numalbums).toString();
+        sFormatBuilder.setLength(0);
+        sFormatter.format(f, Integer.valueOf(numalbums));
+        songs_albums.append(sFormatBuilder);
+        songs_albums.append(context.getString(R.string.albumsongseparator));
+        return songs_albums.toString();
+    }
+
+    /**
+     * This is now only used in artistlabum screen
+     */
+    public static String makeArtistAlbumsSongsLabel(Context context, int numsongs) {
+        StringBuilder songs_albums = new StringBuilder();
+
+        if (numsongs == 1) {
+            songs_albums.append(context.getString(R.string.onesong));
         } else {
-            String f = r.getQuantityText(R.plurals.Nalbums, numalbums).toString();
+            Resources r = context.getResources();
+
+            String f = r.getQuantityText(R.plurals.Nsongs, numsongs).toString();
             sFormatBuilder.setLength(0);
-            sFormatter.format(f, Integer.valueOf(numalbums));
+            sFormatter.format(f, Integer.valueOf(numsongs));
             songs_albums.append(sFormatBuilder);
-            songs_albums.append(context.getString(R.string.albumsongseparator));
         }
         return songs_albums.toString();
     }

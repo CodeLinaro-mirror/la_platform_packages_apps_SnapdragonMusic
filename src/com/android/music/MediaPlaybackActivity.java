@@ -42,6 +42,8 @@ import android.graphics.Rect;
 import android.graphics.drawable.BitmapDrawable;
 import android.media.audiofx.AudioEffect;
 import android.media.AudioManager;
+import android.media.MediaPlayer;
+import android.media.MediaPlayer.OnCompletionListener;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
@@ -85,7 +87,7 @@ import com.codeaurora.music.custom.MusicPanelLayout.ViewHookSlipListener;
 import com.codeaurora.music.custom.MusicPanelLayout.BoardState;
 
 public class MediaPlaybackActivity extends Activity implements MusicUtils.Defs,
-        ServiceConnection {
+        ServiceConnection, OnCompletionListener {
     private static final int USE_AS_RINGTONE = CHILD_MENU_BASE;
     private static final int SAVE_AS_PLAYLIST = CHILD_MENU_BASE + 2;
     private static final int CLEAR_PLAYLIST = CHILD_MENU_BASE + 4;
@@ -1476,7 +1478,7 @@ public class MediaPlaybackActivity extends Activity implements MusicUtils.Defs,
             if ((pos >= 0) && (mDuration > 0)) {
                 mCurrentTime.setText(MusicUtils
                         .makeTimeString(this, pos / 1000));
-                int progress = (int) (1000 * pos / mDuration);
+                int progress = (int) (mProgress.getMax() * pos / mDuration);
                 mProgress.setProgress(progress);
                 if (mService.isComplete()) {
                     mCurrentTime.setText(MusicUtils.makeTimeString(this,
@@ -1764,4 +1766,13 @@ public class MediaPlaybackActivity extends Activity implements MusicUtils.Defs,
             mLooper.quit();
         }
     }
+
+	@Override
+	public void onCompletion(MediaPlayer mp) {
+        // Leave 100ms for mediaplayer to change state.
+        SystemClock.sleep(100);
+        // isCompleted = true;
+        mProgress.setProgress(mProgress.getMax());
+        //updatePlayPause();
+        }
 }
