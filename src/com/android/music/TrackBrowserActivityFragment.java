@@ -138,6 +138,7 @@ public class TrackBrowserActivityFragment extends Fragment
     private ImageView mImageView;
     private boolean mIsparentActivityFInishing;
     private BitmapDrawable mDefaultAlbumIcon;
+    private static AnimationDrawable mCurrPlayAnimation;
 
     public TrackBrowserActivityFragment()
     {
@@ -513,6 +514,7 @@ public class TrackBrowserActivityFragment extends Fragment
     public void onPause() {
         mReScanHandler.removeCallbacksAndMessages(null);
         mParentActivity.unregisterReceiver(mStatusListener);
+        stopAnimation();
         super.onPause();
     }
 
@@ -1236,11 +1238,25 @@ public class TrackBrowserActivityFragment extends Fragment
         vh.anim_icon.setVisibility(View.VISIBLE);
         vh.anim_icon.setBackgroundResource(R.drawable.animation_list);
         vh.mMusicAnimation = (AnimationDrawable) vh.anim_icon.getBackground();
-        vh.mMusicAnimation.start();
+        setCurrPlayAnimation(vh.mMusicAnimation);
+        startAnimation();
         vh.mMusicAnimation.setVisible(true, true);
         prevV= v;
     }
 
+    private static void setCurrPlayAnimation(AnimationDrawable anim) {
+        stopAnimation();
+        mCurrPlayAnimation = anim;
+    }
+
+    private static void startAnimation() {
+        mCurrPlayAnimation.start();
+    }
+
+    private static void stopAnimation() {
+        if (mCurrPlayAnimation != null && mCurrPlayAnimation.isRunning())
+            mCurrPlayAnimation.stop();
+    }
 
     private boolean onCreateOptionsMenu(PopupMenu menu) {
          /*This activity is used for a number of different browsing modes, and the menu can
@@ -1962,12 +1978,13 @@ public class TrackBrowserActivityFragment extends Fragment
                     iv.setVisibility(View.VISIBLE);
                     iv.setBackgroundResource(R.drawable.animation_list);
                     vh.mMusicAnimation = (AnimationDrawable) iv.getBackground();
-                    vh.mMusicAnimation.start();
+                    setCurrPlayAnimation(vh.mMusicAnimation);
+                    startAnimation();
                     vh.mMusicAnimation.setVisible(true, true);
                 } else {
                     iv.setBackgroundResource(R.drawable.wave_stop);
                     if(vh.mMusicAnimation!=null && vh.mMusicAnimation.isRunning())
-                        vh.mMusicAnimation.stop();
+                       stopAnimation();
                 }
             } else {
                 iv.setVisibility(View.INVISIBLE);
