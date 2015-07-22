@@ -259,6 +259,12 @@ public class TrackBrowserActivityFragment extends Fragment
         if(getArguments()!=null){
             mAlbumId = getArguments().getString("album");
             mArtistId = getArguments().getString("artist");
+
+            if (MusicUtils.isGroupByFolder()) {
+                mParent = getArguments().getInt("parent", -1);
+                mRootPath = getArguments().getString("rootPath");
+            }
+
         }
         mListView = (ListView)rootView. findViewById(R.id.media_list);
         mTextView1 = (TextView) rootView.findViewById(R.id.textView1);

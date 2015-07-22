@@ -94,6 +94,7 @@ public class MusicBrowserActivity extends MediaPlaybackActivity implements
         setContentView(R.layout.music_browser);
         mActivityInstance = this;
         mime = getIntent().getType();
+        MusicUtils.updateGroupByFolder(this);
         init();
         initView();
         String shuf = getIntent().getStringExtra("autoshuffle");
@@ -189,14 +190,20 @@ public class MusicBrowserActivity extends MediaPlaybackActivity implements
     }
 
     private void showScreen(int position) {
-        if (position > 5) {
+        if (position > 4) {
             position = 0;
         }
         mNavigationAdapter.setClickPosition(position);
         mDrawerListView.invalidateViews();
         FragmentManager fragmentManager = getFragmentManager();
         Fragment fragment = null;
-        mToolbar.setTitle(getResources().getStringArray(R.array.title_array)[position]);
+        if (MusicUtils.isGroupByFolder()) {
+            mToolbar.setTitle(getResources().getStringArray(
+                    R.array.title_array_folder)[position]);
+        } else {
+            mToolbar.setTitle(getResources().getStringArray(
+                    R.array.title_array_songs)[position]);
+        }
         mDrawerListView.setItemChecked(position, true);
         mDrawerListView.setSelection(position);
         FrameLayout fl = (FrameLayout) findViewById(R.id.fragment_page);

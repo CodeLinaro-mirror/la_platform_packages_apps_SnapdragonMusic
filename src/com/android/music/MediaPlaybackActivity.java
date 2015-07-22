@@ -890,8 +890,15 @@ public class MediaPlaybackActivity extends Activity implements MusicUtils.Defs,
             getFragmentManager().beginTransaction()
                     .replace(R.id.fragment_page, fragment).commit();
             mToolbar.setVisibility(View.VISIBLE);
-            mToolbar.setTitle(getResources()
-                    .getStringArray(R.array.title_array)[MusicUtils.navigatingTabPosition]);
+            if (MusicUtils.isGroupByFolder()) {
+                mToolbar.setTitle(getResources().getStringArray(
+                        R.array.title_array_folder)[MusicUtils.navigatingTabPosition]);
+            } else {
+                mToolbar.setTitle(getResources().getStringArray(
+                        R.array.title_array_songs)[MusicUtils.navigatingTabPosition]);
+
+            }
+
         }
     }
 

@@ -123,6 +123,8 @@ public class MusicUtils {
     // decoding and caching 20 bitmaps to overcome Out of memory exception.
     public static LruCache<String, Bitmap[]> mArtCache =
                                          new LruCache<String, Bitmap[]>(20);
+    public static LruCache<String, Bitmap> mFolderCache = new LruCache<String, Bitmap>(
+            20);
 
     public static HashMap<Integer, Cursor> cur = new HashMap<Integer, Cursor>();
     static Bitmap mAlbumArtsArray[];
@@ -250,6 +252,15 @@ public class MusicUtils {
         }
         Log.e("Music", "Failed to bind to service");
         return null;
+    }
+
+    public static void updateGroupByFolder(Activity a) {
+        if (a.getApplicationContext().getResources()
+                .getBoolean(R.bool.group_by_folder)) {
+            mGroupByFolder = true;
+        } else {
+            mGroupByFolder = false;
+        }
     }
 
     public static void unbindFromService(ServiceToken token) {
@@ -1859,6 +1870,17 @@ public class MusicUtils {
                 return true;
             }
         }
+        if (fragmentManager.findFragmentByTag("folder_fragment") != null) {
+            if (fragmentManager.findFragmentByTag("folder_fragment").isAdded()
+                    && !fragmentManager.findFragmentByTag("folder_fragment")
+                            .isDetached()) {
+                fragmentManager
+                        .beginTransaction()
+                        .remove(fragmentManager
+                                .findFragmentByTag("folder_fragment")).commit();
+                return true;
+            }
+        }
         return false;
     }
 
@@ -1930,6 +1952,125 @@ public class MusicUtils {
                 });
             }
         }
+    }
+    static class FolderBitmapThread extends Thread {
+
+        // Handler handler = null;
+        BitmapDrawable defaultArtwork;
+        private long songId;
+        ImageView img;
+        Activity context;
+        private Bitmap bitmap;
+
+        public FolderBitmapThread(Activity context, long songId,
+                BitmapDrawable defaultArtwork, ImageView img) {
+            this.defaultArtwork = defaultArtwork;
+            this.songId = songId;
+            this.img = img;
+            // this.handler = handler;
+            this.context = context;
+        }
+
+        @Override
+        public void run() {
+            super.run();
+            android.os.Process
+                    .setThreadPriority(android.os.Process.THREAD_PRIORITY_BACKGROUND);
+            if (songId + "" != null) {
+                bitmap = mFolderCache.get(songId + "");
+                if (bitmap == null) {
+                    bitmap = getFolderBitmap(context, songId);
+                    if(bitmap != null)
+                    mFolderCache.put(songId + "", bitmap);
+                }
+            }
+
+            if (img != null && !mIsScreenOff) {
+                context.runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        // TODO Auto-generated method stub
+                        if (bitmap != null)
+                            img.setImageBitmap(bitmap);
+                        else
+                            img.setImageDrawable(defaultArtwork);
+                    }
+                });
+            }
+        }
+    }
+
+    public static Bitmap getFolderBitmap(Context context, long songId) {
+        ContentResolver res = context.getContentResolver();
+        Uri uri = null;
+        int h = 100, w = 100;
+        Bitmap bitmap = null;
+        if (songId != -1) {
+            String selection = MediaStore.Audio.Media._ID + " = " + songId + "";
+
+            Cursor cursor = res.query(
+                    MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, new String[] {
+                            MediaStore.Audio.Media._ID,
+                            MediaStore.Audio.Media.ALBUM_ID }, selection, null,
+                    null);
+
+            if (cursor.moveToFirst()) {
+                long albumId = cursor.getLong(cursor
+                        .getColumnIndex(MediaStore.Audio.Media.ALBUM_ID));
+                uri = ContentUris.withAppendedId(sArtworkUri, albumId);
+            }
+            cursor.close();
+
+            if (uri != null) {
+                ParcelFileDescriptor fd = null;
+                try {
+                    fd = res.openFileDescriptor(uri, "r");
+                    int sampleSize = 1;
+
+                    if (fd != null) {
+                        sBitmapOptionsCache.inJustDecodeBounds = true;
+                        BitmapFactory.decodeFileDescriptor(
+                                fd.getFileDescriptor(), null,
+                                sBitmapOptionsCache);
+                        int nextWidth = sBitmapOptionsCache.outWidth >> 1;
+                        int nextHeight = sBitmapOptionsCache.outHeight >> 1;
+                        while (nextWidth > w && nextHeight > h) {
+                            sampleSize <<= 1;
+                            nextWidth >>= 1;
+                            nextHeight >>= 1;
+                        }
+
+                        sBitmapOptionsCache.inSampleSize = sampleSize;
+                        sBitmapOptionsCache.inJustDecodeBounds = false;
+                        Bitmap b = BitmapFactory.decodeFileDescriptor(
+                                fd.getFileDescriptor(), null,
+                                sBitmapOptionsCache);
+
+                        if (b != null) {
+                            if (sBitmapOptionsCache.outWidth != w
+                                    || sBitmapOptionsCache.outHeight != h) {
+                                Bitmap tmp = Bitmap.createScaledBitmap(b, w, h,
+                                        true);
+                                if (tmp != b)
+                                    b.recycle();
+                                b = tmp;
+                            }
+                        }
+
+                        return b;
+                    }
+                } catch (FileNotFoundException e) {
+                } finally {
+                    try {
+                        if (fd != null)
+                            fd.close();
+                    } catch (IOException e) {
+                    }
+                }
+            }
+        }
+        return bitmap;
+
     }
 
     public static boolean isTelephonyCallInProgress() {
