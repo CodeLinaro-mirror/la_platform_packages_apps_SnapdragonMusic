@@ -2819,6 +2819,8 @@ public class MediaPlaybackService extends Service {
             } catch (IOException ex) {
                 if (!mQuietMode && !isNextPlayer) {
                     Toast.makeText(MediaPlaybackService.this, R.string.open_failed, Toast.LENGTH_SHORT).show();
+                } else {
+                    mHandler.sendEmptyMessage(ERROR);
                 }
                 return false;
             } catch (IllegalArgumentException ex) {
