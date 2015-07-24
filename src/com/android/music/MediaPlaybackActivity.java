@@ -1667,6 +1667,11 @@ public class MediaPlaybackActivity extends Activity implements MusicUtils.Defs,
                     new String [] { MediaStore.Audio.Media.DURATION}, null, null, null);
             if (cursor != null && cursor.moveToFirst()) {
                 mDuration = cursor.getInt(0);
+                // if duration in media database is not valid,
+                // fall back to media service duration
+                if (mDuration <= 0) {
+                    mDuration = mService.duration();
+                }
                 cursor.close();
             } else {
                 mDuration = mService.duration();
