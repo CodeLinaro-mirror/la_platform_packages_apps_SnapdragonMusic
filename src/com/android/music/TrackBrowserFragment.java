@@ -537,7 +537,7 @@ public class TrackBrowserFragment extends Fragment implements
         if (mTrackCursor.getCount() == 0) {
             mShuffleLayout.setVisibility(View.GONE);
             mSdErrorMessageView.setVisibility(View.VISIBLE);
-            mSdErrorMessageView.setText("No Music Found");
+            mSdErrorMessageView.setText(R.string.no_music_found);
         }
         setTitle();
 
@@ -798,8 +798,6 @@ public class TrackBrowserFragment extends Fragment implements
                             mCursorCols);
                     if (c.getCount() == 0) {
                         if (MusicBrowserActivity.isPanelExpanded) {
-                            mParentActivity.getSlidingPanelLayout()
-                                    .setHookState(BoardState.COLLAPSED);
                             mParentActivity.getSlidingPanelLayout()
                                     .setHookState(BoardState.HIDDEN);
                             MusicBrowserActivity.isPanelExpanded = false;
@@ -1064,14 +1062,7 @@ public class TrackBrowserFragment extends Fragment implements
             Intent shareIntent = new Intent(Intent.ACTION_SEND);
             shareIntent.setType("audio/*");
             mTrackCursor.moveToPosition(mSelectedPosition);
-            if (mEditMode && !mPlaylist.equals("nowplaying")) {
-                id = mTrackCursor
-                        .getLong(mTrackCursor
-                                .getColumnIndexOrThrow(MediaStore.Audio.Playlists.Members.AUDIO_ID));
-            } else {
-                id = mTrackCursor.getLong(mTrackCursor
-                        .getColumnIndexOrThrow(MediaStore.Audio.Media._ID));
-            }
+            id = mSelectedId;
             Uri uri = ContentUris.withAppendedId(
                     MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, id);
 
@@ -1963,7 +1954,16 @@ public class TrackBrowserFragment extends Fragment implements
             builder.delete(0, builder.length());
             String name = cursor.getString(mArtistIdx);
             long aid = cursor.getLong(mAlbumIdx);
-            new MusicUtils.AlbumBitmapDownloadThread(mParentActivity, aid, mDefaultAlbumIcon, vh.icon, null).start();
+            final Drawable d = MusicUtils.getCachedArtwork(context, aid,
+                    mDefaultAlbumIcon);
+            if (d != null) {
+                vh.icon.setImageDrawable(d);
+            } else {
+                vh.icon.setImageDrawable(mDefaultAlbumIcon);
+                new MusicUtils.AlbumBitmapDownloadThread(mParentActivity, aid,
+                        mDefaultAlbumIcon, vh.icon, null).start();
+            }
+
             if (name == null || name.equals(MediaStore.UNKNOWN_STRING)) {
                 // Reload the "unknown_artist_name" string in order to
                 // avoid that this string doesn't change when user
