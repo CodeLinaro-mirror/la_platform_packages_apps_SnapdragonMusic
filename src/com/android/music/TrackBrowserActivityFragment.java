@@ -1277,11 +1277,7 @@ public class TrackBrowserActivityFragment extends Fragment
                 mAnimView.setBackgroundDrawable(null);
             }
         }
-
-        if (mCurrPlayAnimation != null && mCurrPlayAnimation.isRunning()) {
-            mCurrPlayAnimation.stop();
-            mCurrPlayAnimation = null;
-        }
+        mCurrPlayAnimation = null;
     }
 
     @Override
