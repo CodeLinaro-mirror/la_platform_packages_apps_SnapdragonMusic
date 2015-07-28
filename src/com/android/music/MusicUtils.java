@@ -57,6 +57,7 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.widget.Toolbar;
 import android.telephony.TelephonyManager;
+import android.telephony.SubscriptionManager;
 import android.text.TextUtils;
 import android.text.format.Time;
 import android.util.Log;
@@ -163,21 +164,29 @@ public class MusicUtils {
         // "N Album(s)" - used for known albums
         StringBuilder songs_albums = new StringBuilder();
         Resources r = context.getResources();
-        if (isUnknown) {
-            if (numsongs == 1) {
-                songs_albums.append(context.getString(R.string.onesong));
-            } else {
-                String f = r.getQuantityText(R.plurals.Nsongs, numsongs).toString();
-                sFormatBuilder.setLength(0);
-                sFormatter.format(f, Integer.valueOf(numsongs));
-                songs_albums.append(sFormatBuilder);
-            }
+        String f = r.getQuantityText(R.plurals.Nalbums, numalbums).toString();
+        sFormatBuilder.setLength(0);
+        sFormatter.format(f, Integer.valueOf(numalbums));
+        songs_albums.append(sFormatBuilder);
+        songs_albums.append(context.getString(R.string.albumsongseparator));
+        return songs_albums.toString();
+    }
+
+    /**
+     * This is now only used in artistlabum screen
+     */
+    public static String makeArtistAlbumsSongsLabel(Context context, int numsongs) {
+        StringBuilder songs_albums = new StringBuilder();
+
+        if (numsongs == 1) {
+            songs_albums.append(context.getString(R.string.onesong));
         } else {
-            String f = r.getQuantityText(R.plurals.Nalbums, numalbums).toString();
+            Resources r = context.getResources();
+
+            String f = r.getQuantityText(R.plurals.Nsongs, numsongs).toString();
             sFormatBuilder.setLength(0);
-            sFormatter.format(f, Integer.valueOf(numalbums));
+            sFormatter.format(f, Integer.valueOf(numsongs));
             songs_albums.append(sFormatBuilder);
-            songs_albums.append(context.getString(R.string.albumsongseparator));
         }
         return songs_albums.toString();
     }
@@ -1921,6 +1930,25 @@ public class MusicUtils {
                 });
             }
         }
+    }
+
+    public static boolean isTelephonyCallInProgress() {
+        TelephonyManager telephonyManager = TelephonyManager.getDefault();
+        Log.d(TAG, "Phone Count - " + telephonyManager.getPhoneCount());
+
+        for (int i = 0; i < telephonyManager.getPhoneCount(); i++) {
+            int[] subId = SubscriptionManager.getSubId(i);
+            if (subId != null && subId.length > 0) {
+                int telephony_state = telephonyManager.getCallState(subId[0]);
+
+                if (telephony_state == TelephonyManager.CALL_STATE_OFFHOOK
+                        || telephony_state == TelephonyManager.CALL_STATE_RINGING) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
     }
 
 }

@@ -42,6 +42,8 @@ import android.graphics.Rect;
 import android.graphics.drawable.BitmapDrawable;
 import android.media.audiofx.AudioEffect;
 import android.media.AudioManager;
+import android.media.MediaPlayer;
+import android.media.MediaPlayer.OnCompletionListener;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
@@ -68,6 +70,7 @@ import android.view.View.OnClickListener;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.FrameLayout;
 import android.widget.PopupMenu;
 import android.widget.PopupMenu.OnMenuItemClickListener;
 import android.widget.ProgressBar;
@@ -85,7 +88,7 @@ import com.codeaurora.music.custom.MusicPanelLayout.ViewHookSlipListener;
 import com.codeaurora.music.custom.MusicPanelLayout.BoardState;
 
 public class MediaPlaybackActivity extends Activity implements MusicUtils.Defs,
-        ServiceConnection {
+        ServiceConnection, OnCompletionListener {
     private static final int USE_AS_RINGTONE = CHILD_MENU_BASE;
     private static final int SAVE_AS_PLAYLIST = CHILD_MENU_BASE + 2;
     private static final int CLEAR_PLAYLIST = CHILD_MENU_BASE + 4;
@@ -103,6 +106,7 @@ public class MediaPlaybackActivity extends Activity implements MusicUtils.Defs,
     private ImageButton mRepeatButton;
     private ImageButton mShuffleButton;
     private ImageButton mCurrentPlaylist;
+    private FrameLayout mQueueLayout;
     public Toolbar mToolbar;
     private Worker mAlbumArtWorker;
     private AlbumArtHandler mAlbumArtHandler;
@@ -157,6 +161,7 @@ public class MediaPlaybackActivity extends Activity implements MusicUtils.Defs,
         mCurrentTime = (TextView) findViewById(R.id.currenttimer);
         mTotalTime = (TextView) findViewById(R.id.totaltimer);
         mProgress = (ProgressBar) findViewById(R.id.progress);
+        mQueueLayout = (FrameLayout) findViewById(R.id.current_queue_view);
         mAlbum = (ImageView) findViewById(R.id.album);
         mAlbumIcon = (ImageView) findViewById(R.id.album_icon_view);
         mArtistName = (TextView) findViewById(R.id.artist_name);
@@ -174,6 +179,8 @@ public class MediaPlaybackActivity extends Activity implements MusicUtils.Defs,
         mNextButton.setOnClickListener(mNextListener);
         mNextButton.setRepeatListener(mFfwdListener, 260);
         seekmethod = 1;
+        MusicPanelLayout.mSeekBarView = mProgress;
+        MusicPanelLayout.mSongsQueueView = mQueueLayout;
 
         mDeviceHasDpad = (getResources().getConfiguration().navigation == Configuration.NAVIGATION_DPAD);
 
@@ -445,6 +452,7 @@ public class MediaPlaybackActivity extends Activity implements MusicUtils.Defs,
         public void onClick(View v) {
             MusicBrowserActivity.mIsparentActivityFInishing = true;
             if (mAlbumIcon.getVisibility() == View.GONE) {
+                mSlidingPanelLayout.mIsQueueEnabled = false;
                 mAlbumIcon.setVisibility(View.VISIBLE);
                 mMenuOverFlow.setOnClickListener(mActiveButtonPopUpMenuListener);
                 mCurrentPlaylist.setImageResource(R.drawable.list);
@@ -452,6 +460,7 @@ public class MediaPlaybackActivity extends Activity implements MusicUtils.Defs,
                     getFragmentManager().beginTransaction().remove(mFragment)
                             .commit();
             } else {
+                mSlidingPanelLayout.mIsQueueEnabled = true;
                 mAlbumIcon.setVisibility(View.GONE);
                 mCurrentPlaylist.setImageResource(R.drawable.list_active);
                 mMenuOverFlow.setOnClickListener(mPopUpMenuListener);
@@ -531,16 +540,11 @@ public class MediaPlaybackActivity extends Activity implements MusicUtils.Defs,
         public void onClick(View v) {
             PopupMenu popup = new PopupMenu(mActivity, mMenuOverFlow);
             // icon will be set in onPrepareOptionsMenu()
-            popup.getMenu().add(0, PARTY_SHUFFLE, 0, R.string.party_shuffle);
-            popup.getMenu().add(0, SHUFFLE_ALL, 0, R.string.shuffle_all)
-                    .setIcon(R.drawable.ic_menu_shuffle);
             popup.getMenu()
                     .add(0, SAVE_AS_PLAYLIST, 0, R.string.save_as_playlist)
                     .setIcon(android.R.drawable.ic_menu_save);
             popup.getMenu().add(0, CLEAR_PLAYLIST, 0, R.string.clear_playlist)
                     .setIcon(R.drawable.ic_menu_clear_playlist);
-            popup.getMenu().add(0, CLOSE, 0, R.string.close_music)
-                    .setIcon(R.drawable.quick_panel_music_close);
             popup.show();
             popup.setOnMenuItemClickListener(new OnMenuItemClickListener() {
 
@@ -557,7 +561,6 @@ public class MediaPlaybackActivity extends Activity implements MusicUtils.Defs,
         public void onClick(View v) {
             PopupMenu popup = new PopupMenu(mActivity, mMenuOverFlow);
             // icon will be set in onPrepareOptionsMenu()
-            popup.getMenu().add(0, PARTY_SHUFFLE, 0, R.string.party_shuffle);
             SubMenu sub = popup.getMenu().addSubMenu(0,
                     ADD_TO_PLAYLIST, 0, R.string.add_to_playlist);
             MusicUtils.makePlaylistMenu(MediaPlaybackActivity.this, sub);
@@ -1476,7 +1479,7 @@ public class MediaPlaybackActivity extends Activity implements MusicUtils.Defs,
             if ((pos >= 0) && (mDuration > 0)) {
                 mCurrentTime.setText(MusicUtils
                         .makeTimeString(this, pos / 1000));
-                int progress = (int) (1000 * pos / mDuration);
+                int progress = (int) (mProgress.getMax() * pos / mDuration);
                 mProgress.setProgress(progress);
                 if (mService.isComplete()) {
                     mCurrentTime.setText(MusicUtils.makeTimeString(this,
@@ -1667,6 +1670,11 @@ public class MediaPlaybackActivity extends Activity implements MusicUtils.Defs,
                     new String [] { MediaStore.Audio.Media.DURATION}, null, null, null);
             if (cursor != null && cursor.moveToFirst()) {
                 mDuration = cursor.getInt(0);
+                // if duration in media database is not valid,
+                // fall back to media service duration
+                if (mDuration <= 0) {
+                    mDuration = mService.duration();
+                }
                 cursor.close();
             } else {
                 mDuration = mService.duration();
@@ -1759,4 +1767,13 @@ public class MediaPlaybackActivity extends Activity implements MusicUtils.Defs,
             mLooper.quit();
         }
     }
+
+	@Override
+	public void onCompletion(MediaPlayer mp) {
+        // Leave 100ms for mediaplayer to change state.
+        SystemClock.sleep(100);
+        // isCompleted = true;
+        mProgress.setProgress(mProgress.getMax());
+        //updatePlayPause();
+        }
 }

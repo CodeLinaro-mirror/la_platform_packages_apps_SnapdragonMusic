@@ -77,6 +77,7 @@ public class MusicBrowserActivity extends MediaPlaybackActivity implements
     static MediaPlaybackActivity mActivityInstance;
     NavigationDrawerListAdapter mNavigationAdapter;
     String mArtistID, mAlbumID;
+    String mime;
 
     public MusicBrowserActivity() {
     }
@@ -92,6 +93,7 @@ public class MusicBrowserActivity extends MediaPlaybackActivity implements
         setVolumeControlStream(AudioManager.STREAM_MUSIC);
         setContentView(R.layout.music_browser);
         mActivityInstance = this;
+        mime = getIntent().getType();
         init();
         initView();
         String shuf = getIntent().getStringExtra("autoshuffle");
@@ -160,6 +162,10 @@ public class MusicBrowserActivity extends MediaPlaybackActivity implements
                 mDrawerLayout.openDrawer(Gravity.LEFT);
             }
         });
+        if(mime != null && mime.equalsIgnoreCase("vnd.android.cursor.dir/playlist"))
+        {
+            activeTab = 3;
+	    }
         showScreen(activeTab);
     }
 
@@ -172,6 +178,7 @@ public class MusicBrowserActivity extends MediaPlaybackActivity implements
             mAlbumID = getIntent().getStringExtra("album");
             initView();
         }
+        mime = intent.getType();
     }
 
     @Override

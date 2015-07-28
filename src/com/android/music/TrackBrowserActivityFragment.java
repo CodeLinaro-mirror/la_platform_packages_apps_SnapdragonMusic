@@ -2032,10 +2032,9 @@ public class TrackBrowserActivityFragment extends Fragment
             if ( (mIsNowPlaying && cursor.getPosition() == id) ||
                  (!mIsNowPlaying && cursor.getLong(mAudioIdIdx) == id)) {
                 // We set different icon according to different play state
+                mAnimView.setVisibility(View.VISIBLE);
                 if (MusicUtils.isPlaying()) {
-                    mAnimView.setVisibility(View.VISIBLE);
                     clearAnimation();
-
                     mAnimView.setBackgroundResource(R.drawable.animation_list);
                     vh.mMusicAnimation = (AnimationDrawable) mAnimView
                             .getBackground();
