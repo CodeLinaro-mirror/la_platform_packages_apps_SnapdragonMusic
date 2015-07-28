@@ -343,26 +343,6 @@ public class FolderBrowserFragment extends Fragment
                 MusicUtils.addToPlaylist(mActivity, list, playlist);
                 return true;
             }
-            case DELETE_ITEM: {
-                long[] list = MusicUtils
-                        .getSongListForFolder(mActivity, Long.parseLong(mCurretParent));
-                String f;
-                String status = MusicUtils.getSDState(mActivity);
-                if (status.equals(android.os.Environment.MEDIA_MOUNTED)) {
-                    f = getString(R.string.delete_album_desc);
-                } else {
-                    f = getString(R.string.delete_album_desc_nosdcard);
-                }
-                String desc = String.format(f, mCurretParent);
-                Bundle b = new Bundle();
-                b.putString("description", desc);
-                b.putLongArray("items", list);
-                Intent intent = new Intent();
-                intent.setClass(mActivity, DeleteItems.class);
-                intent.putExtras(b);
-                startActivityForResult(intent, -1);
-                return true;
-            }
         }
         return super.onContextItemSelected(item);
     }
@@ -586,8 +566,7 @@ public class FolderBrowserFragment extends Fragment
                             ADD_TO_PLAYLIST, 0, R.string.add_to_playlist);
                     MusicUtils.makePlaylistMenu(mFragment.getParentActivity(),
                             sub);
-                    popup.getMenu()
-                            .add(0, DELETE_ITEM, 0, R.string.delete_item);
+
                     popup.show();
                     popup.setOnMenuItemClickListener(new OnMenuItemClickListener() {
 
