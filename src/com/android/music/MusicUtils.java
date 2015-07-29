@@ -104,7 +104,9 @@ public class MusicUtils {
     private static boolean mGroupByFolder = false;
     private static boolean mDisableAnimation;
     public static boolean mRepeatPlay = false;
-
+    public static boolean isFragmentRemoved;
+    public static boolean mEditMode;
+    public static boolean mPause;
     public final static int RINGTONE_SUB_0 = 0;
     public final static int RINGTONE_SUB_1 = 1;
 

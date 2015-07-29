@@ -457,10 +457,15 @@ public class MediaPlaybackActivity extends Activity implements MusicUtils.Defs,
                 mAlbumIcon.setVisibility(View.VISIBLE);
                 mMenuOverFlow.setOnClickListener(mActiveButtonPopUpMenuListener);
                 mCurrentPlaylist.setImageResource(R.drawable.list);
-                if (mFragment != null)
+                TrackBrowserFragment.mEditMode = MusicUtils.mEditMode;
+                TrackBrowserFragment.mPause = MusicUtils.mPause;
+                if (mFragment != null) {
+                    MusicUtils.isFragmentRemoved = true;
                     getFragmentManager().beginTransaction().remove(mFragment)
                             .commit();
+                }
             } else {
+                MusicUtils.isFragmentRemoved = false;
                 mSlidingPanelLayout.mIsQueueEnabled = true;
                 mAlbumIcon.setVisibility(View.GONE);
                 mCurrentPlaylist.setImageResource(R.drawable.list_active);

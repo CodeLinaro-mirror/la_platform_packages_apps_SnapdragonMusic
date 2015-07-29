@@ -117,7 +117,7 @@ public class TrackBrowserFragment extends Fragment implements
     private String[] mCursorCols;
     private String[] mPlaylistMemberCols;
     private boolean mDeletedOneRow = false;
-    private static boolean mEditMode = false;
+    public static boolean mEditMode = false;
     private String mCurrentTrackName;
     private String mCurrentAlbumName;
     private String mCurrentArtistNameForAlbum;
@@ -145,7 +145,7 @@ public class TrackBrowserFragment extends Fragment implements
     private RelativeLayout mShuffleLayout;
     private static AnimationDrawable mCurrPlayAnimation;
     private static ImageView mAnimView;
-    private static boolean mPause = false;
+    public static boolean mPause = false;
     private String mFolderName;
 
     public TrackBrowserFragment() {
@@ -449,6 +449,10 @@ public class TrackBrowserFragment extends Fragment implements
             mTrackList.invalidateViews();
         }
         mPause = false;
+        if (!MusicUtils.isFragmentRemoved) {
+            MusicUtils.mPause = mPause;
+            MusicUtils.mEditMode = mEditMode;
+        }
         MusicUtils.setSpinnerState(mParentActivity);
         IntentFilter stateIntentfilter = new IntentFilter();
         stateIntentfilter.addAction(MediaPlaybackService.PLAYSTATE_CHANGED);
@@ -1296,14 +1300,9 @@ public class TrackBrowserFragment extends Fragment implements
     private static void stopAnimation() {
         if (mAnimView != null) {
             mAnimView.clearAnimation();
-            if (mPause) {
-                mAnimView.setBackgroundDrawable(null);
-            }
+        if (mPause) {
+            mAnimView.setBackgroundDrawable(null);
         }
-
-        if (mCurrPlayAnimation != null && mCurrPlayAnimation.isRunning()) {
-            mCurrPlayAnimation.stop();
-            mCurrPlayAnimation = null;
         }
     }
 
@@ -2001,10 +2000,9 @@ public class TrackBrowserFragment extends Fragment implements
             if ((mIsNowPlaying && cursor.getPosition() == id)
                     || (!mIsNowPlaying && cursor.getLong(mAudioIdIdx) == id)) {
                 // We set different icon according to different play state
+                mAnimView.setVisibility(View.VISIBLE);
                 if (MusicUtils.isPlaying()) {
-                    mAnimView.setVisibility(View.VISIBLE);
                     clearAnimation();
-
                     mAnimView.setBackgroundResource(R.drawable.animation_list);
                     vh.mMusicAnimation = (AnimationDrawable) mAnimView
                             .getBackground();
