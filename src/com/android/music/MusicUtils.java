@@ -1873,7 +1873,6 @@ public class MusicUtils {
                 context.runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        // TODO Auto-generated method stub
                         img.setImageDrawable(d);
                     }
                 });

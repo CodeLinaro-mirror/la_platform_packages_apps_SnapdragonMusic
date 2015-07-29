@@ -233,6 +233,11 @@ public class FolderBrowserFragment extends Fragment
         }
 
         hideDatabaseError();
+        if (mFilesCursor.getCount() == 0) {
+            mSdErrorMessageView.setVisibility(View.VISIBLE);
+            mSdErrorMessageView.setText(R.string.no_music_found);
+            mFolderList.setVisibility(View.GONE);
+        }
         //setTitle();
     }
 

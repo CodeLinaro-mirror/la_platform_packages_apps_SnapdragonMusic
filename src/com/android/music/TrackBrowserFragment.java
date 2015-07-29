@@ -554,6 +554,7 @@ public class TrackBrowserFragment extends Fragment implements
             mShuffleLayout.setVisibility(View.GONE);
             mSdErrorMessageView.setVisibility(View.VISIBLE);
             mSdErrorMessageView.setText(R.string.no_music_found);
+            mTrackList.setVisibility(View.GONE);
         }
         setTitle();
 
@@ -1216,13 +1217,10 @@ public class TrackBrowserFragment extends Fragment implements
         }
     }
 
-    View prevV;
-
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position,
             long id) {
 
-        ViewHolder vh = (ViewHolder) view.getTag();
         ((MediaPlaybackActivity) mParentActivity)
                 .updateNowPlaying(mParentActivity);
         if ((mTrackCursor == null) || (mTrackCursor.getCount() == 0)) {
@@ -1271,21 +1269,8 @@ public class TrackBrowserFragment extends Fragment implements
         if (mEditMode && mPlaylist != null && !mPlaylist.equals("nowplaying")) {
             MusicUtils.setPlayListId(Long.valueOf(mPlaylist));
         }
-        if (prevV != null) {
-            ViewHolder vh1 = (ViewHolder) prevV.getTag();
-            if (vh1.mMusicAnimation.isRunning())
-                stopAnimation();
-            vh1.anim_icon.setVisibility(View.INVISIBLE);
 
-        }
         MusicUtils.playAll(mParentActivity, mTrackCursor, position);
-        vh.anim_icon.setVisibility(View.VISIBLE);
-        vh.anim_icon.setBackgroundResource(R.drawable.animation_list);
-        vh.mMusicAnimation = (AnimationDrawable) vh.anim_icon.getBackground();
-        setCurrPlayAnimation(vh.mMusicAnimation);
-        startAnimation();
-        vh.mMusicAnimation.setVisible(true, true);
-        prevV = view;
     }
 
     private static void setCurrPlayAnimation(AnimationDrawable anim) {
@@ -1880,7 +1865,6 @@ public class TrackBrowserFragment extends Fragment implements
             vh.line1.setText(vh.buffer1.data, 0, vh.buffer1.sizeCopied);
             vh.mCurrentTrackName = cursor.getString(mTitleIdx);
             vh.mSelectedID = cursor.getLong(mAudioIdIdx);
-            vh.icon.setImageDrawable(mDefaultAlbumIcon);
             int secs = cursor.getInt(mDurationIdx) / 1000;
             final StringBuilder builder = mBuilder;
             builder.delete(0, builder.length());
@@ -1890,13 +1874,17 @@ public class TrackBrowserFragment extends Fragment implements
                     mDefaultAlbumIcon);
             if (MusicUtils.isGroupByFolder() && !mEditMode && mParent != -1) {
                 long l = cursor.getLong(1);
-
-                new MusicUtils.FolderBitmapThread(mParentActivity, l,
-                        mDefaultAlbumIcon, vh.icon).start();
+                if (vh.icon.getTag() != (Integer)vh.icon.getId()) {
+                    new MusicUtils.FolderBitmapThread(mParentActivity, l,
+                            mDefaultAlbumIcon, vh.icon).start();
+                    vh.icon.setTag(vh.icon.getId());
+                }
             } else {
-                vh.icon.setImageDrawable(mDefaultAlbumIcon);
-                new MusicUtils.AlbumBitmapDownloadThread(mParentActivity, aid,
-                        mDefaultAlbumIcon, vh.icon, null).start();
+                if (vh.icon.getTag() != (Integer)vh.icon.getId()) {
+                    new MusicUtils.AlbumBitmapDownloadThread(mParentActivity, aid,
+                            mDefaultAlbumIcon, vh.icon, null).start();
+                    vh.icon.setTag(vh.icon.getId());
+                }
             }
 
             if (name == null || name.equals(MediaStore.UNKNOWN_STRING)) {
@@ -2013,7 +2001,6 @@ public class TrackBrowserFragment extends Fragment implements
                     mAnimView.setBackgroundDrawable(null);
                     mAnimView.setBackgroundResource(R.drawable.wave_stop);
                     mAnimView.clearAnimation();
-
                     if (vh.mMusicAnimation != null
                             && vh.mMusicAnimation.isRunning()) {
                         stopAnimation();

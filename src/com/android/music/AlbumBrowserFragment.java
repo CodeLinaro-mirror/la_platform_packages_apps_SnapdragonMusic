@@ -259,6 +259,7 @@ public class AlbumBrowserFragment extends Fragment implements MusicUtils.Defs,
         if (mAlbumCursor.getCount() == 0) {
             mSdErrorMessageView.setVisibility(View.VISIBLE);
             mSdErrorMessageView.setText(R.string.no_music_found);
+            mAlbumList.setVisibility(View.GONE);
         }
     }
 

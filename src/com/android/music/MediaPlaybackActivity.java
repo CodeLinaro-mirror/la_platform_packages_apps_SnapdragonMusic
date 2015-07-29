@@ -821,10 +821,13 @@ public class MediaPlaybackActivity extends Activity implements MusicUtils.Defs,
             if (resultCode == RESULT_OK) {
                 Uri uri = intent.getData();
                 if (uri != null) {
-                    long[] list = new long[1];
-                    list[0] = MusicUtils.getCurrentAudioId();
+                    Cursor c = updateTrackCursor();
+                    if (c != null) {
+                        long[] list = MusicUtils
+                                .getSongListForCursor(updateTrackCursor());
                     int playlist = Integer.parseInt(uri.getLastPathSegment());
                     MusicUtils.addToPlaylist(this, list, playlist);
+                    }
                 }
             }
             break;
