@@ -131,7 +131,7 @@ public class PlaylistBrowserFragment extends Fragment implements
                 MediaStore.Audio.Playlists.Members._ID,
                 MediaStore.Audio.Media.ARTIST };
         mPlaylistMemberCols1 = new String[] {
-			MediaStore.Audio.Media.ALBUM_ID };
+            MediaStore.Audio.Media.ALBUM_ID };
         parentActivity.setVolumeControlStream(AudioManager.STREAM_MUSIC);
         mToken = MusicUtils.bindToService(parentActivity,
                 new ServiceConnection() {
@@ -278,7 +278,12 @@ public class PlaylistBrowserFragment extends Fragment implements
                             .replace(R.id.fragment_page, fragment,
                                     "track_fragment").commit();
                 }
-                MusicUtils.navigatingTabPosition = 3;
+                if (MusicUtils.isGroupByFolder()) {
+                    MusicUtils.navigatingTabPosition = 4;
+                }
+                else {
+                    MusicUtils.navigatingTabPosition = 3;
+                }
 
             }
         });

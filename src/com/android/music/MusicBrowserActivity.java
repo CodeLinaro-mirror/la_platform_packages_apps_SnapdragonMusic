@@ -156,17 +156,30 @@ public class MusicBrowserActivity extends MediaPlaybackActivity implements
                 return false;
             }
         });
+        mToolbar.setNavigationContentDescription("drawer");
         mToolbar.setNavigationOnClickListener(new OnClickListener() {
 
             @Override
             public void onClick(View v) {
-                mDrawerLayout.openDrawer(Gravity.LEFT);
+                if (mToolbar.getNavigationContentDescription().equals("drawer")) {
+                    mDrawerLayout.openDrawer(Gravity.LEFT);
+                }else {
+                    showScreen(3);
+                    mToolbar.setNavigationContentDescription("drawer");
+                    mToolbar
+                    .setNavigationIcon(R.drawable.ic_material_light_navigation_drawer);
+                }
             }
         });
-        if(mime != null && mime.equalsIgnoreCase("vnd.android.cursor.dir/playlist"))
-        {
-            activeTab = 3;
-	    }
+        if (mime != null
+                && mime.equalsIgnoreCase("vnd.android.cursor.dir/playlist")) {
+            if (MusicUtils.isGroupByFolder()) {
+                activeTab = 4;
+            }
+            else {
+                activeTab = 3;
+            }
+        }
         showScreen(activeTab);
     }
 
@@ -189,10 +202,11 @@ public class MusicBrowserActivity extends MediaPlaybackActivity implements
         updateNowPlaying(this);
     }
 
-    private void showScreen(int position) {
-        if (position > 4) {
+    public void showScreen(int position) {
+        if (position > 5) {
             position = 0;
         }
+
         mNavigationAdapter.setClickPosition(position);
         mDrawerListView.invalidateViews();
         FragmentManager fragmentManager = getFragmentManager();

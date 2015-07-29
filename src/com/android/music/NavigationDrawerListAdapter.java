@@ -40,7 +40,7 @@ import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
-public class NavigationDrawerListAdapter  extends BaseAdapter {
+public class NavigationDrawerListAdapter extends BaseAdapter {
 
     private int curTab = 0;
     Context mContext;
@@ -53,27 +53,24 @@ public class NavigationDrawerListAdapter  extends BaseAdapter {
                 R.string.artists_title));
         mListItemNames.add(context.getResources().getString(
                 R.string.albums_title));
+        mListItemNames.add(context.getResources().getString(
+                R.string.tracks_title));
+
         if (MusicUtils.isGroupByFolder()) {
             mListItemNames.add(context.getResources().getString(
-                    R.string.folders_title));
-
-        } else {
-            mListItemNames.add(context.getResources().getString(
-                    R.string.tracks_title));
-
+                R.string.folders_title));
         }
         mListItemNames.add(context.getResources().getString(
                 R.string.playlists_title));
 
         mListItemIcons.add(R.drawable.artists);
         mListItemIcons.add(R.drawable.albums);
+        mListItemIcons.add(R.drawable.songs);
+
         if (MusicUtils.isGroupByFolder()) {
             mListItemIcons.add(R.drawable.ic_folder);
-        } else {
-            mListItemIcons.add(R.drawable.songs);
         }
         mListItemIcons.add(R.drawable.playlist);
-
     }
 
     @Override
@@ -96,11 +93,11 @@ public class NavigationDrawerListAdapter  extends BaseAdapter {
         View view;
 
         if (convertView == null) {
-            LayoutInflater inflater = (LayoutInflater) mContext.
-                                                        getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-            view = inflater.inflate(com.android.music.R.layout.drawer_list_item, null);
-        }
-        else {
+            LayoutInflater inflater = (LayoutInflater) mContext
+                    .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+            view = inflater.inflate(
+                    com.android.music.R.layout.drawer_list_item, null);
+        } else {
             view = convertView;
         }
 
@@ -108,13 +105,12 @@ public class NavigationDrawerListAdapter  extends BaseAdapter {
         ImageView iconView = (ImageView) view.findViewById(R.id.icon);
         RelativeLayout layout = (RelativeLayout) view.findViewById(R.id.layout);
 
-        titleView.setText( mListItemNames.get(position) );
+        titleView.setText(mListItemNames.get(position));
         iconView.setImageResource(mListItemIcons.get(position));
 
-        if(curTab == position){
+        if (curTab == position) {
             view.setBackgroundResource(R.drawable.back);
-        }
-        else{
+        } else {
             view.setBackgroundColor(android.R.color.transparent);
         }
 

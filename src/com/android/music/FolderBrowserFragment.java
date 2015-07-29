@@ -410,7 +410,7 @@ public class FolderBrowserFragment extends Fragment
                 .beginTransaction()
                 .replace(R.id.fragment_page, fragment, "folder_fragment")
                 .commit();
-        MusicUtils.navigatingTabPosition = 2;
+        MusicUtils.navigatingTabPosition = 3;
     }
 
     private Cursor getFolderCursor(AsyncQueryHandler async, String filter) {
