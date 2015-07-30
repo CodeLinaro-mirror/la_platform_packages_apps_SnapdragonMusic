@@ -47,6 +47,7 @@ import android.support.v4.app.ActionBarDrawerToggle;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
+import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.MenuItem;
@@ -74,6 +75,11 @@ public class MusicBrowserActivity extends MediaPlaybackActivity implements
     public static boolean mIsparentActivityFInishing;
     private ArrayList<Fragment> mMusicFragments;
     private int activeTab;
+    //List item height - list item padding ==> 48 - 3 = 45
+    //Number of menu items in Non-CMCC mode are 4 (doesn't includes "Folder")
+    private static final int LIST_HEIGHT_NON_CMCC_MODE = 45 * 4;
+    //number of menu items in CMCC mode are 5 (includes "Folder")
+    private static final int LIST_HEIGHT_CMCC_MODE = 45 * 5;
     static MediaPlaybackActivity mActivityInstance;
     NavigationDrawerListAdapter mNavigationAdapter;
     String mArtistID, mAlbumID;
@@ -107,6 +113,11 @@ public class MusicBrowserActivity extends MediaPlaybackActivity implements
         mNowPlayingIcon = (ImageView) findViewById(R.id.nowplay_icon);
         mNowPlayingIcon.setOnClickListener(mPauseListener);
         mDrawerListView = (ListView) findViewById(R.id.navList);
+        int height = MusicUtils.isGroupByFolder() ? LIST_HEIGHT_CMCC_MODE
+                     : LIST_HEIGHT_NON_CMCC_MODE;
+        height = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, height,
+                      getResources().getDisplayMetrics());
+        mDrawerListView.getLayoutParams().height = height;
         RelativeLayout equalizerLayout = (RelativeLayout) findViewById(R.id.equalizer_btn_view);
         mNavigationAdapter = new NavigationDrawerListAdapter(this);
         mDrawerListView.setAdapter(mNavigationAdapter);
