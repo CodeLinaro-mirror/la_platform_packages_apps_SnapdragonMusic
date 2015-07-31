@@ -2895,6 +2895,17 @@ public class MediaPlaybackService extends Service {
             public void onCompletion(MediaPlayer mp) {
                 mIsComplete = true;
                 if (mp == mCurrentMediaPlayer && mNextMediaPlayer != null) {
+                    if (mPlayPos == mNextPlayPos) {
+                        mCursor = getCursorForId(mPlayList[mNextPlayPos]);
+                        if (mCursor == null) {
+                           stop();
+                           mNextMediaPlayer.release();
+                           mNextMediaPlayer = null;
+                           mFileToPlay = null;
+                           notifyChange(META_CHANGED);
+                           return;
+                        }
+                    }
                     mCurrentMediaPlayer.release();
                     mCurrentMediaPlayer = mNextMediaPlayer;
                     mNextMediaPlayer = null;
