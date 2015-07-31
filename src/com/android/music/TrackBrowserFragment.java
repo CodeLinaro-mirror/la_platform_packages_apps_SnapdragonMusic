@@ -43,10 +43,6 @@ import android.content.res.Resources;
 import android.database.AbstractCursor;
 import android.database.CharArrayBuffer;
 import android.database.Cursor;
-import android.drm.DrmManagerClientWrapper;
-import android.drm.DrmStore.Action;
-import android.drm.DrmStore.DrmDeliveryType;
-import android.drm.DrmStore.RightsStatus;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.AnimationDrawable;
@@ -107,7 +103,6 @@ import java.util.HashMap;
 public class TrackBrowserFragment extends Fragment implements
         View.OnCreateContextMenuListener, MusicUtils.Defs, ServiceConnection,
         OnItemClickListener {
-    public static final String BUY_LICENSE = "android.drmservice.intent.action.BUY_LICENSE";
     private static final int Q_SELECTED = CHILD_MENU_BASE;
     private static final int Q_ALL = CHILD_MENU_BASE + 1;
     private static final int SAVE_AS_PLAYLIST = CHILD_MENU_BASE + 2;
@@ -971,12 +966,6 @@ public class TrackBrowserFragment extends Fragment implements
             mSelectedId = mi.id;
         }
 
-        String path = MusicUtils.getSelectAudioPath(
-                mParentActivity.getApplicationContext(), mSelectedId);
-        if (path.endsWith(".dcf") || path.endsWith(".dm")) {
-            menu.add(0, DRM_LICENSE_INFO, 0, R.string.drm_license_info);
-        }
-
         // only add the 'search' menu if the selected item is music
         if (isMusic(mTrackCursor)) {
             menu.add(0, SEARCH, 0, R.string.search_title);
@@ -1060,19 +1049,6 @@ public class TrackBrowserFragment extends Fragment implements
             removePlaylistItem(mSelectedPosition);
             return true;
 
-        case DRM_LICENSE_INFO:
-            String path = MusicUtils.getSelectAudioPath(
-                    mParentActivity.getApplicationContext(), mSelectedId);
-            path = path.replace("/storage/emulated/0",
-                    "/storage/emulated/legacy");
-            Intent intent = new Intent(
-                    "android.drmservice.intent.action.SHOW_PROPERTIES");
-            intent.putExtra("DRM_FILE_PATH", path);
-            intent.putExtra("DRM_TYPE", "OMAV1");
-            Log.d(LOGTAG, "onContextItemSelected:------filepath===" + path);
-            mParentActivity.sendBroadcast(intent);
-            return true;
-
         case SEARCH:
             doSearch();
             return true;
@@ -1094,56 +1070,8 @@ public class TrackBrowserFragment extends Fragment implements
             }
             Uri uri = ContentUris.withAppendedId(
                     MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, id);
-
-            boolean canBeShared = false;
-            String filepath = null;
-            String scheme = uri.getScheme();
-            if ("file".equals(scheme)) {
-                filepath = uri.getPath();
-            } else {
-                Cursor cursor = null;
-                try {
-                    cursor = mParentActivity.getContentResolver().query(uri,
-                            new String[] { VideoColumns.DATA }, null, null,
-                            null);
-                    if (cursor != null && cursor.moveToNext()) {
-                        filepath = cursor.getString(0);
-                    }
-                } catch (Throwable t) {
-                    Log.w(LOGTAG, "cannot get path from: " + uri);
-                } finally {
-                    if (cursor != null)
-                        cursor.close();
-                }
-            }
-
-            if (filepath != null
-                    && (filepath.endsWith(".dcf") || filepath.endsWith(".dm"))) {
-                DrmManagerClientWrapper drmClient = new DrmManagerClientWrapper(
-                        mParentActivity);
-                ContentValues values = drmClient.getMetadata(filepath);
-                int drmType = values.getAsInteger("DRM-TYPE");
-                Log.d(LOGTAG,
-                        "SHARE:drmType returned= " + Integer.toString(drmType)
-                                + " for path= " + filepath);
-                if (drmType != DrmDeliveryType.SEPARATE_DELIVERY) {
-                    canBeShared = false;
-                    Toast.makeText(mParentActivity,
-                            R.string.no_permission_for_drm, Toast.LENGTH_LONG)
-                            .show();
-                    return true;
-                } else {
-                    canBeShared = true;
-                }
-                if (drmClient != null)
-                    drmClient.release();
-            } else {
-                canBeShared = true;
-            }
-
             shareIntent.putExtra(Intent.EXTRA_STREAM, uri);
-            if (canBeShared)
-                startActivity(shareIntent);
+            startActivity(shareIntent);
             return true;
         }
         return super.onContextItemSelected(item);
@@ -1321,28 +1249,6 @@ public class TrackBrowserFragment extends Fragment implements
                                 .getColumnIndexOrThrow(MediaStore.Audio.Media.MIME_TYPE));
             }
             cursor.close();
-        }
-        Log.d(LOGTAG, "onListItemClick:path = " + path);
-        if (path.endsWith(".dcf") || path.endsWith(".dm")) {
-            DrmManagerClientWrapper drmClient = new DrmManagerClientWrapper(
-                    mParentActivity);
-            path = path.replace("/storage/emulated/0",
-                    "/storage/emulated/legacy");
-            int status = drmClient.checkRightsStatus(path, Action.PLAY);
-            Log.d(LOGTAG, "onListItemClick:status from checkRightsStatus is "
-                    + Integer.toString(status));
-            if (RightsStatus.RIGHTS_VALID != status) {
-                ContentValues values = drmClient.getMetadata(path);
-                String address = values.getAsString("Rights-Issuer");
-                Log.d(LOGTAG, "onListItemClick:address = " + address);
-                Intent intent = new Intent(BUY_LICENSE);
-                intent.putExtra("DRM_FILE_PATH", address);
-                mParentActivity.sendBroadcast(intent);
-                return;
-            }
-
-            if (drmClient != null)
-                drmClient.release();
         }
 
         // When selecting a track from the queue, just jump there instead of
@@ -1816,7 +1722,6 @@ public class TrackBrowserFragment extends Fragment implements
             ImageView play_indicator;
             CharArrayBuffer buffer1;
             char[] buffer2;
-            ImageView drm_icon;
             ImageView anim_icon, icon;
             AnimationDrawable mMusicAnimation;
             String mCurrentTrackName;
@@ -1958,7 +1863,6 @@ public class TrackBrowserFragment extends Fragment implements
                     .setTouchDelegate(vh.play_indicator);
             vh.buffer1 = new CharArrayBuffer(100);
             vh.buffer2 = new char[200];
-            // vh.drm_icon = (ImageView) v.findViewById(R.id.drm_icon);
             vh.anim_icon = (ImageView) v.findViewById(R.id.animView);
             vh.icon = (ImageView) v.findViewById(R.id.icon);
 
@@ -2010,18 +1914,6 @@ public class TrackBrowserFragment extends Fragment implements
             }
             builder.getChars(0, len, vh.buffer2, 0);
             vh.line2.setText(vh.buffer2, 0, len);
-
-            // Show DRM lock icon on track list
-            if (mDataIdx != -1) {
-                String data = cursor.getString(mDataIdx);
-                boolean isDrm = !TextUtils.isEmpty(data)
-                        && (data.endsWith(".dm") || data.endsWith(".dcf"));
-                if (isDrm) {
-                    // vh.drm_icon.setVisibility(View.VISIBLE);
-                } else {
-                    // vh.drm_icon.setVisibility(View.GONE);
-                }
-            }
 
             String albumArtName = cursor.getString(cursor
                     .getColumnIndexOrThrow(MediaStore.Audio.Albums.ALBUM));

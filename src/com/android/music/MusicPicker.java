@@ -20,21 +20,17 @@ import android.app.ListActivity;
 import android.content.AsyncQueryHandler;
 import android.content.BroadcastReceiver;
 import android.content.ContentUris;
-import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.database.CharArrayBuffer;
 import android.database.Cursor;
-import android.drm.DrmManagerClientWrapper;
-import android.drm.DrmRights;
-import android.drm.DrmStore.DrmDeliveryType;
+import android.drm.OmaDrmHelper;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Environment;
 import android.os.Parcelable;
 import android.provider.MediaStore;
 import android.text.TextUtils;
@@ -53,6 +49,7 @@ import android.widget.SimpleCursorAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.io.File;
 import java.io.IOException;
 import java.text.Collator;
 import java.util.Formatter;
@@ -163,8 +160,6 @@ public class MusicPicker extends ListActivity
     /** This is used for playing previews of the music files. */
     MediaPlayer mMediaPlayer;
 
-    boolean mIsAsAlarm = false;
-
     /**
      * A special implementation of SimpleCursorAdapter that knows how to bind
      * our cursor data to our list item structure, and takes care of other
@@ -183,7 +178,6 @@ public class MusicPicker extends ListActivity
         private int mArtistIdx;
         private int mAlbumIdx;
         private int mDurationIdx;
-        private int mDataIdx;
 
         private boolean mLoading = true;
         private int mIndexerSortMode;
@@ -300,10 +294,7 @@ public class MusicPicker extends ListActivity
             }
 
             // Show DRM lock icon on track list
-            String data = cursor.getString(mDataIdx);
-            boolean isDrm = !TextUtils.isEmpty(data)
-                    && (data.endsWith(".dm") || data.endsWith(".dcf"));
-            if (isDrm) {
+            if (OmaDrmHelper.isDrmFile(OmaDrmHelper.getFilePath(mContext, cursor))) {
                 vh.drm_icon.setVisibility(View.VISIBLE);
             } else {
                 vh.drm_icon.setVisibility(View.GONE);
@@ -330,7 +321,6 @@ public class MusicPicker extends ListActivity
                 mArtistIdx = cursor.getColumnIndex(MediaStore.Audio.Media.ARTIST);
                 mAlbumIdx = cursor.getColumnIndex(MediaStore.Audio.Media.ALBUM);
                 mDurationIdx = cursor.getColumnIndex(MediaStore.Audio.Media.DURATION);
-                mDataIdx = cursor.getColumnIndex(MediaStore.Audio.Media.DATA);
 
                 // If the sort mode has changed, or we haven't yet created an
                 // indexer one, then create a new one that is indexing the
@@ -441,8 +431,6 @@ public class MusicPicker extends ListActivity
         mAudioManager = (AudioManager) MusicPicker.this.getSystemService(Context.AUDIO_SERVICE);
 
         requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
-
-        mIsAsAlarm = getIntent().getBooleanExtra("mIsAsAlarm", false);
 
         int sortMode = TRACK_MENU;
         if (icicle == null) {
@@ -706,23 +694,26 @@ public class MusicPicker extends ListActivity
     void setSelected(Cursor c) {
         Uri uri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI;
         long newId = mCursor.getLong(mCursor.getColumnIndex(MediaStore.Audio.Media._ID));
-
-        String data = mCursor.getString(mCursor.getColumnIndex(MediaStore.Audio.Media.DATA));
-        if (!mIsAsAlarm && (data.endsWith(".dcf") || data.endsWith(".dm"))) {
-            DrmManagerClientWrapper drmClient = new DrmManagerClientWrapper(this);
-            data = data.replace("/storage/emulated/0", "/storage/emulated/legacy");
-            ContentValues values = drmClient.getMetadata(data);
-            int drmType = values.getAsInteger("DRM-TYPE");
-            Log.d(TAG, "setSelected:drm type = " + Integer.toString(drmType));
-            if (drmType != DrmDeliveryType.SEPARATE_DELIVERY) { // Only SD files are sharable
-                Toast.makeText(MusicPicker.this, R.string.no_permission_for_drm,
-                        Toast.LENGTH_LONG).show();
-                return;
-            }
-            if (drmClient != null) drmClient.release();
-        }
-
         mSelectedUri = ContentUris.withAppendedId(uri, newId);
+
+        String path = OmaDrmHelper.getFilePath(MusicPicker.this, mCursor);
+        if (OmaDrmHelper.isDrmFile(path)) {
+            if (!OmaDrmHelper.isShareableDrmFile(path)) {
+                // Only SD files are sharable
+                Toast.makeText(MusicPicker.this,
+                        R.string.no_permission_for_drm, Toast.LENGTH_LONG)
+                        .show();
+                return;
+            } else {
+                // Special treatment to play midi drm file
+                String mime = OmaDrmHelper.getOriginalMimeType(this, path);
+                if (OmaDrmHelper.isDrmMidiFile(this, path, mime)) {
+                    path = OmaDrmHelper.getDrmMidiFilePath(this, path, this
+                            .getFilesDir().getAbsolutePath(), mime);
+                    mSelectedUri = Uri.fromFile(new File(path));
+                }
+            }
+        }
 
         mSelectedId = newId;
         if (newId != mPlayingId || mMediaPlayer == null) {
