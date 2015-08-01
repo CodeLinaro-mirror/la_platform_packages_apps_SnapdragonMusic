@@ -84,6 +84,7 @@ public class AlbumBrowserFragment extends Fragment implements MusicUtils.Defs,
     private GridView mAlbumList;
     private TextView mSdErrorMessageView;
     private View mSdErrorMessageIcon;
+    private static int mLastSelectedPosition = -1;
     private MediaPlaybackActivity mParentActivity;
 
     public AlbumBrowserFragment() {
@@ -132,6 +133,7 @@ public class AlbumBrowserFragment extends Fragment implements MusicUtils.Defs,
                 mParentActivity.findViewById(R.id.music_tool_bar)
                         .setVisibility(View.GONE);
                 Fragment fragment = new TrackBrowserActivityFragment();
+                mLastSelectedPosition = position;
                 Bundle args = new Bundle();
                 args.putString("artist", mArtistId);
                 args.putString("album", Long.valueOf(id).toString());
@@ -252,6 +254,7 @@ public class AlbumBrowserFragment extends Fragment implements MusicUtils.Defs,
 
         // restore previous position
         if (mLastListPosCourse >= 0) {
+            mAlbumList.setSelection(mLastSelectedPosition);
             mLastListPosCourse = -1;
         }
 

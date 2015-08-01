@@ -89,7 +89,6 @@ public class PlaylistBrowserFragment extends Fragment implements
     private PlaylistListAdapter mAdapter;
     private boolean mAdapterSent;
     private static int mLastListPosCourse = -1;
-    private static int mLastListPosFine = -1;
     private CharSequence mTitle;
     private boolean mCreateShortcut;
     private ServiceToken mToken;
@@ -98,6 +97,7 @@ public class PlaylistBrowserFragment extends Fragment implements
     private TextView sdErrorMessageView;
     private View sdErrorMessageIcon;
     private BitmapDrawable mDefaultAlbumIcon;
+    private static int mLastSelectedPosition = -1;
     private String[] mPlaylistMemberCols;
     private String[] mPlaylistMemberCols1;
     private Toolbar mToolbar;
@@ -230,6 +230,7 @@ public class PlaylistBrowserFragment extends Fragment implements
                         .getTag();
                 mToolbar.setTitle(vh.tv.getText().toString());
                 Fragment fragment = null;
+                mLastSelectedPosition = position;
                 fragment = new TrackBrowserFragment();
                 Bundle args = new Bundle();
                 if (mCreateShortcut) {
@@ -318,9 +319,6 @@ public class PlaylistBrowserFragment extends Fragment implements
         if (mGridView != null) {
             mLastListPosCourse = mGridView.getFirstVisiblePosition();
             View cv = mGridView.getChildAt(0);
-            if (cv != null) {
-                mLastListPosFine = cv.getTop();
-            }
         }
         MusicUtils.unbindFromService(mToken);
         // If we have an adapter and didn't send it off to another activity yet,
@@ -406,7 +404,7 @@ public class PlaylistBrowserFragment extends Fragment implements
         }
         // restore previous position
         if (mLastListPosCourse >= 0) {
-            mGridView.setSelectionFromTop(mLastListPosCourse, mLastListPosFine);
+            mGridView.setSelection(mLastSelectedPosition);
             mLastListPosCourse = -1;
         }
         hideDatabaseError();
