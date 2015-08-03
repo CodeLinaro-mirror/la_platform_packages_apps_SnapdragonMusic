@@ -23,6 +23,7 @@ import android.app.AlertDialog;
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.app.KeyguardManager;
+import android.app.NotificationManager;
 import android.app.SearchManager;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
@@ -890,8 +891,15 @@ public class MediaPlaybackActivity extends Activity implements MusicUtils.Defs,
             getFragmentManager().beginTransaction()
                     .replace(R.id.fragment_page, fragment).commit();
             mToolbar.setVisibility(View.VISIBLE);
-            mToolbar.setTitle(getResources()
-                    .getStringArray(R.array.title_array)[MusicUtils.navigatingTabPosition]);
+            if (MusicUtils.isGroupByFolder()) {
+                mToolbar.setTitle(getResources().getStringArray(
+                        R.array.title_array_folder)[MusicUtils.navigatingTabPosition]);
+            } else {
+                mToolbar.setTitle(getResources().getStringArray(
+                        R.array.title_array_songs)[MusicUtils.navigatingTabPosition]);
+
+            }
+
         }
     }
 
@@ -1628,6 +1636,11 @@ public class MediaPlaybackActivity extends Activity implements MusicUtils.Defs,
         try {
             String path = mService.getPath();
             if (path == null) {
+                MusicBrowserActivity.isPanelExpanded = false;
+                mSlidingPanelLayout.setHookState(BoardState.HIDDEN);
+                NotificationManager nm = (NotificationManager)
+                        getSystemService(Context.NOTIFICATION_SERVICE);
+                nm.cancel(MediaPlaybackService.PLAYBACKSERVICE_STATUS);
                 return;
             }
 
@@ -1686,6 +1699,18 @@ public class MediaPlaybackActivity extends Activity implements MusicUtils.Defs,
         } catch (NullPointerException ex) {
             // we might not actually have the service yet
             ex.printStackTrace();
+        } catch (IllegalStateException istateex) {
+            Log.e(TAG,
+                    "IllegalStateException in query uri. " + istateex.getMessage());
+            if (mService == null) {
+                Log.e(TAG, " service is null");
+                return;
+            }
+            try {
+                mService.next();
+            } catch (RemoteException ex) {
+                Log.e(TAG, " remote exception in playing song");
+            }
         }
     }
 

@@ -122,7 +122,7 @@ public class TrackBrowserFragment extends Fragment implements
     private String[] mCursorCols;
     private String[] mPlaylistMemberCols;
     private boolean mDeletedOneRow = false;
-    private boolean mEditMode = false;
+    private static boolean mEditMode = false;
     private String mCurrentTrackName;
     private String mCurrentAlbumName;
     private String mCurrentArtistNameForAlbum;
@@ -151,6 +151,7 @@ public class TrackBrowserFragment extends Fragment implements
     private static AnimationDrawable mCurrPlayAnimation;
     private static ImageView mAnimView;
     private static boolean mPause = false;
+    private String mFolderName;
 
     public TrackBrowserFragment() {
     }
@@ -173,6 +174,7 @@ public class TrackBrowserFragment extends Fragment implements
         // TODO Auto-generated method stub
         super.onAttach(activity);
         mParentActivity = (MediaPlaybackActivity) activity;
+        mEditMode = false;
     }
 
     /** Called when the activity is first created. */
@@ -243,8 +245,13 @@ public class TrackBrowserFragment extends Fragment implements
             mEditMode = getArguments().getBoolean("editValue");
             mPlaylist = getArguments().getString("playlist");
             mAlbumId = getArguments().getString("album");
+            if (MusicUtils.isGroupByFolder()) {
+                mParent = getArguments().getInt("parent", -1);
+                mRootPath = getArguments().getString("rootPath");
+                mFolderName = getArguments().getString("folder_name");
+            }
         }
-        if (mEditMode) {
+        if (mEditMode || MusicUtils.isGroupByFolder()) {
             mShuffleLayout.setVisibility(View.GONE);
             ((TouchInterceptor) mTrackList).setDropListener(mDropListener);
             ((TouchInterceptor) mTrackList).setRemoveListener(mRemoveListener);
@@ -700,8 +707,12 @@ public class TrackBrowserFragment extends Fragment implements
                 mParentActivity.setTitle(fancyName);
             }
         } else {
+            if(MusicUtils.isGroupByFolder()){
+                mParentActivity.mToolbar.setTitle(mFolderName);
+            }else{
             mParentActivity.setTitle(R.string.tracks_title);
         }
+    }
     }
 
     private TouchInterceptor.DropListener mDropListener = new TouchInterceptor.DropListener() {
@@ -1062,7 +1073,14 @@ public class TrackBrowserFragment extends Fragment implements
             Intent shareIntent = new Intent(Intent.ACTION_SEND);
             shareIntent.setType("audio/*");
             mTrackCursor.moveToPosition(mSelectedPosition);
-            id = mSelectedId;
+            if (mEditMode && (mPlaylist != null && !mPlaylist.equals("nowplaying"))) {
+                id = mTrackCursor
+                        .getLong(mTrackCursor
+                                .getColumnIndexOrThrow(MediaStore.Audio.Playlists.Members.AUDIO_ID));
+            } else {
+                id = mTrackCursor.getLong(mTrackCursor
+                        .getColumnIndexOrThrow(MediaStore.Audio.Media._ID));
+            }
             Uri uri = ContentUris.withAppendedId(
                     MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, id);
 
@@ -1329,7 +1347,7 @@ public class TrackBrowserFragment extends Fragment implements
             }
         }
 
-        if (mEditMode && !mPlaylist.equals("nowplaying")) {
+        if (mEditMode && mPlaylist != null && !mPlaylist.equals("nowplaying")) {
             MusicUtils.setPlayListId(Long.valueOf(mPlaylist));
         }
         if (prevV != null) {
@@ -1956,8 +1974,11 @@ public class TrackBrowserFragment extends Fragment implements
             long aid = cursor.getLong(mAlbumIdx);
             final Drawable d = MusicUtils.getCachedArtwork(context, aid,
                     mDefaultAlbumIcon);
-            if (d != null) {
-                vh.icon.setImageDrawable(d);
+            if (MusicUtils.isGroupByFolder() && !mEditMode) {
+                long l = cursor.getLong(1);
+
+                new MusicUtils.FolderBitmapThread(mParentActivity, l,
+                        mDefaultAlbumIcon, vh.icon).start();
             } else {
                 vh.icon.setImageDrawable(mDefaultAlbumIcon);
                 new MusicUtils.AlbumBitmapDownloadThread(mParentActivity, aid,
