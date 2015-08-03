@@ -267,7 +267,8 @@ public class TrackBrowserFragment extends Fragment implements
         } else {
             mTrackList.setTextFilterEnabled(true);
         }
-        if ("podcasts".equals(mPlaylist) || "recentlyadded".equals(mPlaylist)) {
+        if ("podcasts".equals(mPlaylist) || "recentlyadded".equals(mPlaylist)
+                || mParent != -1) {
             mShuffleLayout.setVisibility(View.GONE);
         }
         if (mAdapter != null) {
