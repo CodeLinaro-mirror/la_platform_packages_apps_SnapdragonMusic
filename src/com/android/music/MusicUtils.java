@@ -1677,6 +1677,10 @@ public class MusicUtils {
         return mStorageManager.getVolumeState(getSDPath(context));
     }
 
+    public static String getInternalSdCardPath() {
+        return android.os.Environment.getExternalStorageDirectory().getPath();
+    }
+
     public static void startSoundEffectActivity(Activity activity) {
         Intent i = new Intent(AudioEffect.ACTION_DISPLAY_AUDIO_EFFECT_CONTROL_PANEL);
         try {
