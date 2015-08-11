@@ -233,6 +233,11 @@ public class FolderBrowserFragment extends Fragment
         }
 
         hideDatabaseError();
+        if (mFilesCursor.getCount() == 0) {
+            mSdErrorMessageView.setVisibility(View.VISIBLE);
+            mSdErrorMessageView.setText(R.string.no_music_found);
+            mFolderList.setVisibility(View.GONE);
+        }
         //setTitle();
     }
 
@@ -410,7 +415,7 @@ public class FolderBrowserFragment extends Fragment
                 .beginTransaction()
                 .replace(R.id.fragment_page, fragment, "folder_fragment")
                 .commit();
-        MusicUtils.navigatingTabPosition = 2;
+        MusicUtils.navigatingTabPosition = 3;
     }
 
     private Cursor getFolderCursor(AsyncQueryHandler async, String filter) {

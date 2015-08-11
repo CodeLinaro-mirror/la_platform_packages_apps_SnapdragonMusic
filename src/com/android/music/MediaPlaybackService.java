@@ -36,7 +36,7 @@ import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteException;
-import android.drm.DrmManagerClientWrapper;
+import android.drm.OmaDrmHelper;
 import android.drm.DrmStore.Action;
 import android.drm.DrmStore.RightsStatus;
 import android.graphics.Bitmap;
@@ -1575,8 +1575,7 @@ public class MediaPlaybackService extends Service {
             if (path == null) {
                 return false;
             }
-            String actualFilePath = "";
-            int status = 0;
+
             // if mCursor is null, try to associate path with a database cursor
             if (mCursor == null) {
 
@@ -1613,21 +1612,14 @@ public class MediaPlaybackService extends Service {
                 }
             }
 
-            if (mCursor != null && (mCursor.getCount() != 0)) {
-                actualFilePath = mCursor.getString(mCursor
-                        .getColumnIndexOrThrow(MediaStore.Audio.Media.DATA));
-            }
-            if (actualFilePath != null
-                    && (actualFilePath.endsWith(".dm")
-                            || actualFilePath.endsWith(".dcf"))) {
-                DrmManagerClientWrapper drmClient = new DrmManagerClientWrapper(this);
-                actualFilePath = actualFilePath.replace("/storage/emulated/0", "/storage/emulated/legacy");
-                status = drmClient.checkRightsStatus(actualFilePath, Action.PLAY);
-                if (RightsStatus.RIGHTS_VALID != status) {
-                    Toast.makeText(this, "Rights are expired for the previous song",
-                            Toast.LENGTH_SHORT).show();
+            if (OmaDrmHelper.isDrmFile(
+                    OmaDrmHelper.getFilePath(this, Uri.parse(path)))) {
+                // Special treatment to play midi drm file
+                String mime = OmaDrmHelper.getOriginalMimeType(this, path);
+                if (OmaDrmHelper.isDrmMidiFile(this, path, mime)) {
+                    path = OmaDrmHelper.getDrmMidiFilePath(this, path, this
+                            .getFilesDir().getAbsolutePath(), mime);
                 }
-                if (drmClient != null) drmClient.release();
             }
 
             mFileToPlay = path;
@@ -2903,6 +2895,17 @@ public class MediaPlaybackService extends Service {
             public void onCompletion(MediaPlayer mp) {
                 mIsComplete = true;
                 if (mp == mCurrentMediaPlayer && mNextMediaPlayer != null) {
+                    if (mPlayPos == mNextPlayPos) {
+                        mCursor = getCursorForId(mPlayList[mNextPlayPos]);
+                        if (mCursor == null) {
+                           stop();
+                           mNextMediaPlayer.release();
+                           mNextMediaPlayer = null;
+                           mFileToPlay = null;
+                           notifyChange(META_CHANGED);
+                           return;
+                        }
+                    }
                     mCurrentMediaPlayer.release();
                     mCurrentMediaPlayer = mNextMediaPlayer;
                     mNextMediaPlayer = null;

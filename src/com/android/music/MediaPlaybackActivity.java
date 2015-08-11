@@ -457,10 +457,15 @@ public class MediaPlaybackActivity extends Activity implements MusicUtils.Defs,
                 mAlbumIcon.setVisibility(View.VISIBLE);
                 mMenuOverFlow.setOnClickListener(mActiveButtonPopUpMenuListener);
                 mCurrentPlaylist.setImageResource(R.drawable.list);
-                if (mFragment != null)
+                TrackBrowserFragment.mEditMode = MusicUtils.mEditMode;
+                TrackBrowserFragment.mPause = MusicUtils.mPause;
+                if (mFragment != null) {
+                    MusicUtils.isFragmentRemoved = true;
                     getFragmentManager().beginTransaction().remove(mFragment)
                             .commit();
+                }
             } else {
+                MusicUtils.isFragmentRemoved = false;
                 mSlidingPanelLayout.mIsQueueEnabled = true;
                 mAlbumIcon.setVisibility(View.GONE);
                 mCurrentPlaylist.setImageResource(R.drawable.list_active);
@@ -816,10 +821,13 @@ public class MediaPlaybackActivity extends Activity implements MusicUtils.Defs,
             if (resultCode == RESULT_OK) {
                 Uri uri = intent.getData();
                 if (uri != null) {
-                    long[] list = new long[1];
-                    list[0] = MusicUtils.getCurrentAudioId();
+                    Cursor c = updateTrackCursor();
+                    if (c != null) {
+                        long[] list = MusicUtils
+                                .getSongListForCursor(updateTrackCursor());
                     int playlist = Integer.parseInt(uri.getLastPathSegment());
                     MusicUtils.addToPlaylist(this, list, playlist);
+                    }
                 }
             }
             break;
@@ -1673,8 +1681,6 @@ public class MediaPlaybackActivity extends Activity implements MusicUtils.Defs,
                         new AlbumSongIdWrapper(albumid, songid)).sendToTarget();
                 mAlbum.setVisibility(View.VISIBLE);
 
-                String filePath = MusicUtils.getSelectAudioPath(
-                        MediaPlaybackActivity.this, songid);
             }
 
             // fetch clip duration from media database if available

@@ -105,6 +105,7 @@
     <string-array name="title_array_folder">
         <item>Artists</item>
         <item>Albums</item>
+        <item>Songs</item>
         <item>Folder</item>
         <item>Playlists</item>
     </string-array>

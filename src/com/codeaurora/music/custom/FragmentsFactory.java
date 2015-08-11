@@ -46,7 +46,7 @@ public class FragmentsFactory {
     private static HashMap<Integer, Fragment> frg = new HashMap<Integer, Fragment>();
 
     static enum FragmentEnum {
-        ARTIST_FRAG, ALBUM_FRAG, TRACK_FOLDER_FRAG, PLAYLIST_FRAG, TRACK_BROWSER
+        ARTIST_FRAG, ALBUM_FRAG, TRACK_FRAG, FOLDER_FRAG, PLAYLIST_FRAG, TRACK_BROWSER
     };
 
     public static Fragment loadFragment(int pos) {
@@ -64,17 +64,17 @@ public class FragmentsFactory {
             return new ArtistAlbumBrowserFragment();
         case ALBUM_FRAG:
             return new AlbumBrowserFragment();
-        case TRACK_FOLDER_FRAG:
-            if (MusicUtils.isGroupByFolder())
-                return new FolderBrowserFragment();
-
+        case TRACK_FRAG:
             return new TrackBrowserFragment();
-
+        case FOLDER_FRAG:
+            if (MusicUtils.isGroupByFolder()) {
+                return new FolderBrowserFragment();
+            }
+            return new PlaylistBrowserFragment();
         case PLAYLIST_FRAG:
             return new PlaylistBrowserFragment();
         case TRACK_BROWSER:
             return new TrackBrowserActivityFragment();
-
         }
         return new ArtistAlbumBrowserFragment();
     }
