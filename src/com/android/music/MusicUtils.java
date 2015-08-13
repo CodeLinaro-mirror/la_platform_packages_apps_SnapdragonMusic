@@ -1510,6 +1510,9 @@ public class MusicUtils {
                 }
                 artist.setText(artistName);
                 return;
+            } else if(MusicUtils.sService.getAudioId() == -1) {
+                // we might get an audio id as -1 which will result in a blank/white screen.
+                return;
             }
         } catch (RemoteException ex) {
         } catch (NullPointerException ex) {
@@ -1517,7 +1520,7 @@ public class MusicUtils {
             ex.printStackTrace();
             return ;
         }
-        nowPlayingView.setVisibility(View.GONE);
+        ((MediaPlaybackActivity) a).getSlidingPanelLayout().setHookState(BoardState.HIDDEN);
     }
 
     static void setBackground(final View v, Bitmap bm) {
@@ -1672,6 +1675,10 @@ public class MusicUtils {
         StorageManager mStorageManager = (StorageManager) context
                 .getSystemService(Context.STORAGE_SERVICE);
         return mStorageManager.getVolumeState(getSDPath(context));
+    }
+
+    public static String getInternalSdCardPath() {
+        return android.os.Environment.getExternalStorageDirectory().getPath();
     }
 
     public static void startSoundEffectActivity(Activity activity) {
