@@ -55,7 +55,6 @@
         android:ellipsize="marquee"
         android:fontFamily="sans-serif"
         android:marqueeRepeatLimit="marquee_forever"
-        android:maxLength="28"
         android:singleLine="true"
         android:textColor="#000000"
         android:textSize="16sp" />
