@@ -1009,7 +1009,7 @@ public class TrackBrowserFragment extends Fragment implements
             long id;
             Intent shareIntent = new Intent(Intent.ACTION_SEND);
             shareIntent.setType("audio/*");
-            mTrackCursor.moveToPosition(mSelectedPosition);
+            mTrackCursor.moveToPosition(position);
             if (mEditMode
                     && (mPlaylist != null && !mPlaylist.equals("nowplaying"))) {
                 id = mTrackCursor
