@@ -37,10 +37,6 @@
         android:taskAffinity="android.task.music"
         android:allowTaskReparenting="true"
         android:supportsRtl="true" >
-        <meta-data
-            android:name="android.app.default_searchable"
-            android:value="com.android.music.QueryBrowserActivity"
-        />
         <activity android:name="com.android.music.MusicBrowserActivity"
         android:theme="@style/AppTheme"
         android:configChanges="orientation|screenSize"
