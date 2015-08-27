@@ -567,7 +567,9 @@ public class QueryBrowserActivity extends ListActivity implements
     @Override
     public boolean onQueryTextSubmit(String query) {
         // TODO Auto-generated method stub
-        mTrackList.setFilterText(query);
+        if (mTrackList != null) {
+            mTrackList.setFilterText(query);
+        }
         return false;
     }
 
@@ -578,8 +580,10 @@ public class QueryBrowserActivity extends ListActivity implements
             mTrackList.clearTextFilter();
             return false;
         }
-        mTrackList.setFilterText(newText);
 
+       if (mTrackList != null) {
+            mTrackList.setFilterText(newText);
+        }
         return false;
     }
 }
