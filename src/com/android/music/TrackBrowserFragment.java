@@ -1813,8 +1813,6 @@ public class TrackBrowserFragment extends Fragment implements
             builder.delete(0, builder.length());
             String name = cursor.getString(mArtistIdx);
             long aid = cursor.getLong(mAlbumIdx);
-            final Drawable d = MusicUtils.getCachedArtwork(context, aid,
-                    mDefaultAlbumIcon);
             if (MusicUtils.isGroupByFolder() && !mEditMode && mParent != -1) {
                 long l = cursor.getLong(1);
                 if (vh.icon.getTag() != (Integer)vh.icon.getId()) {
