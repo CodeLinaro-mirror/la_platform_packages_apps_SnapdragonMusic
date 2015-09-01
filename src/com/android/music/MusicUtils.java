@@ -1487,16 +1487,18 @@ public class MusicUtils {
                 ImageButton currPlaylist = (ImageButton) nowPlayingView.findViewById(R.id.animViewcurrPlaylist);
                 ImageButton overflow = (ImageButton) nowPlayingView.findViewById(R.id.menu_overflow_audio_header);
                 View layout = nowPlayingView.findViewById(R.id.header_layout);
-                if(isExpanded) {
+                if (isExpanded) {
                     image.setVisibility(View.GONE);
                     currPlaylist.setVisibility(View.VISIBLE);
                     overflow.setVisibility(View.VISIBLE);
                     layout.setBackgroundResource(R.drawable.playingbar_bg_rev);
-                }else {
+                    title.setSelected(true);
+                } else {
                     image.setVisibility(View.VISIBLE);
                     currPlaylist.setVisibility(View.GONE);
                     overflow.setVisibility(View.GONE);
                     layout.setBackgroundResource(R.drawable.playingbar_bg);
+                    title.setSelected(false);
                     if (isPlaying()) {
                         image.setImageResource(R.drawable.play_pause);
                     } else {
