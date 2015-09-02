@@ -535,6 +535,8 @@ public class MediaPlaybackService extends Service {
         mRemoteControlClient.setPlaybackPositionUpdateListener(mPosListener);
 
         mPreferences = getSharedPreferences("Music", MODE_WORLD_READABLE | MODE_WORLD_WRITEABLE);
+        mRepeatMode = mPreferences.getInt("repeatmode", REPEAT_NONE);
+
         mCardId = MusicUtils.getCardId(this);
 
         registerExternalStorageListener();
