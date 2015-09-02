@@ -1592,6 +1592,9 @@ public class MediaPlaybackService extends Service {
           try {
             String[] projection = { MediaStore.Images.Media.DATA };
             cursor = context.getContentResolver().query(contentUri,  projection, null, null, null);
+            if (cursor == null) {
+                return null;
+            }
             int colIndex = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DATA);
             cursor.moveToFirst();
             return cursor.getString(colIndex);
@@ -1659,8 +1662,10 @@ public class MediaPlaybackService extends Service {
             mPlayer.setDataSource(mFileToPlay);
             if (mPlayer.isInitialized()) {
                 String realPath = getRealPathFromContentURI(this, Uri.parse(path));
-                mFileObserver = new MyFileObserver(realPath, FileObserver.ALL_EVENTS);
-                mFileObserver.startWatching();
+                if(realPath != null) {
+                    mFileObserver = new MyFileObserver(realPath, FileObserver.ALL_EVENTS);
+                    mFileObserver.startWatching();
+                }
                 mOpenFailedCounter = 0;
                 return true;
             }
@@ -1830,7 +1835,9 @@ public class MediaPlaybackService extends Service {
      * Stops playback.
      */
     public void stop() {
-        mFileObserver.stopWatching();
+        if (mFileObserver != null) {
+            mFileObserver.stopWatching();
+        }
         stop(true);
     }
 

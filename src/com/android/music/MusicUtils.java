@@ -1271,6 +1271,10 @@ public class MusicUtils {
     }
 
     static void setRingtone(Context context, long id, int sub_id) {
+        if (context == null) {
+            Log.e(TAG, "context is null");
+            return;
+        }
         ContentResolver resolver = context.getContentResolver();
         // Set the flag in the database to mark this as a ringtone
         Uri ringUri = ContentUris.withAppendedId(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, id);
