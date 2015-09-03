@@ -388,6 +388,9 @@ public class MediaPlaybackService extends Service {
                     }
                     break;
                 case ERROR:
+                    Toast.makeText(MediaPlaybackService.this, R.string.open_failed,
+                            Toast.LENGTH_SHORT).show();
+
                     if (mRepeatMode == REPEAT_CURRENT) {
                         //Called from onError when current clip is played in
                         //repeat only mode.
