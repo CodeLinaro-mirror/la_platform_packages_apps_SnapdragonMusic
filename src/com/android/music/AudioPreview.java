@@ -158,8 +158,11 @@ public class AudioPreview extends Activity implements OnPreparedListener, OnErro
                         return;
                     }
                 }
-
-                Toast.makeText(this, R.string.playback_failed, Toast.LENGTH_SHORT).show();
+                if (ex instanceof IOException) {
+                    Toast.makeText(this, R.string.song_deleted_error_message, Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(this, R.string.playback_failed, Toast.LENGTH_SHORT).show();
+                }
                 finish();
                 return;
             }
