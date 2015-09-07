@@ -159,11 +159,12 @@ public class QueryBrowserActivity extends ListActivity implements
 
         mTrackList = getListView();
         mTrackList.setDivider(null);
-        mTrackList.setTextFilterEnabled(true);
+        mTrackList.setTextFilterEnabled(false);
         if (mAdapter == null) {
             mAdapter = new QueryListAdapter(getApplication(), this,
                     R.layout.track_list_item, null, // cursor
                     new String[] {}, new int[] {});
+
             setListAdapter(mAdapter);
             if (TextUtils.isEmpty(mFilterString)) {
                 getQueryCursor(mAdapter.getQueryHandler(), null);
@@ -575,15 +576,9 @@ public class QueryBrowserActivity extends ListActivity implements
 
     @Override
     public boolean onQueryTextChange(String newText) {
-        // TODO Auto-generated method stub
-        if (newText == null || TextUtils.isEmpty(newText)) {
-            mTrackList.clearTextFilter();
-            return false;
-        }
 
-       if (mTrackList != null) {
-            mTrackList.setFilterText(newText);
-        }
+        mAdapter.getFilter().filter(newText);
+
         return false;
     }
 }
