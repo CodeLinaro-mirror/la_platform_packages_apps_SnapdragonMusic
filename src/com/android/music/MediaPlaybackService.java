@@ -18,6 +18,7 @@ package com.android.music;
 
 import android.app.ActivityManager;
 import android.app.ActivityManager.RunningAppProcessInfo;
+import android.app.AlertDialog;
 import android.app.Notification;
 import android.app.Notification.Builder;
 import android.app.NotificationManager;
@@ -62,6 +63,7 @@ import android.os.PowerManager.WakeLock;
 import android.provider.MediaStore;
 import android.util.Log;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.RemoteViews;
 import android.widget.Toast;
 import android.support.v4.app.NotificationCompat;
@@ -301,15 +303,22 @@ public class MediaPlaybackService extends Service {
                     mPlayer.setVolume(mCurrentVolume);
                     break;
                 case SERVER_DIED:
-                    if (mIsSupposedToBePlaying) {
-                        gotoNext(true);
-                    } else {
-                        // the server died when we were idle, so just
-                        // reopen the same song (it will start again
-                        // from the beginning though when the user
-                        // restarts)
-                        openCurrentAndNext();
+                    if (isPlaying()) {
+                        pause(false);
+                        if (isAppOnForeground(MediaPlaybackService.this)) {
+                            AlertDialog alertDialog =
+                                    new AlertDialog.Builder(MediaPlaybackService.this)
+                                    .setTitle(R.string.service_start_error_title)
+                                    .setMessage(R.string.service_start_error_msg)
+                                    .setPositiveButton(R.string.button_ok, null)
+                                    .create();
+
+                            alertDialog.getWindow()
+                                    .setType(WindowManager.LayoutParams.TYPE_SYSTEM_ALERT);
+                            alertDialog.show();
+                        }
                     }
+                    openCurrentAndNext();
                     break;
                 case TRACK_WENT_TO_NEXT:
                     mPlayPos = mNextPlayPos;
