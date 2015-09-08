@@ -686,7 +686,6 @@ public class MediaPlaybackActivity extends Activity implements MusicUtils.Defs,
         super.onResume();
         updateNowPlaying(this);
         updateTrackInfo();
-        setPauseButtonImage();
     }
 
     @Override
