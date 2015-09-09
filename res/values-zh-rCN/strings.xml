@@ -204,4 +204,6 @@
         <item>播放列表</item>
     </string-array>
     <string name="no_music_found">没有歌曲</string>
+    <!--  Adding new string here for file delete error message -->
+    <string name="song_deleted_error_message">无法播放您所要求的音乐文件</string>
 </resources>
