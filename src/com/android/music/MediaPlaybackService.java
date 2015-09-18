@@ -1725,7 +1725,9 @@ public class MediaPlaybackService extends Service {
 
         if (views != null && status != null) {
             // Reset notification play function to pause function
-            views.setImageViewResource(R.id.pause, R.drawable.notification_play);
+            views.setImageViewResource(R.id.pause,
+                    isPlaying() ? R.drawable.notification_pause
+                            : R.drawable.notification_play);
             Intent pauseIntent = new Intent(PAUSE_ACTION);
             PendingIntent pausePendingIntent = PendingIntent.getBroadcast(this,
                     0 /* no requestCode */, pauseIntent, 0 /* no flags */);
@@ -2063,7 +2065,7 @@ public class MediaPlaybackService extends Service {
 
                 // no more clip, then reset playback state icon in status bar
                 if (views != null){
-                    views.setImageViewResource(R.id.pause, R.drawable.notification_pause);
+                    views.setImageViewResource(R.id.pause, R.drawable.notification_play);
                     Intent playIntent = new Intent(TOGGLEPAUSE_ACTION);
                     PendingIntent playPendingIntent = PendingIntent.getBroadcast(this,
                             0 /* no requestCode */, playIntent, 0 /* no flags */);
