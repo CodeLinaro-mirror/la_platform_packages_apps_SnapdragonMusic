@@ -80,8 +80,9 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="start"
                 android:alpha="0.54"
-                android:ellipsize="end"
+                android:ellipsize="marquee"
                 android:maxLines="2"
+                android:singleLine="true"
                 android:scrollHorizontally="true"
                 android:textColor="#000000" />
 
