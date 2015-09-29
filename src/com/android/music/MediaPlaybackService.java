@@ -2870,8 +2870,6 @@ public class MediaPlaybackService extends Service {
         }
 
         private boolean setDataSourceImpl(MediaPlayer player, String path) {
-            boolean isNextPlayer = (mNextMediaPlayer != null) ?
-                           (player == mNextMediaPlayer) : false;
             try {
                 player.reset();
                 player.setOnPreparedListener(null);
@@ -2883,10 +2881,8 @@ public class MediaPlaybackService extends Service {
                 player.setAudioStreamType(AudioManager.STREAM_MUSIC);
                 player.prepare();
             } catch (IOException ex) {
-                if (!mQuietMode && !isNextPlayer) {
+                if (!mQuietMode && (player == mCurrentMediaPlayer)) {
                     Toast.makeText(MediaPlaybackService.this, R.string.open_failed, Toast.LENGTH_SHORT).show();
-                } else {
-                    mHandler.sendEmptyMessage(ERROR);
                 }
                 return false;
             } catch (IllegalArgumentException ex) {
