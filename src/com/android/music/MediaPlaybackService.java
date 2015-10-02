@@ -2911,16 +2911,27 @@ public class MediaPlaybackService extends Service {
             if (path == null) {
                 return;
             }
-            mNextMediaPlayer = new CompatMediaPlayer();
-            mNextMediaPlayer.setWakeMode(MediaPlaybackService.this, PowerManager.PARTIAL_WAKE_LOCK);
-            mNextMediaPlayer.setAudioSessionId(getAudioSessionId());
-            if (setDataSourceImpl(mNextMediaPlayer, path)) {
-                mCurrentMediaPlayer.setNextMediaPlayer(mNextMediaPlayer);
+            final CompatMediaPlayer mp = new CompatMediaPlayer();
+            mp.setWakeMode(MediaPlaybackService.this, PowerManager.PARTIAL_WAKE_LOCK);
+            mp.setAudioSessionId(getAudioSessionId());
+            if (setDataSourceImpl(mp, path)) {
+                new Handler().postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        if (mIsSupposedToBePlaying
+                            && mCurrentMediaPlayer != null) {
+                            mCurrentMediaPlayer.setNextMediaPlayer(mp);
+                            mNextMediaPlayer = mp;
+                        }
+                    }
+                }, 300);
             } else {
                 // failed to open next, we'll transition the old fashioned way,
                 // which will skip over the faulty file
-                mNextMediaPlayer.release();
-                mNextMediaPlayer = null;
+                if (mNextMediaPlayer != null) {
+                    mNextMediaPlayer.release();
+                    mNextMediaPlayer = null;
+                }
             }
         }
 
