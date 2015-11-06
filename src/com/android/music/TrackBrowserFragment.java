@@ -1232,9 +1232,13 @@ public class TrackBrowserFragment extends Fragment implements
         if (mAnimView != null) {
             mAnimView.clearAnimation();
         if (mPause) {
+            if (mCurrPlayAnimation != null) { 
+                mCurrPlayAnimation.stop();
+            }
             mAnimView.setBackgroundDrawable(null);
         }
         }
+        mCurrPlayAnimation = null;
     }
 
     @Override
