@@ -102,10 +102,10 @@ public class MediaPlaybackService extends Service {
     public static final String CMDGET = "get";
     public static final String CMDSET = "set";
 
-    public static final String TOGGLEPAUSE_ACTION = "com.android.music.musicservicecommand.togglepause";
-    public static final String PAUSE_ACTION = "com.android.music.musicservicecommand.pause";
-    public static final String PREVIOUS_ACTION = "com.android.music.musicservicecommand.previous";
-    public static final String NEXT_ACTION = "com.android.music.musicservicecommand.next";
+    public static final String TOGGLEPAUSE_ACTION = "org.codeaurora.android.music.musicservicecommand.togglepause";
+    public static final String PAUSE_ACTION = "org.codeaurora.android.music.musicservicecommand.pause";
+    public static final String PREVIOUS_ACTION = "org.codeaurora.android.music.musicservicecommand.previous";
+    public static final String NEXT_ACTION = "org.codeaurora.android.music.musicservicecommand.next";
     private static final String PLAYSTATUS_REQUEST = "org.codeaurora.android.music.playstatusrequest";
     private static final String PLAYSTATUS_RESPONSE = "org.codeaurora.music.playstatusresponse";
     private static final String PLAYERSETTINGS_REQUEST = "org.codeaurora.music.playersettingsrequest";
