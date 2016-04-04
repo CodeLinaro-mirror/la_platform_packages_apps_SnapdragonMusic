@@ -115,7 +115,7 @@ public class MusicUtils {
     private static boolean mGroupByFolder = false;
     private static boolean mDisableAnimation;
     public static boolean mRepeatPlay = false;
-    public static boolean isFragmentRemoved;
+    public static boolean isFragmentRemoved = true;
     public static boolean mEditMode;
     public static boolean mPause;
     public final static int RINGTONE_SUB_0 = 0;
@@ -1316,7 +1316,8 @@ public class MusicUtils {
         BitmapFactory.Options opts = new BitmapFactory.Options();
         opts.inPreferredConfig = Bitmap.Config.ARGB_8888;
         return BitmapFactory.decodeStream(
-                context.getResources().openRawResource(R.drawable.albumart_mp_unknown), null, opts);
+                context.getResources().openRawResource(R.drawable.album_cover_background),
+                null, opts);
     }
 
     static int getIntPref(Context context, String name, int def) {

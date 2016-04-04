@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-  Copyright (c) 2015, The Linux Foundation. All rights reserved.
+  Copyright (c) 2015-2016, The Linux Foundation. All rights reserved.
 
   Redistribution and use in source and binary forms, with or without
   modification, are permitted provided that the following conditions are
@@ -33,7 +33,7 @@
     android:layout_height="80dp"
     android:background="#f57f17"
     android:elevation="4dp"
-    android:paddingTop="30dp"
+    android:paddingTop="25dp"
     android:theme="@style/ToolbarTheme"
     android:navigationIcon="@drawable/ic_material_light_navigation_drawer" >
 
