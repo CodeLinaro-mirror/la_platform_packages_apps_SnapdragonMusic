@@ -27,6 +27,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
+import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.database.Cursor;
 import android.graphics.Bitmap;
@@ -84,6 +85,7 @@ public class FolderBrowserFragment extends Fragment
     private View mSdErrorMessageIcon;
     private ListView mFolderList;
     private MediaPlaybackActivity mActivity;
+    public PopupMenu mPopupMenu;
 
     public Activity getParentActivity() {
         return mActivity;
@@ -585,6 +587,7 @@ public class FolderBrowserFragment extends Fragment
                             return true;
                         }
                     });
+                    mFragment.mPopupMenu = popup;
 
                     mFilesCursor.moveToPosition(p);
                     mCurretParent = mFilesCursor.getString(mFilesCursor
@@ -648,5 +651,19 @@ public class FolderBrowserFragment extends Fragment
 
     public void onServiceDisconnected(ComponentName name) {
         mActivity.finish();
+    }
+
+    @Override
+    public void onConfigurationChanged(Configuration config) {
+        super.onConfigurationChanged(config);
+        if (mPopupMenu != null) {
+            mPopupMenu.dismiss();
+        }
+        Fragment fragment = new FolderBrowserFragment();
+        Bundle args = getArguments();
+        fragment.setArguments(args);
+        getFragmentManager().beginTransaction()
+                .replace(R.id.fragment_page, fragment, "folder_fragment")
+                .commitAllowingStateLoss();
     }
 }

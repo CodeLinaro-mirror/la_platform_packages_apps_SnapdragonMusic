@@ -23,6 +23,7 @@ import com.android.music.MusicUtils.Defs;
 import com.android.music.MusicUtils.ServiceToken;
 import com.android.music.TrackBrowserFragment.TrackListAdapter.ViewHolder;
 
+import android.R.integer;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -41,6 +42,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
+import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.database.AbstractCursor;
 import android.database.CharArrayBuffer;
@@ -166,6 +168,7 @@ public class TrackBrowserFragment extends Fragment implements
     private boolean mCreateShortcut = false;
     public static volatile boolean isScrolling = false;
     private int lastVisiblePos = 0;
+    public PopupMenu mPopupMenu;
 
     public TrackBrowserFragment() {
     }
@@ -772,6 +775,7 @@ public class TrackBrowserFragment extends Fragment implements
         }
         v.setVisibility(View.VISIBLE);
         mTrackList.invalidateViews();
+        mParentActivity.updateNowPlaying(getActivity());
     }
 
     private BroadcastReceiver mTrackListListener = new BroadcastReceiver() {
@@ -2058,6 +2062,7 @@ public class TrackBrowserFragment extends Fragment implements
                             return true;
                         }
                     });
+                    mFragment.mPopupMenu = popup;
                 }
             });
             long id = -1;
@@ -2284,5 +2289,25 @@ public class TrackBrowserFragment extends Fragment implements
 
             if (mAnimate) invalidate();
         }
+    }
+
+    @Override
+    public void onConfigurationChanged(Configuration config) {
+        super.onConfigurationChanged(config);
+        if (mPopupMenu != null) {
+            mPopupMenu.dismiss();
+        }
+        int contentResId;
+        if (mParentActivity.mFragment == null || !mParentActivity.mFragment.isVisible()) {
+           contentResId = R.id.fragment_page;
+        } else {
+           contentResId = R.id.current_queue_view;
+        }
+        Fragment fragment = new TrackBrowserFragment();
+        Bundle args = getArguments();
+        fragment.setArguments(args);
+        getFragmentManager().beginTransaction()
+             .replace(contentResId, fragment, "track_fragment")
+             .commitAllowingStateLoss();
     }
 }

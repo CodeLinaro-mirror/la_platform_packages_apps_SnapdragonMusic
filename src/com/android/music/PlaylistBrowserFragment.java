@@ -106,6 +106,7 @@ public class PlaylistBrowserFragment extends Fragment implements
     private String[] mPlaylistMemberCols1;
     private Toolbar mToolbar;
     private int mPlaylistId;
+    public PopupMenu mPopupMenu;
     static final LruCache<Integer, Bitmap[]> playlistMap = new LruCache<Integer, Bitmap[]>(
             20);
 
@@ -202,7 +203,16 @@ public class PlaylistBrowserFragment extends Fragment implements
     @Override
     public void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
+        if (mPopupMenu != null) {
+            mPopupMenu.dismiss();
+        }
         arrangeGridColums(newConfig);
+        Fragment fragment = new PlaylistBrowserFragment();
+        Bundle args = getArguments();
+        fragment.setArguments(args);
+        getFragmentManager().beginTransaction()
+                .replace(R.id.fragment_page, fragment, "playlist_fragment")
+                .commitAllowingStateLoss();
     }
 
     public void arrangeGridColums(Configuration newConfig) {
@@ -1188,6 +1198,7 @@ public class PlaylistBrowserFragment extends Fragment implements
                             return true;
                         }
                     });
+                    mFragment.mPopupMenu = popup;
                 }
             });
         }

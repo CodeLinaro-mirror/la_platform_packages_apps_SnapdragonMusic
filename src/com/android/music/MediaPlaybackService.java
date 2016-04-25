@@ -16,6 +16,7 @@
 
 package com.android.music;
 
+import android.Manifest.permission;
 import android.app.ActivityManager;
 import android.app.ActivityManager.RunningAppProcessInfo;
 import android.app.AlertDialog;
@@ -35,6 +36,7 @@ import android.content.IntentFilter;
 import android.content.BroadcastReceiver;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
+import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteException;
 //import android.drm.DrmManagerClientWrapper;
@@ -75,7 +77,6 @@ import java.util.List;
 import java.util.Random;
 import java.util.Vector;
 import java.util.HashMap;
-import com.android.music.SysApplication;
 
 /**
  * Provides "background" audio playback capabilities, allowing the
@@ -155,6 +156,7 @@ public class MediaPlaybackService extends Service {
     private static final int INVALID_SONG_UID = 0xffffffff;
 
     private RemoteViews views;
+    private RemoteViews viewsLarge;
     private Notification status = new Notification();
 
     private boolean mControlInStatusBar = false;
@@ -264,6 +266,7 @@ public class MediaPlaybackService extends Service {
     private static final String EXTRA_ATTRIBUTE_STRING_ARRAY = "AttributeStrings";
     private static final String EXTRA_VALUE_ID_ARRAY = "Values";
     private static final String EXTRA_ATTIBUTE_ID_ARRAY = "Attributes";
+    private boolean mIsReadGranted = false;
 
 
     private SharedPreferences mPreferences;
@@ -468,14 +471,8 @@ public class MediaPlaybackService extends Service {
                 pause();
                 mPausedByTransientLossOfFocus = false;
             } else if (EXIT_ACTION.equals(action)) {
-                if (isPlaying()) {
-                    // Let it Play dont stop
-                } else {
-                    if (!isAppOnForeground(getApplicationContext())) {
-                        stop();
-                        SysApplication.getInstance().exit();
-                    }
-                }
+                stop();
+                SysApplication.getInstance().exit();
 
             } else if (CMDPLAY.equals(cmd)) {
                 play();
@@ -548,6 +545,13 @@ public class MediaPlaybackService extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
+        if (checkSelfPermission(permission.READ_EXTERNAL_STORAGE) !=
+                PackageManager.PERMISSION_GRANTED) {
+            stopSelf();
+            return;
+        } else {
+            mIsReadGranted = true;
+        }
         // add for clear the notification when the service restart
         stopForeground(true);
 
@@ -651,6 +655,8 @@ public class MediaPlaybackService extends Service {
 
     @Override
     public void onDestroy() {
+        if (!mIsReadGranted)
+            return;
         // Check that we're not being destroyed while something is still playing.
         if (isPlaying()) {
             Log.e(LOGTAG, "Service being destroyed while still playing.");
@@ -711,7 +717,7 @@ public class MediaPlaybackService extends Service {
     };
 
     private void saveQueue(boolean full) {
-        if (!mQueueIsSaveable) {
+        if (!mQueueIsSaveable || mPreferences == null) {
             return;
         }
 
@@ -1802,37 +1808,53 @@ public class MediaPlaybackService extends Service {
     }
 
     private void updateNotification() {
-        views = new RemoteViews(getPackageName(), R.layout.statusbar);
+        views = new RemoteViews(getPackageName(), R.layout.statusbar_appwidget_s);
+        viewsLarge = new RemoteViews(getPackageName(), R.layout.statusbar_appwidget_l);
+        if (!getApplicationContext().getResources().getBoolean(R.bool.exit_in_notification)) {
+            views.setViewVisibility(R.id.exit, View.GONE);
+            viewsLarge.setViewVisibility(R.id.exit, View.GONE);
+        }
         Bitmap icon = MusicUtils.getArtwork(this, getAudioId(), getAlbumId(),
                 true);
         views.setImageViewBitmap(R.id.icon, icon);
+        viewsLarge.setImageViewBitmap(R.id.icon, icon);
         Intent prevIntent = new Intent(PREVIOUS_ACTION);
         PendingIntent prevPendingIntent = PendingIntent.getBroadcast(this,
                 0 /* no requestCode */, prevIntent, 0 /* no flags */);
         views.setOnClickPendingIntent(R.id.prev, prevPendingIntent);
+        viewsLarge.setOnClickPendingIntent(R.id.prev, prevPendingIntent);
 
         Intent toggleIntent = new Intent(MediaPlaybackService.TOGGLEPAUSE_ACTION);
         PendingIntent togglePendingIntent = PendingIntent.getBroadcast(this,
                 0 /* no requestCode */, toggleIntent, 0 /* no flags */);
         views.setOnClickPendingIntent(R.id.pause, togglePendingIntent);
+        viewsLarge.setOnClickPendingIntent(R.id.pause, togglePendingIntent);
 
         Intent nextIntent = new Intent(NEXT_ACTION);
         PendingIntent nextPendingIntent = PendingIntent.getBroadcast(this,
                 0 /* no requestCode */, nextIntent, 0 /* no flags */);
         views.setOnClickPendingIntent(R.id.next, nextPendingIntent);
+        viewsLarge.setOnClickPendingIntent(R.id.next, nextPendingIntent);
 
         Intent exitIntent = new Intent(EXIT_ACTION);
         PendingIntent exitPendingIntent = PendingIntent.getBroadcast(this,
                 0 /* no requestCode */, exitIntent, 0 /* no flags */);
+        views.setOnClickPendingIntent(R.id.exit, exitPendingIntent);
+        viewsLarge.setOnClickPendingIntent(R.id.exit, exitPendingIntent);
 
         if (getAudioId() < 0) {
             // streaming
             views.setTextViewText(R.id.trackname, getPath());
             views.setTextViewText(R.id.artist, null);
             views.setTextViewText(R.id.album, null);
+
+            viewsLarge.setTextViewText(R.id.trackname, getPath());
+            viewsLarge.setTextViewText(R.id.artist, null);
+            viewsLarge.setTextViewText(R.id.album, null);
         } else {
             String artist = getArtistName();
             views.setTextViewText(R.id.trackname, getTrackName());
+            viewsLarge.setTextViewText(R.id.trackname, getTrackName());
             if (artist == null || artist.equals(MediaStore.UNKNOWN_STRING)) {
                 artist = getString(R.string.unknown_artist_name);
             }
@@ -1842,9 +1864,15 @@ public class MediaPlaybackService extends Service {
             }
             views.setTextViewText(R.id.artist, artist);
             views.setTextViewText(R.id.album, album);
+            viewsLarge.setTextViewText(R.id.artist, artist);
+            viewsLarge.setTextViewText(R.id.album, album);
         }
 
         views.setImageViewResource(R.id.pause,
+                (isPlaying() ? R.drawable.notification_pause
+                        : R.drawable.notification_play));
+
+        viewsLarge.setImageViewResource(R.id.pause,
                 (isPlaying() ? R.drawable.notification_pause
                         : R.drawable.notification_play));
 
@@ -1858,6 +1886,7 @@ public class MediaPlaybackService extends Service {
         status1.setSmallIcon(R.drawable.stat_notify_musicplayer);
         status1.setDeleteIntent(exitPendingIntent);
         status = status1.build();
+        status.bigContentView = viewsLarge;
         if (isPlaying()) {
             status.flags |= Notification.FLAG_ONGOING_EVENT;
         } else {
@@ -2890,7 +2919,10 @@ public class MediaPlaybackService extends Service {
     private class MultiPlayer {
         private CompatMediaPlayer mCurrentMediaPlayer = new CompatMediaPlayer();
         private CompatMediaPlayer mNextMediaPlayer;
+        private CompatMediaPlayer mLastMediaPlayer;
         private Handler mHandler;
+        private Handler mSetNextMediaPlayerHandler = null;
+        private Runnable mSetNextMediaPlayerRunnable = null;
         private boolean mIsInitialized = false;
         private boolean mIsComplete = false;
         private boolean mIsNextPrepared = false;
@@ -2963,9 +2995,20 @@ public class MediaPlaybackService extends Service {
             mp.setWakeMode(MediaPlaybackService.this, PowerManager.PARTIAL_WAKE_LOCK);
             mp.setAudioSessionId(getAudioSessionId());
             if (setDataSourceImpl(mp, path)) {
-                new Handler().postDelayed(new Runnable() {
+                if (mSetNextMediaPlayerHandler == null) {
+                    mSetNextMediaPlayerHandler = new Handler();
+                }
+                if (mSetNextMediaPlayerRunnable != null) {
+                    mSetNextMediaPlayerHandler.removeCallbacks(mSetNextMediaPlayerRunnable);
+                }
+                if (mLastMediaPlayer != null) {
+                    mLastMediaPlayer.release();
+                }
+                mLastMediaPlayer = mp;
+                mSetNextMediaPlayerRunnable = new Runnable() {
                     @Override
                     public void run() {
+                        mLastMediaPlayer = null;
                         if (mIsSupposedToBePlaying
                             && mCurrentMediaPlayer != null
                             && mIsInitialized && mIsNextPrepared
@@ -2980,7 +3023,8 @@ public class MediaPlaybackService extends Service {
                         }
                         mIsNextPrepared = false;
                     }
-                }, 300);
+                };
+                mSetNextMediaPlayerHandler.postDelayed(mSetNextMediaPlayerRunnable, 300);
             } else {
                 // failed to open next, we'll transition the old fashioned way,
                 // which will skip over the faulty file

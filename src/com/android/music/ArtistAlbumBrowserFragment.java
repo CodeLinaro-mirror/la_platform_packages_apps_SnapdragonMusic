@@ -37,6 +37,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
+import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.database.Cursor;
 import android.database.CursorWrapper;
@@ -123,6 +124,7 @@ public class ArtistAlbumBrowserFragment extends Fragment implements
     private boolean isPaused;
     private int lastVisiblePos = 0;
     private boolean isScrolling = true;
+    public PopupMenu mPopupMenu;
 
     OnGroupClickListener onGroupClickListener = new OnGroupClickListener() {
         @SuppressLint("ResourceAsColor")
@@ -830,6 +832,7 @@ public class ArtistAlbumBrowserFragment extends Fragment implements
                             return true;
                         }
                     });
+                    mFragment.mPopupMenu = popup;
                 }
             });
         }
@@ -1086,6 +1089,20 @@ public class ArtistAlbumBrowserFragment extends Fragment implements
             int visibleItemCount, int totalItemCount) {
         // TODO Auto-generated method stub
 
+    }
+
+    @Override
+    public void onConfigurationChanged(Configuration config) {
+        super.onConfigurationChanged(config);
+        if (mPopupMenu != null) {
+            mPopupMenu.dismiss();
+        }
+        Fragment fragment = new ArtistAlbumBrowserFragment();
+        Bundle args = getArguments();
+        fragment.setArguments(args);
+        getFragmentManager().beginTransaction()
+                .replace(R.id.fragment_page, fragment, "artist_fragment")
+                .commitAllowingStateLoss();
     }
 
 }
