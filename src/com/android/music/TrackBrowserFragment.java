@@ -41,6 +41,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
+import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.database.AbstractCursor;
 import android.database.CharArrayBuffer;
@@ -164,6 +165,7 @@ public class TrackBrowserFragment extends Fragment implements
     private boolean mCreateShortcut = false;
     public static volatile boolean isScrolling = false;
     private int lastVisiblePos = 0;
+    public PopupMenu mPopupMenu;
 
     public TrackBrowserFragment() {
     }
@@ -386,6 +388,12 @@ public class TrackBrowserFragment extends Fragment implements
 
     @Override
     public void onDestroy() {
+        if (mPopupMenu != null) {
+            mPopupMenu.dismiss();
+        }
+        if (mSubMenu != null) {
+            mSubMenu.close();
+        }
         // ListView lv = getListView();
         if (mTrackList != null) {
             if (mUseLastListPos) {
@@ -2010,9 +2018,9 @@ public class TrackBrowserFragment extends Fragment implements
                         popup.getMenu().add(0, REMOVE, 0,
                                 R.string.remove_from_playlist);
                     }
-                    SubMenu sub = popup.getMenu().addSubMenu(0,
+                    mSubMenu = popup.getMenu().addSubMenu(0,
                             ADD_TO_PLAYLIST, 0, R.string.add_to_playlist);
-                    MusicUtils.makePlaylistMenu(mFragment.getActivity(), sub);
+                    MusicUtils.makePlaylistMenu(mFragment.getActivity(), mSubMenu);
                     popup.getMenu()
                             .add(0, DELETE_ITEM, 0, R.string.delete_item);
                     if (TelephonyManager.getDefault().isMultiSimEnabled()) {
@@ -2042,6 +2050,7 @@ public class TrackBrowserFragment extends Fragment implements
                             return true;
                         }
                     });
+                    mFragment.mPopupMenu = popup;
                 }
             });
             long id = -1;
@@ -2267,6 +2276,17 @@ public class TrackBrowserFragment extends Fragment implements
             }
 
             if (mAnimate) invalidate();
+        }
+    }
+
+    @Override
+    public void onConfigurationChanged(Configuration config) {
+        super.onConfigurationChanged(config);
+        if (mPopupMenu != null) {
+            mPopupMenu.dismiss();
+        }
+        if (mSubMenu != null) {
+            mSubMenu.close();
         }
     }
 }

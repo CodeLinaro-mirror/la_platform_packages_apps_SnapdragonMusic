@@ -87,6 +87,8 @@ public class AlbumBrowserFragment extends Fragment implements MusicUtils.Defs,
     private View mSdErrorMessageIcon;
     private static int mLastSelectedPosition = -1;
     private MediaPlaybackActivity mParentActivity;
+    public PopupMenu mPopupMenu;
+    private static SubMenu mSub = null;
 
     public AlbumBrowserFragment() {
     }
@@ -168,6 +170,12 @@ public class AlbumBrowserFragment extends Fragment implements MusicUtils.Defs,
     @Override
     public void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
+        if (mPopupMenu != null ) {
+            mPopupMenu.dismiss();
+        }
+        if (mSub != null) {
+            mSub.close();
+        }
         arrangeGridColums(newConfig);
     }
 
@@ -181,6 +189,12 @@ public class AlbumBrowserFragment extends Fragment implements MusicUtils.Defs,
 
     @Override
     public void onDestroy() {
+        if (mPopupMenu != null ) {
+            mPopupMenu.dismiss();
+        }
+        if (mSub != null) {
+            mSub.close();
+        }
         if (mAlbumList != null) {
             mLastListPosCourse = mAlbumList.getFirstVisiblePosition();
             View cv = mAlbumList.getChildAt(0);
@@ -670,10 +684,10 @@ public class AlbumBrowserFragment extends Fragment implements MusicUtils.Defs,
                             .getParentActivity(), vh.popup_menu_button);
                     popup.getMenu().add(0, PLAY_SELECTION, 0,
                             R.string.play_selection);
-                    SubMenu sub = popup.getMenu().addSubMenu(0,
+                    mSub = popup.getMenu().addSubMenu(0,
                             ADD_TO_PLAYLIST, 0, R.string.add_to_playlist);
                     MusicUtils.makePlaylistMenu(mFragment.getParentActivity(),
-                            sub);
+                            mSub);
                     popup.getMenu()
                             .add(0, DELETE_ITEM, 0, R.string.delete_item);
                     popup.show();
@@ -686,6 +700,7 @@ public class AlbumBrowserFragment extends Fragment implements MusicUtils.Defs,
                             return true;
                         }
                     });
+                    mFragment.mPopupMenu = popup;
                     mFragment.mCurrentAlbumId = vh.albumID;
                     mFragment.mCurrentAlbumName = vh.albumName;
                     mFragment.mCurrentArtistNameForAlbum = vh.artistNameForAlbum;
