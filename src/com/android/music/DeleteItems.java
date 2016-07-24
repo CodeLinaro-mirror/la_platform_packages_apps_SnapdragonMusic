@@ -143,7 +143,9 @@ public class DeleteItems extends Activity
                         DeleteItems.this.finish();
                     }
                 }.execute();
+                return;
             }
+            finish();
         }
     };
 
