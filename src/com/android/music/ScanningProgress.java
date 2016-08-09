@@ -45,7 +45,9 @@ public class ScanningProgress extends Activity
                    finish();
                    return;
                 }
-                mCheckExternalMediaThread.start();
+                if (!mCheckExternalMediaThread.isAlive()) {
+                   mCheckExternalMediaThread.start();
+                }
                 break;
             case EXTERNAL_CHECK_OK:
                 setResult(RESULT_OK);
