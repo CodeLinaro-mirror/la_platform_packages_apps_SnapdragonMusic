@@ -16,6 +16,7 @@
 
 package com.android.music;
 
+import android.Manifest;
 import android.app.ListActivity;
 import android.content.ContentResolver;
 import android.content.ContentUris;
@@ -32,6 +33,11 @@ import java.lang.Integer;
 
 public class VideoBrowserActivity extends ListActivity implements MusicUtils.Defs
 {
+    private static final String[] REQUIRED_PERMISSIONS = {
+            Manifest.permission.READ_EXTERNAL_STORAGE,
+            Manifest.permission.WRITE_EXTERNAL_STORAGE
+    };
+
     public VideoBrowserActivity()
     {
     }
@@ -40,6 +46,10 @@ public class VideoBrowserActivity extends ListActivity implements MusicUtils.Def
     @Override
     public void onCreate(Bundle icicle)
     {
+        if (PermissionActivity.checkAndRequestPermission(this, REQUIRED_PERMISSIONS)) {
+            System.exit(0);
+        }
+
         super.onCreate(icicle);
         setVolumeControlStream(AudioManager.STREAM_MUSIC);
         init();

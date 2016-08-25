@@ -16,6 +16,7 @@
 
 package com.android.music;
 
+import android.Manifest;
 import android.app.Notification;
 import android.app.PendingIntent;
 import android.app.Service;
@@ -30,6 +31,7 @@ import android.content.IntentFilter;
 import android.content.BroadcastReceiver;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
+import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteException;
 import android.graphics.Bitmap;
@@ -239,6 +241,7 @@ public class MediaPlaybackService extends Service {
     private static final String EXTRA_VALUE_ID_ARRAY = "Values";
     private static final String EXTRA_ATTIBUTE_ID_ARRAY = "Attributes";
 
+    private boolean mIsReadGranted = false;
 
     private SharedPreferences mPreferences;
     // We use this to distinguish between different cards when saving/restoring playlists.
@@ -405,6 +408,14 @@ public class MediaPlaybackService extends Service {
     public void onCreate() {
         super.onCreate();
 
+        if (checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE) !=
+                PackageManager.PERMISSION_GRANTED) {
+            stopSelf();
+            return;
+        } else {
+            mIsReadGranted = true;
+        }
+
         mAudioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
         ComponentName rec = new ComponentName(getPackageName(),
                 MediaButtonIntentReceiver.class.getName());
@@ -472,6 +483,9 @@ public class MediaPlaybackService extends Service {
 
     @Override
     public void onDestroy() {
+        if (!mIsReadGranted) {
+            return;
+        }
         // Check that we're not being destroyed while something is still playing.
         if (isPlaying()) {
             Log.e(LOGTAG, "Service being destroyed while still playing.");
