@@ -18,7 +18,7 @@
         package="com.android.music">
 
     <original-package android:name="com.android.music" />
-    <uses-sdk android:minSdkVersion="8" android:targetSdkVersion="9"/>
+    <uses-sdk android:minSdkVersion="8" android:targetSdkVersion="23"/>
     <uses-permission android:name="android.permission.WRITE_SETTINGS" />
     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
@@ -41,6 +41,7 @@
         <activity android:name="com.android.music.MusicBrowserActivity"
             android:theme="@android:style/Theme.NoTitleBar"
             android:exported="true"
+            android:launchMode="singleTask"
         >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -267,6 +268,8 @@
             android:theme="@android:style/Theme.Dialog" android:exported="false" />
         <activity android:name="com.android.music.ScanningProgress"
             android:theme="@android:style/Theme.Dialog" android:exported="false" />
+        <activity android:name="com.android.music.PermissionActivity"
+            android:launchMode="singleTask"/>
         <service android:name="com.android.music.MediaPlaybackService"
             android:exported="false" />
 

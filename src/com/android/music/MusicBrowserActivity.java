@@ -18,6 +18,7 @@ package com.android.music;
 
 import com.android.music.MusicUtils.ServiceToken;
 
+import android.Manifest;
 import android.app.Activity;
 import android.content.ComponentName;
 import android.content.Intent;
@@ -29,6 +30,12 @@ import android.os.RemoteException;
 public class MusicBrowserActivity extends Activity
     implements MusicUtils.Defs {
 
+    private static final String[] REQUIRED_PERMISSIONS = {
+            Manifest.permission.READ_PHONE_STATE,
+            Manifest.permission.READ_EXTERNAL_STORAGE,
+            Manifest.permission.WRITE_EXTERNAL_STORAGE
+    };
+
     private ServiceToken mToken;
 
     public MusicBrowserActivity() {
@@ -39,6 +46,10 @@ public class MusicBrowserActivity extends Activity
      */
     @Override
     public void onCreate(Bundle icicle) {
+        if (PermissionActivity.checkAndRequestPermission(this, REQUIRED_PERMISSIONS)) {
+            System.exit(0);
+        }
+
         super.onCreate(icicle);
         int activeTab = MusicUtils.getIntPref(this, "activetab", R.id.artisttab);
         if (activeTab != R.id.artisttab
