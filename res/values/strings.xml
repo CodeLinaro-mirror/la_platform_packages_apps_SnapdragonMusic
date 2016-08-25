@@ -311,5 +311,11 @@
 
     <!-- Menu text for the item controlling the audio effects panel [CHAR LIMIT=15] -->
     <string name="effectspanel">Sound effects</string>
+
+    <!-- permission request -->
+    <string name="dialog_title_help">Help</string>
+    <string name="dialog_content">This application can\'t work without required permissions. Please grant the permissions in Settings.</string>
+    <string name="dialog_button_quit">Quit</string>
+    <string name="dialog_button_settings">Settings</string>
 </resources>
 
