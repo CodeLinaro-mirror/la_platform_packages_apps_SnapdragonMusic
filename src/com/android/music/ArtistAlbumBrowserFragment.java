@@ -37,6 +37,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
+import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.database.Cursor;
 import android.database.CursorWrapper;
@@ -123,6 +124,8 @@ public class ArtistAlbumBrowserFragment extends Fragment implements
     private boolean isPaused;
     private int lastVisiblePos = 0;
     private boolean isScrolling = true;
+    public PopupMenu mPopupMenu;
+    private static SubMenu mSub = null;
 
     OnGroupClickListener onGroupClickListener = new OnGroupClickListener() {
         @SuppressLint("ResourceAsColor")
@@ -218,6 +221,12 @@ public class ArtistAlbumBrowserFragment extends Fragment implements
 
     @Override
     public void onDestroy() {
+        if (mPopupMenu != null) {
+            mPopupMenu.dismiss();
+        }
+        if (mSub != null) {
+            mSub.close();
+        }
         if (mExpandableListView != null) {
             mLastListPosCourse = mExpandableListView.getFirstVisiblePosition();
             View cv = mExpandableListView.getChildAt(0);
@@ -814,10 +823,10 @@ public class ArtistAlbumBrowserFragment extends Fragment implements
                             .getParentActivity(), vh.play_indicator);
                     popup.getMenu().add(0, PLAY_SELECTION, 0,
                             R.string.play_selection);
-                    SubMenu sub = popup.getMenu().addSubMenu(0,
+                    mSub = popup.getMenu().addSubMenu(0,
                             ADD_TO_PLAYLIST, 0, R.string.add_to_playlist);
                     MusicUtils.makePlaylistMenu(mFragment.getParentActivity(),
-                            sub);
+                            mSub);
                     popup.getMenu()
                             .add(0, DELETE_ITEM, 0, R.string.delete_item);
                     popup.show();
@@ -830,6 +839,7 @@ public class ArtistAlbumBrowserFragment extends Fragment implements
                             return true;
                         }
                     });
+                    mFragment.mPopupMenu = popup;
                 }
             });
         }
@@ -915,10 +925,10 @@ public class ArtistAlbumBrowserFragment extends Fragment implements
                             .getParentActivity(), vh.play_indicator);
                     popup.getMenu().add(0, PLAY_SELECTION, 0,
                             R.string.play_selection);
-                    SubMenu sub = popup.getMenu().addSubMenu(0,
+                    mSub = popup.getMenu().addSubMenu(0,
                             ADD_TO_PLAYLIST, 0, R.string.add_to_playlist);
                     MusicUtils.makePlaylistMenu(mFragment.getParentActivity(),
-                            sub);
+                            mSub);
                     popup.getMenu()
                             .add(0, DELETE_ITEM, 0, R.string.delete_item);
                     popup.show();
@@ -931,6 +941,7 @@ public class ArtistAlbumBrowserFragment extends Fragment implements
                             return true;
                         }
                     });
+                    mFragment.mPopupMenu = popup;
                 }
             });
         }
@@ -1088,4 +1099,14 @@ public class ArtistAlbumBrowserFragment extends Fragment implements
 
     }
 
+    @Override
+    public void onConfigurationChanged(Configuration config) {
+        super.onConfigurationChanged(config);
+        if (mPopupMenu != null) {
+            mPopupMenu.dismiss();
+        }
+        if (mSub != null) {
+            mSub.close();
+        }
+    }
 }

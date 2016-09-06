@@ -36,6 +36,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
+import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.database.AbstractCursor;
 import android.database.CharArrayBuffer;
@@ -150,6 +151,7 @@ public class TrackBrowserActivityFragment extends Fragment
     private BitmapDrawable mDefaultAlbumIcon;
     private static WaveView mAnimView;
     private static boolean mPause = false;
+    public PopupMenu mPopupMenu;
 
     public TrackBrowserActivityFragment()
     {
@@ -344,6 +346,7 @@ public class TrackBrowserActivityFragment extends Fragment
                 });
 
                 popup.show();
+                mPopupMenu = popup;
             }
         });
         mTrackList = getListView();
@@ -488,6 +491,12 @@ public class TrackBrowserActivityFragment extends Fragment
 
     @Override
     public void onDestroy() {
+        if (mPopupMenu != null) {
+            mPopupMenu.dismiss();
+        }
+        if (mSub != null) {
+            mSub.close();
+        }
         ListView lv = getListView();
         if (lv != null) {
             if (mUseLastListPos) {
@@ -906,8 +915,8 @@ public class TrackBrowserActivityFragment extends Fragment
 
     private void onCreatePopupMenu(PopupMenu menu) {
         menu.getMenu().add(0, PLAY_SELECTION, 0, R.string.play_selection);
-        SubMenu sub = menu.getMenu().addSubMenu(0, ADD_TO_PLAYLIST, 0, R.string.add_to_playlist);
-        MusicUtils.makePlaylistMenu(mParentActivity, sub);
+        mSub = menu.getMenu().addSubMenu(0, ADD_TO_PLAYLIST, 0, R.string.add_to_playlist);
+        MusicUtils.makePlaylistMenu(mParentActivity, mSub);
         menu.getMenu().add(0, DELETE_ITEM, 0, R.string.delete_item);
         if (TelephonyManager.getDefault().isMultiSimEnabled()) {
             int[] ringtones = { USE_AS_RINGTONE, USE_AS_RINGTONE_2 };
@@ -2017,6 +2026,7 @@ public class TrackBrowserActivityFragment extends Fragment
                             return true;
                         }
                     });
+                    mActivity.mPopupMenu = popup;
                 }
             });
             int secs = cursor.getInt(mDurationIdx) / 1000;
@@ -2181,5 +2191,16 @@ public class TrackBrowserActivityFragment extends Fragment
             // play the track
          MusicUtils.playAll(mParentActivity, mTrackCursor, position);
          mAdapter.notifyDataSetChanged();
+    }
+
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        if (mPopupMenu != null) {
+            mPopupMenu.dismiss();
+        }
+        if (mSub != null) {
+            mSub.close();
+        }
     }
 }
