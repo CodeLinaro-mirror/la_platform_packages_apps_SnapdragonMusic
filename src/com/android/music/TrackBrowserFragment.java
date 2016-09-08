@@ -1992,6 +1992,9 @@ public class TrackBrowserFragment extends Fragment implements
 
             String trackSize = cursor.getString(cursor
                     .getColumnIndexOrThrow(MediaStore.Audio.Media.SIZE));
+            if (TextUtils.isEmpty(trackSize)) {
+                trackSize = "0";
+            }
             vh.mCurrentTrackSize = getHumanReadableSize(context, Integer.parseInt(trackSize));
 
             Bitmap albumArt;
@@ -2124,6 +2127,9 @@ public class TrackBrowserFragment extends Fragment implements
 
         @Override
         public void changeCursor(Cursor cursor) {
+            if (cursor != null && cursor.isClosed()){
+                return;
+            }
             if (mFragment.getParentActivity().isFinishing() && cursor != null) {
                 cursor.close();
                 cursor = null;
