@@ -2135,7 +2135,9 @@ public class TrackBrowserActivityFragment extends Fragment
             if (mActivity.getParentActivity() != null
                     && mActivity.getParentActivity().isFinishing()
                     && cursor != null) {
-                cursor.close();
+                if (!cursor.isClosed()){
+                    cursor.close();
+                }
                 cursor = null;
             }
             if (cursor != mActivity.mTrackCursor) {

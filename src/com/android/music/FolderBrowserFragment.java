@@ -608,7 +608,9 @@ public class FolderBrowserFragment extends Fragment
             if (mFragment.getParentActivity() != null
                     && mFragment.getParentActivity().isFinishing()
                     && cursor != null) {
-                cursor.close();
+                if (!cursor.isClosed()){
+                    cursor.close();
+                }
                 cursor = null;
             }
             if (cursor != mFragment.mFilesCursor) {

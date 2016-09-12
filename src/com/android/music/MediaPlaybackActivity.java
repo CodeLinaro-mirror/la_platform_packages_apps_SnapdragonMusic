@@ -479,7 +479,7 @@ public class MediaPlaybackActivity extends Activity implements MusicUtils.Defs,
         mCurrentPlaylist.setImageResource(R.drawable.list);
         if (mFragment != null) {
             MusicUtils.isFragmentRemoved = true;
-            getFragmentManager().beginTransaction().remove(mFragment).commit();
+            getFragmentManager().beginTransaction().remove(mFragment).commitAllowingStateLoss();
         }
     }
 
@@ -494,7 +494,7 @@ public class MediaPlaybackActivity extends Activity implements MusicUtils.Defs,
                 if (mFragment != null) {
                     MusicUtils.isFragmentRemoved = true;
                     getFragmentManager().beginTransaction().remove(mFragment)
-                            .commit();
+                            .commitAllowingStateLoss();
                 }
             } else {
                 MusicUtils.isFragmentRemoved = false;
@@ -510,7 +510,7 @@ public class MediaPlaybackActivity extends Activity implements MusicUtils.Defs,
                 getFragmentManager()
                         .beginTransaction()
                         .add(R.id.current_queue_view, mFragment,
-                                "track_fragment").commit();
+                                "track_fragment").commitAllowingStateLoss();
             }
         }
     };
