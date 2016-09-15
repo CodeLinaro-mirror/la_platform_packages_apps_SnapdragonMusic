@@ -1201,7 +1201,9 @@ public class PlaylistBrowserFragment extends Fragment implements
         @Override
         public void changeCursor(Cursor cursor) {
             if (mFragment.getParentActivity().isFinishing() && cursor != null) {
-                cursor.close();
+                if (!cursor.isClosed()){
+                    cursor.close();
+                }
                 cursor = null;
             }
             if (cursor != mFragment.mPlaylistCursor) {
