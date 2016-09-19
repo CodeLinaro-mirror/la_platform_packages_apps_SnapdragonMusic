@@ -979,6 +979,9 @@ public class MusicUtils {
 
     private static void playAll(Context context, long[] list, int position,
             boolean force_shuffle) {
+        if (context == null) {
+            return;
+        }
         if (list.length == 0 || sService == null) {
             Log.d("MusicUtils", "attempt to play empty song list");
             // Don't try to play empty playlists. Nothing good will come of it.
