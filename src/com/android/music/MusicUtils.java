@@ -1023,8 +1023,10 @@ public class MusicUtils {
             sService.play();
         } catch (RemoteException ex) {
         } finally {
-            updateNowPlaying(MusicBrowserActivity.mActivityInstance,
-                    MusicBrowserActivity.isPanelExpanded);
+            if (MusicBrowserActivity.mActivityInstance != null) {
+                updateNowPlaying(MusicBrowserActivity.mActivityInstance,
+                        MusicBrowserActivity.isPanelExpanded);
+            }
             mRepeatPlay = false;
         }
     }
