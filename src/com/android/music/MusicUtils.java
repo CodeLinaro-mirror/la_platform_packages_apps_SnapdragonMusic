@@ -424,7 +424,7 @@ public class MusicUtils {
     private final static long [] sEmptyList = new long[0];
 
     public static long [] getSongListForCursor(Cursor cursor) {
-        if (cursor == null) {
+        if (cursor == null || cursor.isClosed()) {
             return sEmptyList;
         }
         int len = cursor.getCount();
