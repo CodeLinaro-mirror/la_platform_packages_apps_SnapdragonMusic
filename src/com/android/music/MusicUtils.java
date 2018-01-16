@@ -816,7 +816,7 @@ public class MusicUtils {
     }
 
     public static void setSpinnerState(Activity a) {
-        if (isMediaScannerScanning(a)) {
+        /*if (isMediaScannerScanning(a)) {
             // start the progress spinner
             a.getWindow().setFeatureInt(
                     Window.FEATURE_INDETERMINATE_PROGRESS,
@@ -830,7 +830,7 @@ public class MusicUtils {
             a.getWindow().setFeatureInt(
                     Window.FEATURE_INDETERMINATE_PROGRESS,
                     Window.PROGRESS_VISIBILITY_OFF);
-        }
+        }*/
     }
 
     private static String mLastSdStatus;

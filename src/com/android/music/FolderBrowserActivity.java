@@ -89,7 +89,7 @@ public class FolderBrowserActivity extends ListActivity
             mCurretParent = icicle.getString("selectedParent");
         }
         super.onCreate(icicle);
-        requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
+        //requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         setVolumeControlStream(AudioManager.STREAM_MUSIC);
         mToken = MusicUtils.bindToService(this, this);

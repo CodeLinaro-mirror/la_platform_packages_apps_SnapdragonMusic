@@ -125,7 +125,7 @@ public class TrackBrowserActivity extends ListActivity
     public void onCreate(Bundle icicle)
     {
         super.onCreate(icicle);
-        requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
+        //requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
         Intent intent = getIntent();
         if (intent != null) {
             if (intent.getBooleanExtra("withtabs", false)) {

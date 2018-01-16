@@ -91,7 +91,7 @@ public class ArtistAlbumBrowserActivity extends ExpandableListActivity
     public void onCreate(Bundle icicle) {
         super.onCreate(icicle);
         mActivity = this;
-        requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
+        //requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         setVolumeControlStream(AudioManager.STREAM_MUSIC);
         if (icicle != null) {
