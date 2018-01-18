@@ -1243,8 +1243,8 @@ public class MediaPlaybackService extends Service {
         }
 
         // Share this notification directly with our widgets
-        mAppWidgetProvider.notifyChange(this, what);
-        mAppWidgetProviderLarge.notifyChange(this, what);
+        // mAppWidgetProvider.notifyChange(this, what);
+        // mAppWidgetProviderLarge.notifyChange(this, what);
     }
 
     private void ensurePlayListCapacity(int size) {
