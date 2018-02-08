@@ -105,7 +105,7 @@ public class PlaylistBrowserActivity extends Activity implements
             mCreateShortcut = true;
         }
 
-        requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
+        //requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         setVolumeControlStream(AudioManager.STREAM_MUSIC);
         mToken = MusicUtils.bindToService(this, new ServiceConnection() {

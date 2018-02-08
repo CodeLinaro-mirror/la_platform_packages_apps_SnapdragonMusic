@@ -450,7 +450,7 @@ public class MusicPicker extends ListActivity
         super.onCreate(icicle);
         mAudioManager = (AudioManager) MusicPicker.this.getSystemService(Context.AUDIO_SERVICE);
 
-        requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
+        //requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
 
         mIsAsAlarm = getIntent().getBooleanExtra("mIsAsAlarm", false);
 
