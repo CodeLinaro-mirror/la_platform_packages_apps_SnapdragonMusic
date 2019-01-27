@@ -1286,14 +1286,20 @@ public class MusicUtils {
     }
     private static boolean isUriExisted(Context context, Uri uri) {
         if (uri != null) {
-            Cursor result = context.getContentResolver().query(uri, null, null, null, null);
-            if (result != null) {
-                if (result.getCount() == 0) {
-                    result.close();
-                    return false;
-                }
-                return true;
-            }
+            Cursor result = null;
+            try {
+               result = context.getContentResolver().query(uri, null, null, null, null);
+             } catch (UnsupportedOperationException ex) {
+                Log.e(TAG, "UnsupportedOperationException for " + uri);
+             } finally {
+                if (result != null) {
+                    if (result.getCount() == 0) {
+                        result.close();
+                        return false;
+                    }
+                    return true;
+                 }
+             }
         }
         return false;
     }
@@ -1303,6 +1309,7 @@ public class MusicUtils {
         Bitmap bm = null;
         byte [] art = null;
         String path = null;
+        Uri uri = null;
 
         if (albumid < 0 && songid < 0) {
             throw new IllegalArgumentException("Must specify an album or a song id");
@@ -1313,7 +1320,7 @@ public class MusicUtils {
                 if (sLastSong == songid) {
                     return sCachedBitSong != null? sCachedBitSong : getDefaultArtwork(context);
                 }
-                Uri uri = Uri.parse("content://media/external/audio/media/" + songid + "/albumart");
+                uri = Uri.parse("content://media/external/audio/media/" + songid + "/albumart");
                 if (isUriExisted(context, uri)) {
                    throw new FileNotFoundException();
                 }
@@ -1327,7 +1334,7 @@ public class MusicUtils {
                    return sCachedBitAlbum != null?
                            sCachedBitAlbum : getDefaultArtwork(context);
                 }
-                Uri uri = ContentUris.withAppendedId(sArtworkUri, albumid);
+                uri = ContentUris.withAppendedId(sArtworkUri, albumid);
                 if (isUriExisted(context, uri)) {
                     throw new FileNotFoundException();
                 }
@@ -1339,6 +1346,8 @@ public class MusicUtils {
             }
         } catch (IllegalStateException ex) {
         } catch (FileNotFoundException ex) {
+        } catch (IllegalArgumentException ex) {
+            Log.e(TAG, "IllegalArgumentException for " + uri);
         } finally {
             try {
                 if (pfd != null) {
