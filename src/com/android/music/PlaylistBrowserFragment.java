@@ -513,6 +513,8 @@ public class PlaylistBrowserFragment extends Fragment implements
 
         if (mi.id >= 0) {
             menu.add(0, RENAME_PLAYLIST, 0, R.string.rename_playlist_menu);
+            MenuItem menuItem = menu.findItem(RENAME_PLAYLIST);
+            menuItem.setVisible(false);
         }
 
         mPlaylistCursor.moveToPosition(mi.position);
@@ -1193,6 +1195,8 @@ public class PlaylistBrowserFragment extends Fragment implements
                     if (id >= 0) {
                         popup.getMenu().add(0, RENAME_PLAYLIST, 0,
                                 R.string.rename_playlist_menu);
+                        MenuItem menuItem = popup.getMenu().findItem(RENAME_PLAYLIST);
+                        menuItem.setVisible(false);
                     }
                     if (parentActivity.getResources()
                             .getBoolean(R.bool.add_playlist_by_filemanager)) {
