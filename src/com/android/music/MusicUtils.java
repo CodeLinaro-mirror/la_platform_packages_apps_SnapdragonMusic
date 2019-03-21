@@ -1291,6 +1291,11 @@ public class MusicUtils {
         return null;
     }
     private static boolean isUriExisted(Context context, Uri uri) {
+        //workaround for media provider AOB issue
+        if (uri != null) {
+            return false;
+        }
+
         if (uri != null) {
             Cursor result = null;
             try {
