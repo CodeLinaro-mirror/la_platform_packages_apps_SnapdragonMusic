@@ -237,7 +237,10 @@ public class MusicBrowserActivity extends MediaPlaybackActivity implements
         if (mToolbar.getMenu() != null) {
             mToolbar.getMenu().clear();
         }
+
         mToolbar.inflateMenu(R.menu.main);
+        MenuItem menuItem = mToolbar.getMenu().findItem(R.id.action_search);
+        menuItem.setVisible(false);
         mToolbar.setOnMenuItemClickListener(new OnMenuItemClickListener() {
 
             @Override
