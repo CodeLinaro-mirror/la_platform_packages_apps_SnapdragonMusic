@@ -1191,6 +1191,8 @@ public class MediaPlaybackActivity extends Activity implements MusicUtils.Defs,
                 loadPreviousFragment();
                 return true;
             }
+
+            MusicUtils.isLaunchedFromQueryBrowser = false;
             if (MusicUtils.isLaunchedFromQueryBrowser) {
                 MusicUtils.isLaunchedFromQueryBrowser = false;
                 Intent intent = new Intent(MediaPlaybackActivity.this,
