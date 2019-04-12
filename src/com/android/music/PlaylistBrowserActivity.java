@@ -445,6 +445,8 @@ public class PlaylistBrowserActivity extends Activity implements
 
         if (mi.id >= 0) {
             menu.add(0, RENAME_PLAYLIST, 0, R.string.rename_playlist_menu);
+            MenuItem menuItem = menu.findItem(RENAME_PLAYLIST);
+            menuItem.setVisible(false);
         }
 
         mPlaylistCursor.moveToPosition(mi.position);

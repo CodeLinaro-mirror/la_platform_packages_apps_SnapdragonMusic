@@ -87,12 +87,6 @@
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
-        <receiver android:name="com.android.music.MediaButtonIntentReceiver">
-            <intent-filter>
-                <action android:name="android.intent.action.MEDIA_BUTTON" />
-                <action android:name="android.media.AUDIO_BECOMING_NOISY" />
-            </intent-filter>
-        </receiver>
         <!-- This is the "current music playing" panel, which has special
              launch behavior.  We clear its task affinity, so it will not
              be associated with the main media task and if launched
