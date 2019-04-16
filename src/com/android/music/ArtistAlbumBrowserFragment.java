@@ -324,7 +324,7 @@ public class ArtistAlbumBrowserFragment extends Fragment implements
     public boolean onChildClick(ExpandableListView parent, View v,
             int groupPosition, int childPosition, long id) {
 
-        mCurrentAlbumId = Long.valueOf(id).toString();
+        String albumId = mCurrentAlbumId;
         MusicUtils.navigatingTabPosition = 0;
         mActivity.findViewById(R.id.music_tool_bar).setVisibility(View.GONE);
         Fragment fragment = null;
@@ -336,6 +336,8 @@ public class ArtistAlbumBrowserFragment extends Fragment implements
                     .getChild(groupPosition, childPosition);
             String album = c.getString(c
                     .getColumnIndex(MediaStore.Audio.Albums.ALBUM));
+            albumId = c.getString(c
+                    .getColumnIndex(MediaStore.Audio.Albums.ALBUM_ID));
         } catch (Exception e) {
         } finally {
             if (c != null) {
@@ -346,7 +348,7 @@ public class ArtistAlbumBrowserFragment extends Fragment implements
         mCurrentArtistId = mArtistCursor.getString(mArtistCursor
                 .getColumnIndex(MediaStore.Audio.Artists._ID));
         args.putString("artist", mCurrentArtistId);
-        args.putString("album", mCurrentAlbumId);
+        args.putString("album", albumId);
         fragment.setArguments(args);
         getFragmentManager().beginTransaction()
                 .replace(R.id.fragment_page, fragment, "track_fragment")
@@ -866,7 +868,7 @@ public class ArtistAlbumBrowserFragment extends Fragment implements
             }
             vh.mCurrentArtistName = cursor.getString(mGroupArtistIdx);
             vh.mCurrentAlbumID = cursor.getString(cursor
-                    .getColumnIndexOrThrow(MediaStore.Audio.Albums._ID));
+                    .getColumnIndexOrThrow(MediaStore.Audio.Albums.ALBUM_ID));
             vh.line1.setText(displayname);
             vh.mCurrentAlbumName = displayname;
             int numsongs = cursor
@@ -914,7 +916,7 @@ public class ArtistAlbumBrowserFragment extends Fragment implements
             }
 
             mFragment.mCurrentAlbumId = cursor.getString(cursor
-                    .getColumnIndexOrThrow(MediaStore.Audio.Albums._ID));
+                    .getColumnIndexOrThrow(MediaStore.Audio.Albums.ALBUM_ID));
 
             iv.setOnClickListener(new OnClickListener() {
 
@@ -962,6 +964,7 @@ public class ArtistAlbumBrowserFragment extends Fragment implements
                     .getColumnIndexOrThrow(MediaStore.Audio.Artists._ID));
 
             String[] cols = new String[] { MediaStore.Audio.Albums._ID,
+                    MediaStore.Audio.Albums.ALBUM_ID,
                     MediaStore.Audio.Albums.ALBUM,
                     MediaStore.Audio.Albums.NUMBER_OF_SONGS,
                     MediaStore.Audio.Albums.NUMBER_OF_SONGS_FOR_ARTIST,

@@ -1,3 +1,4 @@
+ifeq ($(TARGET_FWK_SUPPORTS_FULL_VALUEADDS),true)
 ifneq ($(TARGET_HAS_LOW_RAM),true)
 
 LOCAL_PATH:= $(call my-dir)
@@ -38,4 +39,5 @@ include $(BUILD_PACKAGE)
 # Use the folloing include to make our test apk.
 #include $(call all-makefiles-under,$(LOCAL_PATH))
 
+endif
 endif
