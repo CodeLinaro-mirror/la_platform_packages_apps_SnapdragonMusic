@@ -164,6 +164,7 @@ public class MediaPlaybackActivity extends Activity implements MusicUtils.Defs,
     private static final int SWITCH_MUSIC_MAX_TIME = 2000;
     private int mLyricIconStatus;
     public boolean mIsPanelExpanded = false;
+    private MediaButtonIntentReceiver mMediaButtonIntentReceiver = new MediaButtonIntentReceiver();
 
     public MediaPlaybackActivity() {
     }
@@ -194,6 +195,12 @@ public class MediaPlaybackActivity extends Activity implements MusicUtils.Defs,
         metaChangeFilter.addAction(MediaPlaybackService.QUEUE_CHANGED);
         metaChangeFilter.addAction(MediaPlaybackService.PLAYSTATE_CHANGED);
         registerReceiver(mTrackListListener, metaChangeFilter);
+
+        IntentFilter f = new IntentFilter();
+        f.addAction(AudioManager.ACTION_AUDIO_BECOMING_NOISY);
+        f.addAction(Intent.ACTION_MEDIA_BUTTON);
+        registerReceiver(mMediaButtonIntentReceiver, f);
+
         new MusicUtils.BitmapDownloadThread(this, null, 0, 20).start();
     }
 
@@ -940,6 +947,8 @@ public class MediaPlaybackActivity extends Activity implements MusicUtils.Defs,
             mLyric.release();
         }
         mLyricPanel = null;
+
+        unregisterReceiver(mMediaButtonIntentReceiver);
         super.onDestroy();
     }
 
