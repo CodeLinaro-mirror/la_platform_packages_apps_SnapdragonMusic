@@ -39,6 +39,8 @@ import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
+import android.content.res.Resources;
+
 import android.database.Cursor;
 import android.database.sqlite.SQLiteException;
 //import android.drm.DrmManagerClientWrapper;
@@ -731,6 +733,11 @@ public class MediaPlaybackService extends Service {
         //because of service is died, so can not use performUpdate
         Intent intent = new Intent(UPDATE_WIDGET_ACTION);
         sendBroadcast(intent);
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O){
+            NotificationManager nm = (NotificationManager) getSystemService(
+                    Context.NOTIFICATION_SERVICE);
+            nm.deleteNotificationChannel(CHANNEL_ONE_ID);
+        }
 
         mWakeLock.release();
         super.onDestroy();
@@ -1259,6 +1266,11 @@ public class MediaPlaybackService extends Service {
             }
             Bitmap b = MusicUtils.getArtwork(this, getAudioId(), getAlbumId(), false);
             if (b != null) {
+                ed.putBitmap(MetadataEditor.BITMAP_KEY_ARTWORK, b);
+            } else {
+                Context context = MediaPlaybackService.this;
+                Resources r = context.getResources();
+                b = BitmapFactory.decodeResource(r, R.drawable.album_cover);
                 ed.putBitmap(MetadataEditor.BITMAP_KEY_ARTWORK, b);
             }
             ed.apply();
@@ -3018,12 +3030,6 @@ public class MediaPlaybackService extends Service {
         public void stop() {
             mCurrentMediaPlayer.reset();
             mIsInitialized = false;
-
-            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O){
-                NotificationManager nm = (NotificationManager) getSystemService(
-                        Context.NOTIFICATION_SERVICE);
-                nm.deleteNotificationChannel(CHANNEL_ONE_ID);
-            }
         }
 
         /**

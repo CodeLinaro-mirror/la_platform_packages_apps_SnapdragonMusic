@@ -49,12 +49,14 @@ import android.view.ViewGroup;
 import android.view.accessibility.AccessibilityEvent;
 import android.support.v4.view.MotionEventCompat;
 import android.support.v4.view.ViewCompat;
+import android.util.Log;
 
 import com.android.music.MediaPlaybackActivity;
 import com.android.music.MusicBrowserActivity.SimplePanelSlideListener;
 import com.android.music.MusicUtils;
 
 public class MusicPanelLayout extends ViewGroup {
+    private static final String TAG = "MusicPanelLayout";
 
     private static final int[] INITIAl_ATTRIBUTES = new int[] { android.R.attr.gravity };
     private final static int MARGIN_TOP = 45;
@@ -718,12 +720,26 @@ public class MusicPanelLayout extends ViewGroup {
                 canvas.drawRect(mSampleRectangle, mFadePaintOccupied);
             }
         } else {
-            result = super.drawChild(canvas, child, drawingTime);
+            try {
+                result = super.drawChild(canvas, child, drawingTime);
+            } catch (Exception e) {
+                Log.d(TAG, ": drawChild    e="+e);
+                result = false;
+            }
         }
 
         canvas.restoreToCount(save);
 
         return result;
+    }
+
+    @Override
+    protected void onDraw(Canvas canvas) {
+        try {
+            super.onDraw(canvas);
+        } catch (Exception e) {
+            Log.d(TAG, ": onDraw  e="+e);
+        }
     }
 
     @Override

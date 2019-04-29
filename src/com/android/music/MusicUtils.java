@@ -142,6 +142,10 @@ public class MusicUtils {
     static Bitmap mAlbumArtsArray[];
 
     public static boolean mIsScreenOff = false;
+    //cache the artwork to avoid the bitmap is released when the quick view the songs in play panel
+    private final static int MAX_ARTWORK_CACHE_SIZE = 40;
+    static Bitmap mAlbumArtWorkCacheArray[] = new Bitmap[MAX_ARTWORK_CACHE_SIZE];
+    private static int counter = 0;
 
     public interface Defs {
         public final static int OPEN_URL = 0;
@@ -169,6 +173,13 @@ public class MusicUtils {
     private static void addDateToCache(String artistName,
             Bitmap[] mAlbumArtsArray2) {
         MusicUtils.putIntoLruCache(artistName, mAlbumArtsArray2, mArtCache);
+    }
+
+    public static void addArtworkToCache(Bitmap bitmap) {
+        if(counter == MAX_ARTWORK_CACHE_SIZE){
+            counter = 0;
+        }
+        mAlbumArtWorkCacheArray[counter++] = bitmap;
     }
 
     public static String makeAlbumsLabel(Context context, int numalbums,
@@ -1196,8 +1207,6 @@ public class MusicUtils {
                                     true);
                             // Bitmap.createScaledBitmap() can return the same
                             // bitmap
-                            if (tmp != b)
-                                b.recycle();
                             b = tmp;
                         }
                     }
@@ -1238,14 +1247,20 @@ public class MusicUtils {
         if (album_id < 0) {
             // This is something that is not in the database, so get the album
             // art directly from the file.
+            Bitmap bm = null;
             if (song_id >= 0) {
-                Bitmap bm = getArtworkFromFile(context, song_id, -1);
+                bm = getArtworkFromFile(context, song_id, -1);
                 if (bm != null) {
+                    addArtworkToCache(bm);
                     return bm;
                 }
             }
             if (allowdefault) {
-                return getDefaultArtwork(context);
+                bm = getDefaultArtwork(context);
+                if (bm != null && song_id >= 0) {
+                    addArtworkToCache(bm);
+                }
+                return bm;
             }
             return null;
         }
@@ -1255,11 +1270,12 @@ public class MusicUtils {
         if (uri != null) {
             InputStream in = null;
             try {
-                if (!isUriExisted(context, uri)) {
-                  throw new FileNotFoundException();
-                }
                 in = res.openInputStream(uri);
-                return BitmapFactory.decodeStream(in, null, sBitmapOptions);
+                Bitmap b= BitmapFactory.decodeStream(in, null, sBitmapOptions);
+                if (b != null && song_id >= 0) {
+                    addArtworkToCache(b);
+                }
+                return b;
             } catch (FileNotFoundException ex) {
                 // The album art thumbnail does not actually exist. Maybe the
                 // user deleted it, or
@@ -1274,6 +1290,9 @@ public class MusicUtils {
                     }
                 } else if (allowdefault) {
                     bm = getDefaultArtwork(context);
+                }
+                if (bm != null && song_id >= 0) {
+                    addArtworkToCache(bm);
                 }
                 return bm;
             } catch (OutOfMemoryError ex) {
@@ -1332,9 +1351,6 @@ public class MusicUtils {
                     return sCachedBitSong != null? sCachedBitSong : getDefaultArtwork(context);
                 }
                 uri = Uri.parse("content://media/external/audio/media/" + songid + "/albumart");
-                if (isUriExisted(context, uri)) {
-                   throw new FileNotFoundException();
-                }
                 pfd = context.getContentResolver().openFileDescriptor(uri, "r");
                 if (pfd != null) {
                     FileDescriptor fd = pfd.getFileDescriptor();
@@ -1343,12 +1359,9 @@ public class MusicUtils {
             } else {
                 if (sLastAlbum == albumid) {
                    return sCachedBitAlbum != null?
-                           sCachedBitAlbum : getDefaultArtwork(context);
+                           sCachedBitAlbum : getDefaultArtworkImage(context);
                 }
                 uri = ContentUris.withAppendedId(sArtworkUri, albumid);
-                if (isUriExisted(context, uri)) {
-                    throw new FileNotFoundException();
-                }
                 pfd = context.getContentResolver().openFileDescriptor(uri, "r");
                 if (pfd != null) {
                     FileDescriptor fd = pfd.getFileDescriptor();
@@ -1383,6 +1396,12 @@ public class MusicUtils {
         return BitmapFactory.decodeStream(
                 context.getResources().openRawResource(R.drawable.album_cover_background),
                 null, opts);
+    }
+
+    public static Bitmap getDefaultArtworkImage(Context context) {
+        Resources r = context.getResources();
+        Bitmap b = BitmapFactory.decodeResource(r, R.drawable.album_cover);
+        return b;
     }
 
     static int getIntPref(Context context, String name, int def) {
@@ -2225,8 +2244,6 @@ public class MusicUtils {
                                     || sBitmapOptionsCache.outHeight != h) {
                                 Bitmap tmp = Bitmap.createScaledBitmap(b, w, h,
                                         true);
-                                if (tmp != b)
-                                    b.recycle();
                                 b = tmp;
                             }
                         }
