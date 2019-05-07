@@ -1859,7 +1859,8 @@ public class MediaPlaybackActivity extends Activity implements MusicUtils.Defs,
         public void handleMessage(Message msg) {
             switch (msg.what) {
             case ALBUM_ART_DECODED:
-                if (msg.obj != null && msg.obj instanceof Bitmap) {
+                if (msg.obj != null && msg.obj instanceof Bitmap
+                        && !(((Bitmap) msg.obj).isRecycled())) {
                     mAlbum.setImageBitmap((Bitmap) msg.obj);
                     mAlbum.getDrawable().setDither(true);
                     mAlbumIcon.setImageBitmap((Bitmap) msg.obj);
