@@ -647,17 +647,24 @@ public class AlbumBrowserFragment extends Fragment implements MusicUtils.Defs,
             ImageView img = null;
             String art = null;
             String name = null;
+            Context context;
 
-            public BitmapDownload(ImageView img, String art, String name) {
+            public BitmapDownload(Context context, ImageView img, String art, String name) {
                 this.img = img;
                 this.art = art;
                 this.name = name;
+                this.context = context;
             }
 
             @Override
             protected Object doInBackground(Object... params) {
                 Bitmap albumArt[] = new Bitmap[1];
-                albumArt[0] = BitmapFactory.decodeFile(art);
+                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.P){
+                    int albumIdx = Integer.valueOf(art);
+                    albumArt[0] = MusicUtils.getArtwork(context, -1, albumIdx, false);
+                } else {
+                    albumArt[0] = BitmapFactory.decodeFile(art);
+                }
                 MusicUtils.mAlbumArtCache.put(art, albumArt);
                 return albumArt[0];
             }
@@ -666,7 +673,15 @@ public class AlbumBrowserFragment extends Fragment implements MusicUtils.Defs,
             protected void onPostExecute(Object result) {
                 super.onPostExecute(result);
                 if (img != null && art.equals(img.getTag())) {
-                    img.setImageBitmap((Bitmap) result);
+                    if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.P){
+                        if ((result != null) && !(((Bitmap) result).isRecycled())) {
+                            img.setImageBitmap((Bitmap) result);
+                        } else {
+                            img.setImageDrawable(null);
+                        }
+                    } else {
+                        img.setImageBitmap((Bitmap) result);
+                    }
                 }
             }
         }
@@ -697,6 +712,9 @@ public class AlbumBrowserFragment extends Fragment implements MusicUtils.Defs,
             // We don't actually need the path to the thumbnail file,
             // we just use it to see if there is album art or not
             String art = cursor.getString(mAlbumArtIndex);
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.P){
+                art = vh.albumID;
+            }
             Bitmap albumArt[];
             if (art != null) {
                 albumArt = MusicUtils.mAlbumArtCache.get(art);
@@ -709,7 +727,7 @@ public class AlbumBrowserFragment extends Fragment implements MusicUtils.Defs,
             } else {
                 if (albumArt == null || albumArt[0] == null) {
                     iv.setTag(art);
-                    new BitmapDownload(iv, art, name).execute();
+                    new BitmapDownload(context, iv, art, name).execute();
                 } else {
                     iv.setImageBitmap(albumArt[0]);
                 }
