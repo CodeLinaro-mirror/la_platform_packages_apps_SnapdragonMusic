@@ -349,7 +349,7 @@ public class MediaPlaybackService extends Service {
                                     .create();
 
                             alertDialog.getWindow()
-                                    .setType(WindowManager.LayoutParams.TYPE_SYSTEM_ALERT);
+                                    .setType(WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY);
                             alertDialog.show();
                         }
                     }
@@ -662,6 +662,7 @@ public class MediaPlaybackService extends Service {
         mControlInStatusBar = getApplicationContext().getResources().getBoolean(R.bool.control_in_statusbar);
 
         updateNotification();
+        startForeground(PLAYBACKSERVICE_STATUS, status);
 
     }
 
@@ -3451,11 +3452,11 @@ public class MediaPlaybackService extends Service {
                         if (keycode == KeyEvent.KEYCODE_HEADSETHOOK &&
                                 eventTime - mLastClickTime < 300) {
                             i.putExtra(MediaPlaybackService.CMDNAME, MediaPlaybackService.CMDNEXT);
-                            context.startService(i);
+                            MusicUtils.startService(context, i);
                             mLastClickTime = 0;
                         } else {
                             i.putExtra(MediaPlaybackService.CMDNAME, command);
-                            context.startService(i);
+                            MusicUtils.startService(context, i);
                             mLastClickTime = eventTime;
                         }
 

@@ -267,7 +267,7 @@ public class MusicUtils {
             realActivity = context;
         }
         ContextWrapper cw = new ContextWrapper(context);
-        cw.startService(new Intent(cw, MediaPlaybackService.class));
+        MusicUtils.startService(cw, new Intent(cw, MediaPlaybackService.class));
         ServiceBinder sb = new ServiceBinder(callback);
         if (cw.bindService((new Intent()).setClass(cw, MediaPlaybackService.class), sb, 0)) {
             sConnectionMap.put(cw, sb);
@@ -2292,4 +2292,19 @@ public class MusicUtils {
 
         return  lruCache.put(key, value);
     }
+
+    public static void startService(Context context, Intent intent) {
+        if (context == null || intent == null){
+            Log.e(TAG, "context or intent null");
+            return ;
+        }
+
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+            context.startForegroundService(intent);
+        } else {
+            context.startService(intent);
+        }
+        return;
+    }
+
 }
