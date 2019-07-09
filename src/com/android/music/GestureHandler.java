@@ -31,6 +31,7 @@ package com.android.music;
 import android.app.Activity;
 import android.content.Intent;
 import android.content.ComponentName;
+import android.content.Context;
 import android.os.Bundle;
 import android.util.Log;
 
@@ -50,21 +51,22 @@ public class GestureHandler extends Activity {
         String componentName = intent.getComponent().getClassName();
         Log.d(LOGTAG,"GestureHandler get componentName : "+ componentName);
 
+        Context context = GestureHandler.this;
         if (GESTURE_CONTROL_PLAY.equals(componentName)) {
             Intent i = new Intent(this, MediaPlaybackService.class);
             i.setAction(MediaPlaybackService.SERVICECMD);
             i.putExtra(MediaPlaybackService.CMDNAME, MediaPlaybackService.CMDTOGGLEPAUSE);
-            this.startService(i);
+            MusicUtils.startService(context, i);
         } else if (GESTURE_CONTROL_PREV.equals(componentName)) {
             Intent i = new Intent(this, MediaPlaybackService.class);
             i.setAction(MediaPlaybackService.SERVICECMD);
             i.putExtra(MediaPlaybackService.CMDNAME, MediaPlaybackService.CMDPREVIOUS);
-            this.startService(i);
+            MusicUtils.startService(context, i);
         } else if (GESTURE_CONTROL_NEXT.equals(componentName)) {
             Intent i = new Intent(this, MediaPlaybackService.class);
             i.setAction(MediaPlaybackService.SERVICECMD);
             i.putExtra(MediaPlaybackService.CMDNAME, MediaPlaybackService.CMDNEXT);
-            this.startService(i);
+            MusicUtils.startService(context, i);
         }
         finish();
     };
