@@ -767,6 +767,9 @@ public class MediaPlaybackActivity extends Activity implements MusicUtils.Defs,
 
     public View.OnClickListener mPauseListener = new View.OnClickListener() {
         public void onClick(View v) {
+            if (MusicUtils.isForbidPlaybackInCall(MediaPlaybackActivity.this)){
+                return;
+            }
             doPauseResume();
         }
     };
@@ -775,6 +778,9 @@ public class MediaPlaybackActivity extends Activity implements MusicUtils.Defs,
         public void onClick(View v) {
             if (mService == null)
                 return;
+            if (MusicUtils.isForbidPlaybackInCall(MediaPlaybackActivity.this)){
+                return;
+            }
             sendIsRespondMessage(GO_PRE);
         }
     };
@@ -783,6 +789,9 @@ public class MediaPlaybackActivity extends Activity implements MusicUtils.Defs,
         public void onClick(View v) {
             if (mService == null)
                 return;
+            if (MusicUtils.isForbidPlaybackInCall(MediaPlaybackActivity.this)){
+                return;
+            }
             sendIsRespondMessage(GO_NEXT);
         }
     };
@@ -1244,6 +1253,11 @@ public class MediaPlaybackActivity extends Activity implements MusicUtils.Defs,
     private boolean seekMethod1(int keyCode) {
         if (mService == null)
             return false;
+
+        if (MusicUtils.isForbidPlaybackInCall(this)){
+            return false;
+        }
+
         for (int x = 0; x < 10; x++) {
             for (int y = 0; y < 3; y++) {
                 if (keyboard[y][x] == keyCode) {
@@ -1289,6 +1303,11 @@ public class MediaPlaybackActivity extends Activity implements MusicUtils.Defs,
     private boolean seekMethod2(int keyCode) {
         if (mService == null)
             return false;
+
+        if (MusicUtils.isForbidPlaybackInCall(this)){
+            return false;
+        }
+
         for (int i = 0; i < 10; i++) {
             if (keyboard[0][i] == keyCode) {
                 int seekpercentage = 100 * i / 10;
@@ -1312,6 +1331,10 @@ public class MediaPlaybackActivity extends Activity implements MusicUtils.Defs,
                     break;
                 }
                 if (mService != null) {
+                    if (MusicUtils.isForbidPlaybackInCall(this)){
+                        return false;
+                    }
+
                     if (!mSeeking && mStartSeekPos >= 0) {
                         mPauseButton.requestFocus();
                         if (mStartSeekPos < 1000) {
@@ -1333,7 +1356,11 @@ public class MediaPlaybackActivity extends Activity implements MusicUtils.Defs,
                 if (!useDpadMusicControl()) {
                     break;
                 }
+
                 if (mService != null) {
+                    if (MusicUtils.isForbidPlaybackInCall(this)){
+                        return false;
+                    }
                     if (!mSeeking && mStartSeekPos >= 0) {
                         mPauseButton.requestFocus();
                         mService.next();
@@ -1432,6 +1459,10 @@ public class MediaPlaybackActivity extends Activity implements MusicUtils.Defs,
     }
 
     private void scanBackward(int repcnt, long delta) {
+        if (MusicUtils.isForbidPlaybackInCall(this)){
+            return;
+        }
+
         if (mService == null) {
             if (repcnt < 0)
                 mPosOverride = -1;
@@ -1475,6 +1506,10 @@ public class MediaPlaybackActivity extends Activity implements MusicUtils.Defs,
     }
 
     private void scanForward(int repcnt, long delta) {
+        if (MusicUtils.isForbidPlaybackInCall(this)){
+            return;
+        }
+
         if (mService == null) {
             if (repcnt < 0)
                 mPosOverride = -1;
@@ -1608,6 +1643,9 @@ public class MediaPlaybackActivity extends Activity implements MusicUtils.Defs,
     };
 
     private void startPlayback() {
+        if (MusicUtils.isForbidPlaybackInCall(this)){
+            return;
+        }
 
         if (mService == null)
             return;

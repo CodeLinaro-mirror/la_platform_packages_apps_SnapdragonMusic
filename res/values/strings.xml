@@ -440,5 +440,6 @@
     <string name="audio_preview_fail_io">Can\'t open file</string>
     <string name="audio_preview_fail_illegal_state">Illegal state, failed to open file.</string>
     <string name="audio_preview_fail_illegal_argument">Illegal argument, failed to open file.</string>
+    <string name="cant_play_music_in_call">Sorry, can not play music in a call.</string>
 </resources>
 
