@@ -213,5 +213,6 @@
     <!-- add by filemanager -->
     <string name="add_by_filemanager">"从文件管理器添加"</string>
     <string name="add_file_failed">"无法添加，格式不支持或媒体库中还未扫描到此文件"</string>
+    <string name="cant_play_music_in_call">抱歉，通话中不能播放音乐</string>
 
 </resources>
