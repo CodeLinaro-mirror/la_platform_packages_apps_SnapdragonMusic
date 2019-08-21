@@ -1000,6 +1000,9 @@ public class MusicUtils {
 
     private static void playAll(Context context, long[] list, int position,
             boolean force_shuffle) {
+        if (isForbidPlaybackInCall(context)) {
+            return;
+        }
         if (list.length == 0 || sService == null) {
             Log.d("MusicUtils", "attempt to play empty song list");
             // Don't try to play empty playlists. Nothing good will come of it.
@@ -2271,6 +2274,20 @@ public class MusicUtils {
         int state = telephonyManager.getCallState();
         return (state == TelephonyManager.CALL_STATE_OFFHOOK
                 || state == TelephonyManager.CALL_STATE_RINGING);
+    }
+
+    public static boolean isForbidPlaybackInCall(Context context) {
+        if (context == null)
+            return false;
+
+        if (isTelephonyCallInProgress(context)) {
+            Log.d("MusicUtils", "playAll  in a call");
+            // Don't try to play music in a call begin from android Q.
+            Toast.makeText(context, R.string.cant_play_music_in_call, Toast.LENGTH_SHORT).show();
+            return true;
+        }
+
+        return false;
     }
 
     public static void addSetRingtonMenu(Menu menu) {

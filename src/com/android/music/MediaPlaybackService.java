@@ -471,6 +471,11 @@ public class MediaPlaybackService extends Service {
             String action = intent.getAction();
             String cmd = intent.getStringExtra("command");
             MusicUtils.debugLog("mIntentReceiver.onReceive " + action + " / " + cmd);
+
+            if (MusicUtils.isForbidPlaybackInCall(context)){
+                return;
+            }
+
             if (CMDNEXT.equals(cmd) || NEXT_ACTION.equals(action)) {
                 sendEmptyMessageIfNo(GOTO_NEXT);
             } else if (CMDPREVIOUS.equals(cmd) || PREVIOUS_ACTION.equals(action)) {
@@ -1158,6 +1163,11 @@ public class MediaPlaybackService extends Service {
             public void onReceive(Context context, Intent intent) {
                 String action = intent.getAction();
                 String cmd = intent.getStringExtra("command");
+
+                if (MusicUtils.isForbidPlaybackInCall(context)){
+                    return;
+                }
+
                 if (action.equals(SET_ADDRESSED_PLAYER)) {
                     play(); // this ensures audio focus change is called and play the media
                 } else if (action.equals(PLAYSTATUS_REQUEST)) {
@@ -1766,6 +1776,10 @@ public class MediaPlaybackService extends Service {
     }
 
     private void updateNotification() {
+        if (MusicUtils.isForbidPlaybackInCall(getApplicationContext())){
+            return;
+        }
+
         views = new RemoteViews(getPackageName(), R.layout.statusbar_appwidget_s);
         viewsLarge = new RemoteViews(getPackageName(), R.layout.statusbar_appwidget_l);
         if (getApplicationContext().getResources().getBoolean(R.bool.exit_in_notification)) {
