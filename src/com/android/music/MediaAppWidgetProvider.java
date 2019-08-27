@@ -70,7 +70,10 @@ public class MediaAppWidgetProvider extends AppWidgetProvider {
             //receive from MediaPlaybackService onDestroy
             final RemoteViews views = new RemoteViews(context.getPackageName(), mWidgetLayoutId);
             AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(context);
-            int[] appWidgetIds = appWidgetManager.getAppWidgetIds(new ComponentName(context, this.getClass()));
+            int[] appWidgetIds = null;
+			if(appWidgetManager != null){
+				appWidgetManager.getAppWidgetIds(new ComponentName(context, this.getClass()));
+			}
             views.setViewVisibility(R.id.trackname, View.GONE);
             views.setTextViewText(R.id.artist, context.getText(R.string.widget_initial_text));
             views.setViewVisibility(R.id.album, View.GONE);
@@ -119,7 +122,7 @@ public class MediaAppWidgetProvider extends AppWidgetProvider {
     private void pushUpdate(Context context, int[] appWidgetIds, RemoteViews views) {
         // Update specific list of appWidgetIds if given, otherwise default to all
         final AppWidgetManager gm = AppWidgetManager.getInstance(context);
-        if (appWidgetIds != null) {
+        if (gm != null && appWidgetIds != null) {
             gm.updateAppWidget(appWidgetIds, views);
         } else {
             gm.updateAppWidget(new ComponentName(context, this.getClass()), views);
@@ -131,9 +134,12 @@ public class MediaAppWidgetProvider extends AppWidgetProvider {
      */
     private boolean hasInstances(Context context) {
         AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(context);
-        int[] appWidgetIds = appWidgetManager.getAppWidgetIds(
-                new ComponentName(context, this.getClass()));
-        return (appWidgetIds.length > 0);
+		if(appWidgetManager != null){
+			int[] appWidgetIds = appWidgetManager.getAppWidgetIds(
+					new ComponentName(context, this.getClass()));
+			return (appWidgetIds.length > 0);
+		}
+		return false;
     }
 
     void setPauseState(boolean mPaused) {
