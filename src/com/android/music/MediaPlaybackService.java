@@ -3340,6 +3340,7 @@ public class MediaPlaybackService extends Service {
     private class MediaSessionCallback extends MediaSessionCompat.Callback {
         private long mLastClickTime = 0;
         private boolean mDown = false;
+        private int mLastKeyCode = KeyEvent.KEYCODE_UNKNOWN;
         private PowerManager.WakeLock mWakeLock = null;
 
         @Override
@@ -3395,7 +3396,7 @@ public class MediaPlaybackService extends Service {
 
             if (command != null) {
                 if (action == KeyEvent.ACTION_DOWN) {
-                    if (mDown) {
+                    if (keycode == mLastKeyCode && mDown) {
                         if ((MediaPlaybackService.CMDTOGGLEPAUSE.equals(command) ||
                                 MediaPlaybackService.CMDPLAY.equals(command))
                                 && mLastClickTime != 0
@@ -3432,6 +3433,7 @@ public class MediaPlaybackService extends Service {
                     mMediaButtonHandler.removeMessages(MSG_LONG_PRESS_TIMEOUT);
                     mDown = false;
                 }
+                mLastKeyCode = keycode;
             }
 
             return super.onMediaButtonEvent(mediaButtonEvent);
