@@ -65,6 +65,7 @@ import android.os.SystemClock;
 import android.os.PowerManager.WakeLock;
 import android.provider.MediaStore;
 import android.support.v4.media.session.MediaSessionCompat;
+import android.support.v4.media.session.PlaybackStateCompat;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
@@ -2988,12 +2989,35 @@ public class MediaPlaybackService extends Service {
         }
 
         public void start() {
+            if (mSessionCompat != null) {
+                PlaybackStateCompat.Builder builder = new PlaybackStateCompat.Builder();
+                builder.setState(PlaybackStateCompat.STATE_PLAYING,
+				 PlaybackStateCompat.PLAYBACK_POSITION_UNKNOWN, 1.0f);
+                PlaybackStateCompat newState = builder.build();
+                mSessionCompat.setPlaybackState(newState);
+            }
             MusicUtils.debugLog(new Exception("MultiPlayer.start called"));
             mCurrentMediaPlayer.start();
             mIsComplete = false;
         }
 
+        public void pause() {
+            if (mSessionCompat != null) {
+                PlaybackStateCompat.Builder builder = new PlaybackStateCompat.Builder();
+                builder.setState(PlaybackStateCompat.STATE_PAUSED, position(), 0.0f);
+                PlaybackStateCompat newState = builder.build();
+                mSessionCompat.setPlaybackState(newState);
+            }
+            mCurrentMediaPlayer.pause();
+        }
+
         public void stop() {
+            if (mSessionCompat != null) {
+                PlaybackStateCompat.Builder builder = new PlaybackStateCompat.Builder();
+                builder.setState(PlaybackStateCompat.STATE_STOPPED, 0, 0.0f);
+                PlaybackStateCompat newState = builder.build();
+                mSessionCompat.setPlaybackState(newState);
+            }
             mCurrentMediaPlayer.reset();
             mIsInitialized = false;
         }
@@ -3008,10 +3032,6 @@ public class MediaPlaybackService extends Service {
                 mNextMediaPlayer.release();
             }
             mCurrentMediaPlayer.release();
-        }
-
-        public void pause() {
-            mCurrentMediaPlayer.pause();
         }
 
         public void setHandler(Handler handler) {
@@ -3102,6 +3122,17 @@ public class MediaPlaybackService extends Service {
         }
 
         public long seek(long whereto) {
+
+            float speed = 0.0f;
+            int playstate = PlaybackStateCompat.STATE_PAUSED;
+            if (mIsSupposedToBePlaying) {
+                speed = PLAYBACK_SPEED_1X;
+                playstate = PlaybackStateCompat.STATE_PLAYING;
+            }
+            PlaybackStateCompat.Builder builder = new PlaybackStateCompat.Builder();
+            PlaybackStateCompat newState = builder.setState(playstate, whereto, speed).build();
+            mSessionCompat.setPlaybackState(newState);
+
             mCurrentMediaPlayer.seekTo((int) whereto);
             return whereto;
         }
@@ -3340,6 +3371,7 @@ public class MediaPlaybackService extends Service {
     private class MediaSessionCallback extends MediaSessionCompat.Callback {
         private long mLastClickTime = 0;
         private boolean mDown = false;
+        private int mLastKeyCode = KeyEvent.KEYCODE_UNKNOWN;
         private PowerManager.WakeLock mWakeLock = null;
 
         @Override
@@ -3395,7 +3427,7 @@ public class MediaPlaybackService extends Service {
 
             if (command != null) {
                 if (action == KeyEvent.ACTION_DOWN) {
-                    if (mDown) {
+                    if (keycode == mLastKeyCode && mDown) {
                         if ((MediaPlaybackService.CMDTOGGLEPAUSE.equals(command) ||
                                 MediaPlaybackService.CMDPLAY.equals(command))
                                 && mLastClickTime != 0
@@ -3432,6 +3464,7 @@ public class MediaPlaybackService extends Service {
                     mMediaButtonHandler.removeMessages(MSG_LONG_PRESS_TIMEOUT);
                     mDown = false;
                 }
+                mLastKeyCode = keycode;
             }
 
             return super.onMediaButtonEvent(mediaButtonEvent);
