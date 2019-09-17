@@ -1001,6 +1001,10 @@ public class MediaPlaybackService extends Service {
                     R.string.dialog_content, Toast.LENGTH_LONG).show();
             return START_STICKY;
         }
+
+        updateNotification();
+        startForeground(PLAYBACKSERVICE_STATUS, status);
+
         mServiceStartId = startId;
         mDelayedStopHandler.removeCallbacksAndMessages(null);
 
@@ -1776,9 +1780,6 @@ public class MediaPlaybackService extends Service {
     }
 
     private void updateNotification() {
-        if (MusicUtils.isForbidPlaybackInCall(getApplicationContext())){
-            return;
-        }
 
         views = new RemoteViews(getPackageName(), R.layout.statusbar_appwidget_s);
         viewsLarge = new RemoteViews(getPackageName(), R.layout.statusbar_appwidget_l);
@@ -1795,29 +1796,32 @@ public class MediaPlaybackService extends Service {
             views.setImageViewBitmap(R.id.icon, icon);
             viewsLarge.setImageViewBitmap(R.id.icon, icon);
         }
-        Intent prevIntent = new Intent(PREVIOUS_ACTION);
-        PendingIntent prevPendingIntent = PendingIntent.getBroadcast(this,
-                0 /* no requestCode */, prevIntent, 0 /* no flags */);
-        views.setOnClickPendingIntent(R.id.prev, prevPendingIntent);
-        viewsLarge.setOnClickPendingIntent(R.id.prev, prevPendingIntent);
 
-        Intent toggleIntent = new Intent(MediaPlaybackService.TOGGLEPAUSE_ACTION);
-        PendingIntent togglePendingIntent = PendingIntent.getBroadcast(this,
-                0 /* no requestCode */, toggleIntent, 0 /* no flags */);
-        views.setOnClickPendingIntent(R.id.pause, togglePendingIntent);
-        viewsLarge.setOnClickPendingIntent(R.id.pause, togglePendingIntent);
+        if (MusicUtils.isForbidPlaybackInCall(getApplicationContext()) == false){
+            Intent prevIntent = new Intent(PREVIOUS_ACTION);
+            PendingIntent prevPendingIntent = PendingIntent.getBroadcast(this,
+                    0 /* no requestCode */, prevIntent, 0 /* no flags */);
+            views.setOnClickPendingIntent(R.id.prev, prevPendingIntent);
+            viewsLarge.setOnClickPendingIntent(R.id.prev, prevPendingIntent);
 
-        Intent nextIntent = new Intent(NEXT_ACTION);
-        PendingIntent nextPendingIntent = PendingIntent.getBroadcast(this,
-                0 /* no requestCode */, nextIntent, 0 /* no flags */);
-        views.setOnClickPendingIntent(R.id.next, nextPendingIntent);
-        viewsLarge.setOnClickPendingIntent(R.id.next, nextPendingIntent);
+            Intent toggleIntent = new Intent(MediaPlaybackService.TOGGLEPAUSE_ACTION);
+            PendingIntent togglePendingIntent = PendingIntent.getBroadcast(this,
+                    0 /* no requestCode */, toggleIntent, 0 /* no flags */);
+            views.setOnClickPendingIntent(R.id.pause, togglePendingIntent);
+            viewsLarge.setOnClickPendingIntent(R.id.pause, togglePendingIntent);
 
-        Intent exitIntent = new Intent(EXIT_ACTION);
-        PendingIntent exitPendingIntent = PendingIntent.getBroadcast(this,
-                0 /* no requestCode */, exitIntent, 0 /* no flags */);
-        views.setOnClickPendingIntent(R.id.exit, exitPendingIntent);
-        viewsLarge.setOnClickPendingIntent(R.id.exit, exitPendingIntent);
+            Intent nextIntent = new Intent(NEXT_ACTION);
+            PendingIntent nextPendingIntent = PendingIntent.getBroadcast(this,
+                    0 /* no requestCode */, nextIntent, 0 /* no flags */);
+            views.setOnClickPendingIntent(R.id.next, nextPendingIntent);
+            viewsLarge.setOnClickPendingIntent(R.id.next, nextPendingIntent);
+
+            Intent exitIntent = new Intent(EXIT_ACTION);
+            PendingIntent exitPendingIntent = PendingIntent.getBroadcast(this,
+                    0 /* no requestCode */, exitIntent, 0 /* no flags */);
+            views.setOnClickPendingIntent(R.id.exit, exitPendingIntent);
+            viewsLarge.setOnClickPendingIntent(R.id.exit, exitPendingIntent);
+        }
 
         if (getAudioId() < 0) {
             // streaming
