@@ -1001,6 +1001,10 @@ public class MediaPlaybackService extends Service {
                     R.string.dialog_content, Toast.LENGTH_LONG).show();
             return START_STICKY;
         }
+
+        updateNotification();
+        startForeground(PLAYBACKSERVICE_STATUS, status);
+
         mServiceStartId = startId;
         mDelayedStopHandler.removeCallbacksAndMessages(null);
 
