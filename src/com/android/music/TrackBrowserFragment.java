@@ -2005,7 +2005,12 @@ public class TrackBrowserFragment extends Fragment implements
 
             String trackSize = cursor.getString(cursor
                     .getColumnIndexOrThrow(MediaStore.Audio.Media.SIZE));
-            vh.mCurrentTrackSize = getHumanReadableSize(context, Integer.parseInt(trackSize));
+            if(trackSize != null){
+                vh.mCurrentTrackSize = getHumanReadableSize(context, Integer.parseInt(trackSize));
+            }
+            else{
+                vh.mCurrentTrackSize = "";
+            }
 
             Bitmap albumArt;
             final ImageView iv = vh.play_indicator;
