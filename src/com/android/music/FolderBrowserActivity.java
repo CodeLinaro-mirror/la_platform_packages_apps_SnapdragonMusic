@@ -464,7 +464,7 @@ public class FolderBrowserActivity extends ListActivity
         private void getColumnIndices(Cursor cursor) {
             if (cursor != null) {
                 mDataIdx = cursor.getColumnIndexOrThrow(MediaStore.Files.FileColumns.DATA);
-                mCountIdx = cursor.getColumnIndexOrThrow("count(*)");
+                mCountIdx = cursor.getColumnIndexOrThrow("count(_id)");
                 if (mIndexer != null) {
                     mIndexer.setCursor(cursor);
                 } else {
