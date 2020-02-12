@@ -431,7 +431,7 @@ public class FolderBrowserFragment extends Fragment
         Cursor ret = null;
         String uriString = "content://media/external/file";
         String selection = "is_music = 1 & 1=1 ) GROUP BY (parent" ;
-        String[] projection = {"count(*)","_id","_data","parent"};
+        String[] projection = {"count(_id)","_id","_data","parent"};
         Uri uri = Uri.parse(uriString);
         if (async != null) {
             async.startQuery(0, null, uri, projection, selection, null, null);
@@ -509,7 +509,7 @@ public class FolderBrowserFragment extends Fragment
         private void getColumnIndices(Cursor cursor) {
             if (cursor != null) {
                 mDataIdx = cursor.getColumnIndexOrThrow(MediaStore.Files.FileColumns.DATA);
-                mCountIdx = cursor.getColumnIndexOrThrow("count(*)");
+                mCountIdx = cursor.getColumnIndexOrThrow("count(_id)");
                 if (mIndexer != null) {
                     mIndexer.setCursor(cursor);
                 } else {
