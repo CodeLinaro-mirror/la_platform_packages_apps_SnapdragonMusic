@@ -728,7 +728,7 @@ public class PlaylistBrowserActivity extends Activity implements
             Uri uri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI;
             String mPlaylistMemberCols[] = new String[] {
                     MediaStore.Audio.Playlists.Members._ID,
-                    MediaStore.Audio.Media.TITLE, MediaStore.Audio.Media.DATA,
+                    MediaStore.Audio.Media.DISPLAY_NAME, MediaStore.Audio.Media.DATA,
                     MediaStore.Audio.Media.ALBUM,
                     MediaStore.Audio.Media.ARTIST,
                     MediaStore.Audio.Media.ARTIST_ID,
@@ -738,7 +738,7 @@ public class PlaylistBrowserActivity extends Activity implements
                     MediaStore.Audio.Media.IS_MUSIC };
 
             String mCursorCols[] = new String[] { MediaStore.Audio.Media._ID,
-                    MediaStore.Audio.Media.TITLE, MediaStore.Audio.Media.DATA,
+                    MediaStore.Audio.Media.DISPLAY_NAME, MediaStore.Audio.Media.DATA,
                     MediaStore.Audio.Media.ALBUM,
                     MediaStore.Audio.Media.ARTIST,
                     MediaStore.Audio.Media.ARTIST_ID,

@@ -1443,7 +1443,7 @@ public class MusicUtils {
         String[] cols = new String[] {
                 MediaStore.Audio.Media._ID,
                 MediaStore.Audio.Media.DATA,
-                MediaStore.Audio.Media.TITLE
+                MediaStore.Audio.Media.DISPLAY_NAME
         };
 
         String where = MediaStore.Audio.Media._ID + "=" + id;
@@ -1906,7 +1906,7 @@ public class MusicUtils {
                 int artIndex = cursor
                         .getColumnIndex(MediaStore.Audio.Media.ALBUM_ID);
                 int mTitleIdx = cursor
-                        .getColumnIndex(MediaStore.Audio.Media.TITLE);
+                        .getColumnIndex(MediaStore.Audio.Media.DISPLAY_NAME);
                 long index = cursor.getLong(artIndex);
                 final Bitmap icon = defaultArtwork.getBitmap();
                 int w = icon.getWidth();

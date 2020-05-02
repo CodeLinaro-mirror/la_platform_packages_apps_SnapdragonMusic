@@ -188,7 +188,7 @@ public class MediaPlaybackService extends Service {
             "_id",             // index must match IDCOLIDX below
             MediaStore.Audio.Media.ARTIST,
             MediaStore.Audio.Media.ALBUM,
-            MediaStore.Audio.Media.TITLE,
+            MediaStore.Audio.Media.DISPLAY_NAME,
             MediaStore.Audio.Media.DATA,
             MediaStore.Audio.Media.MIME_TYPE,
             MediaStore.Audio.Media.ALBUM_ID,
@@ -1524,7 +1524,7 @@ public class MediaPlaybackService extends Service {
             ret.mAlbumName = c.getString(c.getColumnIndexOrThrow(MediaStore.Audio.Media.ALBUM));
             ret.mArtistId = c.getLong(c.getColumnIndexOrThrow(MediaStore.Audio.Media.ARTIST_ID));
             ret.mArtistName = c.getString(c.getColumnIndexOrThrow(MediaStore.Audio.Media.ARTIST));
-            ret.mTrackName = c.getString(c.getColumnIndexOrThrow(MediaStore.Audio.Media.TITLE));
+            ret.mTrackName = c.getString(c.getColumnIndexOrThrow(MediaStore.Audio.Media.DISPLAY_NAME));
             ret.mData = c.getString(c.getColumnIndexOrThrow(MediaStore.Audio.Media.DATA));
             ret.mPodcast = c.getInt(PODCASTCOLIDX);
             ret.mBookmark = c.getLong(c.getColumnIndexOrThrow(MediaStore.Audio.Media.BOOKMARK));
