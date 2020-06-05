@@ -226,7 +226,7 @@ public class TrackBrowserActivityFragment extends Fragment
 
         mCursorCols = new String[] {
                 MediaStore.Audio.Media._ID,
-                MediaStore.Audio.Media.TITLE,
+                MediaStore.Audio.Media.DISPLAY_NAME,
                 MediaStore.Audio.Media.DATA,
                 MediaStore.Audio.Media.ALBUM,
                 MediaStore.Audio.Media.ARTIST,
@@ -236,7 +236,7 @@ public class TrackBrowserActivityFragment extends Fragment
         };
         mPlaylistMemberCols = new String[] {
                 MediaStore.Audio.Playlists.Members._ID,
-                MediaStore.Audio.Media.TITLE,
+                MediaStore.Audio.Media.DISPLAY_NAME,
                 MediaStore.Audio.Media.DATA,
                 MediaStore.Audio.Media.ALBUM,
                 MediaStore.Audio.Media.ARTIST,
@@ -906,7 +906,7 @@ public class TrackBrowserActivityFragment extends Fragment
     // Returns false if the entry matches the naming pattern used for recordings,
     // or if it is marked as not music in the database.
     private boolean isMusic(Cursor c) {
-        int titleidx = c.getColumnIndex(MediaStore.Audio.Media.TITLE);
+        int titleidx = c.getColumnIndex(MediaStore.Audio.Media.DISPLAY_NAME);
         int albumidx = c.getColumnIndex(MediaStore.Audio.Media.ALBUM);
         int artistidx = c.getColumnIndex(MediaStore.Audio.Media.ARTIST);
 
@@ -1499,7 +1499,7 @@ public class TrackBrowserActivityFragment extends Fragment
         Cursor ret = null;
         mSortOrder = MediaStore.Audio.Media.TITLE_KEY;
         StringBuilder where = new StringBuilder();
-        where.append(MediaStore.Audio.Media.TITLE + " != ''");
+        where.append(MediaStore.Audio.Media.DISPLAY_NAME + " != ''");
 
         if (mGenre != null) {
             Uri uri = MediaStore.Audio.Genres.Members.getContentUri("external",
@@ -1951,10 +1951,10 @@ public class TrackBrowserActivityFragment extends Fragment
 
         private void getColumnIndices(Cursor cursor) {
             if (cursor != null) {
-                mTitleIdx = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.TITLE);
+                mTitleIdx = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DISPLAY_NAME);
                 mArtistIdx = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.ARTIST);
                 mDurationIdx = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DURATION);
-                mSongIdx = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.TITLE);
+                mSongIdx = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DISPLAY_NAME);
                 mAlbumIdx = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.ALBUM);
                 try {
                     mAudioIdIdx = cursor.getColumnIndexOrThrow(
