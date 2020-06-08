@@ -116,7 +116,9 @@
 
         <activity android:name="AudioPreview" android:theme="@android:style/Theme.Material.Dialog"
                 android:taskAffinity=""
-                android:excludeFromRecents="true" android:exported="true"
+                android:excludeFromRecents="true"
+                android:exported="true"
+                android:launchMode="singleTask"
                 android:configChanges="orientation" >
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
@@ -165,7 +167,7 @@
             />
         </activity>
         <activity android:name="com.android.music.PlaylistBrowserActivity"
-                android:label="@string/musicbrowserlabel" 
+                android:label="@string/musicbrowserlabel"
                 android:exported="true"
                 android:configChanges="orientation|keyboardHidden|screenSize" >
             <intent-filter>
