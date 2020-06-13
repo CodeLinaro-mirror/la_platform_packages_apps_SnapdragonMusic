@@ -107,7 +107,7 @@ public class AudioPreview extends Activity implements OnPreparedListener, OnErro
             return;
         }
         String scheme = mUri.getScheme();
-        
+
         setVolumeControlStream(AudioManager.STREAM_MUSIC);
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.audiopreview);
@@ -182,12 +182,22 @@ public class AudioPreview extends Activity implements OnPreparedListener, OnErro
             unregisterReceiver(mScreenTimeoutListener);
             mScreenTimeoutListener = null;
         }
+
+        mAudioPreview = null;
     }
 
     @Override
     public void onDestroy() {
         stopPlayback();
         super.onDestroy();
+    }
+
+
+    @Override
+    public void onNewIntent(Intent intent) {
+        // TODO Auto-generated method stub
+        super.onNewIntent(intent);
+
     }
 
     @Override
@@ -252,7 +262,7 @@ public class AudioPreview extends Activity implements OnPreparedListener, OnErro
         }
         updatePlayPause();
     }
-    
+
     private OnAudioFocusChangeListener mAudioFocusListener = new OnAudioFocusChangeListener() {
         public void onAudioFocusChange(int focusChange) {
             if (mPlayer == null) {
@@ -283,7 +293,7 @@ public class AudioPreview extends Activity implements OnPreparedListener, OnErro
             updatePlayPause();
         }
     };
-    
+
     private void start() {
         mAudioManager.requestAudioFocus(mAudioFocusListener, AudioManager.STREAM_MUSIC,
                 AudioManager.AUDIOFOCUS_GAIN_TRANSIENT);
@@ -291,7 +301,7 @@ public class AudioPreview extends Activity implements OnPreparedListener, OnErro
         isCompleted = false;
         mProgressRefresher.postDelayed(new ProgressRefresher(), 200);
     }
-    
+
     public void setNames() {
         if (TextUtils.isEmpty(mTextLine1.getText())) {
             mTextLine1.setText(mUri.getLastPathSegment());
@@ -315,7 +325,7 @@ public class AudioPreview extends Activity implements OnPreparedListener, OnErro
             mProgressRefresher.postDelayed(new ProgressRefresher(), 200);
         }
     }
-    
+
     private boolean mScreenOff;
     private BroadcastReceiver mScreenTimeoutListener = new BroadcastReceiver() {
         @Override
@@ -392,7 +402,7 @@ public class AudioPreview extends Activity implements OnPreparedListener, OnErro
         }
         updatePlayPause();
     }
-    
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         super.onCreateOptionsMenu(menu);
