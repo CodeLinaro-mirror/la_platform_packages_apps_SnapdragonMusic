@@ -45,6 +45,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class PermissionActivity extends Activity{
+    private static final String TAG = "PermissionActivity";
     private static final String PERVIOUS_INTENT = "pervious_intent";
     private static final String REQUEST_PERMISSIONS = "request_permissions";
     private static final String KEY_FROM_PREVIEW = "from_preview";
@@ -55,12 +56,17 @@ public class PermissionActivity extends Activity{
     private boolean mIsFromPreview = false;
 
     public static void startFromPreview(Activity activity, String[] permissions, int requestCode) {
-        Intent intent = new Intent();
-        intent.setClass(activity, PermissionActivity.class);
-        intent.putExtra(REQUEST_PERMISSIONS, permissions);
-        intent.putExtra(PERVIOUS_INTENT, activity.getIntent());
-        intent.putExtra(KEY_FROM_PREVIEW, true);
-        activity.startActivityForResult(intent, requestCode);
+        try {
+            Intent intent = new Intent();
+            intent.setClass(activity, PermissionActivity.class);
+            intent.putExtra(REQUEST_PERMISSIONS, permissions);
+            intent.putExtra(PERVIOUS_INTENT, activity.getIntent());
+            intent.putExtra(KEY_FROM_PREVIEW, true);
+            activity.startActivityForResult(intent, requestCode);
+        } catch (SecurityException e) {
+             Log.e(TAG, "startFromPreview SecurityException");
+             e.printStackTrace();
+        }
     }
 
     public static boolean checkAndRequestPermission(Activity activity, String[] permissions) {
@@ -68,15 +74,24 @@ public class PermissionActivity extends Activity{
         if (neededPermissions.length == 0) {
             return false;
         } else {
-            Intent intent = new Intent();
-            intent.setClass(activity, PermissionActivity.class);
-            intent.putExtra(REQUEST_PERMISSIONS, permissions);
-            intent.putExtra(PERVIOUS_INTENT, activity.getIntent());
-            activity.startActivity(intent);
-            activity.finish();
-            return true;
+            try {
+                Intent intent = new Intent();
+                intent.setClass(activity, PermissionActivity.class);
+                intent.putExtra(REQUEST_PERMISSIONS, permissions);
+                intent.putExtra(PERVIOUS_INTENT, activity.getIntent());
+                activity.startActivity(intent);
+                activity.finish();
+            } catch (SecurityException e) {
+                 Log.e(TAG, "checkAndRequestPermission SecurityException");
+                 e.printStackTrace();
+                 return false;
+            } finally {
+                 return true;
+            }
+
         }
     }
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
