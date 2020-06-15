@@ -1133,7 +1133,7 @@ public class MediaPlaybackActivity extends Activity implements MusicUtils.Defs,
 
     public Cursor updateTrackCursor() {
         String[] cols = new String[] { MediaStore.Audio.Media._ID,
-                MediaStore.Audio.Media.TITLE, MediaStore.Audio.Media.DATA,
+                MediaStore.Audio.Media.DISPLAY_NAME, MediaStore.Audio.Media.DATA,
                 MediaStore.Audio.Media.ALBUM, MediaStore.Audio.Media.ARTIST,
                 MediaStore.Audio.Media.ARTIST_ID,
                 MediaStore.Audio.Media.DURATION };
