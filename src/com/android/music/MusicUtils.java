@@ -223,7 +223,7 @@ public class MusicUtils {
         // There are several formats for the albums/songs information:
         // "1 Song"   - used if there is only 1 song
         // "N Songs" - used for the "unknown artist" item
-        // "1 Album"/"N Songs" 
+        // "1 Album"/"N Songs"
         // "N Album"/"M Songs"
         // Depending on locale, these may need to be further subdivided
         StringBuilder songs_albums = new StringBuilder();
@@ -463,12 +463,12 @@ public class MusicUtils {
 
     public static long [] getSongListForArtist(Context context, long id) {
         final String[] ccols = new String[] { MediaStore.Audio.Media._ID };
-        String where = MediaStore.Audio.Media.ARTIST_ID + "=" + id + " AND " + 
+        String where = MediaStore.Audio.Media.ARTIST_ID + "=" + id + " AND " +
         MediaStore.Audio.Media.IS_MUSIC + "=1";
         Cursor cursor = query(context, MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
                 ccols, where, null,
                 MediaStore.Audio.Media.ALBUM_KEY + ","  + MediaStore.Audio.Media.TRACK);
-        
+
         if (cursor != null) {
             long [] list = getSongListForCursor(cursor);
             cursor.close();
@@ -479,7 +479,7 @@ public class MusicUtils {
 
     public static long [] getSongListForAlbum(Context context, long id) {
         final String[] ccols = new String[] { MediaStore.Audio.Media._ID };
-        String where = MediaStore.Audio.Media.ALBUM_ID + "=" + id + " AND " + 
+        String where = MediaStore.Audio.Media.ALBUM_ID + "=" + id + " AND " +
                 MediaStore.Audio.Media.IS_MUSIC + "=1";
         Cursor cursor = query(context, MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
                 ccols, where, null, MediaStore.Audio.Media.TRACK);
@@ -499,7 +499,7 @@ public class MusicUtils {
         final String[] ccols = new String[] { MediaStore.Audio.Playlists.Members.AUDIO_ID };
         Cursor cursor = query(context, MediaStore.Audio.Playlists.Members.getContentUri("external", plid),
                 ccols, null, null, MediaStore.Audio.Playlists.Members.DEFAULT_SORT_ORDER);
-        
+
         if (cursor != null) {
             long[] list = getSongListForCursor(cursor);
             cursor.close();
@@ -695,7 +695,7 @@ public class MusicUtils {
         // in the media content domain, so update everything.
         context.getContentResolver().notifyChange(Uri.parse("content://media"), null);
     }
-    
+
     public static void addToCurrentPlaylist(Context context, long [] list) {
         if (sService == null) {
             return;
@@ -732,11 +732,13 @@ public class MusicUtils {
                 sContentValuesCache[i] = new ContentValues();
             }
 
-            sContentValuesCache[i].put(MediaStore.Audio.Playlists.Members.PLAY_ORDER, base + offset + i);
-            sContentValuesCache[i].put(MediaStore.Audio.Playlists.Members.AUDIO_ID, ids[offset + i]);
+            sContentValuesCache[i].put(MediaStore.Audio.Playlists.Members.PLAY_ORDER,
+                    base + offset + i + 1);
+            sContentValuesCache[i].put(MediaStore.Audio.Playlists.Members.AUDIO_ID,
+                    ids[offset + i]);
         }
     }
-    
+
     public static void addToPlaylist(Context context, long [] ids, long playlistid) {
         if (ids == null) {
             // this shouldn't happen (the menuitems shouldn't be visible
@@ -819,7 +821,7 @@ public class MusicUtils {
 
     public static boolean isMediaScannerScanning(Context context) {
         boolean result = false;
-        Cursor cursor = query(context, MediaStore.getMediaScannerUri(), 
+        Cursor cursor = query(context, MediaStore.getMediaScannerUri(),
                 new String [] { MediaStore.MEDIA_SCANNER_VOLUME }, null, null, null);
         if (cursor != null) {
             if (cursor.getCount() == 1) {
@@ -944,7 +946,7 @@ public class MusicUtils {
         return Uri.fromFile(new File(path));
     }
 
-    
+
     /*  Try to use String.format() as little as possible, because it creates a
      *  new Formatter every time you call it, which is very inefficient.
      *  Reusing an existing Formatter more than tripled the speed of
@@ -958,7 +960,7 @@ public class MusicUtils {
     public static String makeTimeString(Context context, long secs) {
         String durationformat = context.getString(
                 secs < 3600 ? R.string.durationformatshort : R.string.durationformatlong);
-        
+
         /* Provide multiple arguments so the format can be changed easily
          * by modifying the xml.
          */
@@ -1590,7 +1592,7 @@ public class MusicUtils {
                         }
                     }
                 }});
-            
+
             v.setOnClickListener(new View.OnClickListener() {
 
                 public void onClick(View v) {

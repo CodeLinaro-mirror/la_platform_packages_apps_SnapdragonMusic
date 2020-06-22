@@ -660,7 +660,7 @@ public class AlbumBrowserFragment extends Fragment implements MusicUtils.Defs,
             protected Object doInBackground(Object... params) {
                 Bitmap albumArt[] = new Bitmap[1];
                 if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.P){
-                    int albumIdx = Integer.valueOf(art);
+                    long albumIdx = Long.parseLong(art);
                     albumArt[0] = MusicUtils.getArtwork(context, -1, albumIdx, false);
                 } else {
                     albumArt[0] = BitmapFactory.decodeFile(art);
