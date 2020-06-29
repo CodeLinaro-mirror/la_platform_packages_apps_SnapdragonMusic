@@ -100,7 +100,7 @@ public class MusicPicker extends ListActivity
     /** These are the columns in the music cursor that we are interested in. */
     static final String[] CURSOR_COLS = new String[] {
             MediaStore.Audio.Media._ID,
-            MediaStore.Audio.Media.TITLE,
+            MediaStore.Audio.Media.DISPLAY_NAME,
             MediaStore.Audio.Media.TITLE_KEY,
             MediaStore.Audio.Media.DATA,
             MediaStore.Audio.Media.ALBUM,
@@ -336,7 +336,7 @@ public class MusicPicker extends ListActivity
             if (cursor != null) {
                 // Retrieve indices of the various columns we are interested in.
                 mIdIdx = cursor.getColumnIndex(MediaStore.Audio.Media._ID);
-                mTitleIdx = cursor.getColumnIndex(MediaStore.Audio.Media.TITLE);
+                mTitleIdx = cursor.getColumnIndex(MediaStore.Audio.Media.DISPLAY_NAME);
                 mArtistIdx = cursor.getColumnIndex(MediaStore.Audio.Media.ARTIST);
                 mAlbumIdx = cursor.getColumnIndex(MediaStore.Audio.Media.ALBUM);
                 mDurationIdx = cursor.getColumnIndex(MediaStore.Audio.Media.DURATION);
@@ -680,7 +680,7 @@ public class MusicPicker extends ListActivity
         mQueryHandler.cancelOperation(MY_QUERY_TOKEN);
 
         StringBuilder where = new StringBuilder();
-        where.append(MediaStore.Audio.Media.TITLE + " != ''");
+        where.append(MediaStore.Audio.Media.DISPLAY_NAME + " != ''");
 
         // We want to show all audio files, even recordings.  Enforcing the
         // following condition would hide recordings.
