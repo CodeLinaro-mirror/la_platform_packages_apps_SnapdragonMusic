@@ -33,8 +33,10 @@ import java.util.LinkedList;
 import java.util.List;
 import android.app.Activity;
 import android.app.Application;
+import android.util.Log;
 
 public class SysApplication extends Application {
+    private static final String TAG = "SysApplication";
 
     private List<Activity> mList = new LinkedList<Activity>();
 
@@ -64,6 +66,7 @@ public class SysApplication extends Application {
         } finally {
             if (AudioPreview.getInstance() == null
                     || AudioPreview.getInstance().isDestroyed()) {
+                Log.w(TAG, " exit from SysApplication ");
                 System.exit(0);
             }
         }
