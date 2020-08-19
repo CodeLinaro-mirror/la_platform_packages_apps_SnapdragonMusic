@@ -571,7 +571,6 @@ public class MusicUtils {
                 cols, whereclause, null,
                 MediaStore.Audio.Playlists.NAME);
             sub.clear();
-            sub.add(1, Defs.QUEUE, 0, R.string.queue);
             sub.add(1, Defs.NEW_PLAYLIST, 0, R.string.new_playlist);
             if (cur != null && cur.getCount() > 0) {
                 //sub.addSeparator(1, 0);
