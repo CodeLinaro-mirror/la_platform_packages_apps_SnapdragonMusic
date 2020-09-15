@@ -571,7 +571,6 @@ public class MusicUtils {
                 cols, whereclause, null,
                 MediaStore.Audio.Playlists.NAME);
             sub.clear();
-            sub.add(1, Defs.QUEUE, 0, R.string.queue);
             sub.add(1, Defs.NEW_PLAYLIST, 0, R.string.new_playlist);
             if (cur != null && cur.getCount() > 0) {
                 //sub.addSeparator(1, 0);
@@ -766,10 +765,16 @@ public class MusicUtils {
             }
 
             int numinserted = 0;
-            for (int i = 0; i < size; i += 1000) {
-                makeInsertItems(ids, i, 1000, base);
-                numinserted += resolver.bulkInsert(uri, sContentValuesCache);
+            try {
+                for (int i = 0; i < size; i += 1000) {
+                    makeInsertItems(ids, i, 1000, base);
+                    numinserted += resolver.bulkInsert(uri, sContentValuesCache);
+                }
+             } catch (SecurityException ex) {
+                Log.e(TAG,"addToPlaylist  ex="+ex);
+                return;
             }
+
             String message = context.getResources().getQuantityString(
                     R.plurals.NNNtrackstoplaylist, numinserted, numinserted);
             Toast.makeText(context, message, Toast.LENGTH_SHORT).show();
