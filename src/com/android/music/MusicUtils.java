@@ -765,10 +765,16 @@ public class MusicUtils {
             }
 
             int numinserted = 0;
-            for (int i = 0; i < size; i += 1000) {
-                makeInsertItems(ids, i, 1000, base);
-                numinserted += resolver.bulkInsert(uri, sContentValuesCache);
+            try {
+                for (int i = 0; i < size; i += 1000) {
+                    makeInsertItems(ids, i, 1000, base);
+                    numinserted += resolver.bulkInsert(uri, sContentValuesCache);
+                }
+             } catch (SecurityException ex) {
+                Log.e(TAG,"addToPlaylist  ex="+ex);
+                return;
             }
+
             String message = context.getResources().getQuantityString(
                     R.plurals.NNNtrackstoplaylist, numinserted, numinserted);
             Toast.makeText(context, message, Toast.LENGTH_SHORT).show();
