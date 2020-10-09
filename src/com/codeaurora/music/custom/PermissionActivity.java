@@ -124,7 +124,6 @@ public class PermissionActivity extends Activity{
         if(isAllPermissionsGranted) {
             if (mPreviousIntent != null)
                 if (mIsFromPreview){
-                    startActivity(mPreviousIntent);
                     setResult(Activity.RESULT_OK);
                 } else {
                     if (mPreviousIntent != null)
