@@ -547,6 +547,39 @@ public class MusicUtils {
         }
     }
 
+    public static String getSongNameById(Context context, long id) {
+        Cursor c = query(context, MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
+                new String[] {MediaStore.Audio.Media.DISPLAY_NAME},
+                MediaStore.Audio.Media._ID + "="+id, null, null);
+        try {
+            if (c == null || c.getCount() == 0) {
+                return null;
+            }
+            c.moveToFirst();
+            String name = c.getString(c
+                    .getColumnIndexOrThrow(MediaStore.Audio.Media.DISPLAY_NAME));
+            return name;
+        } finally {
+            if (c != null) {
+                c.close();
+            }
+        }
+    }
+
+    public static boolean BypassForAlbum(Context context, long id) {
+        String name = getSongNameById(context, id);
+        if (name == null) {
+            Log.e(TAG, "BypassForAlbum name is null");
+            return true;
+        }
+        name = name.toUpperCase();
+        if (name.endsWith(".MID")) {
+            Log.e(TAG, "BypassForAlbum name="+ name);
+            return true;
+        }
+        return false;
+    }
+
     /**
      * Fills out the given submenu with items for "new playlist" and
      * any existing playlists. When the user selects an item, the
@@ -1251,6 +1284,10 @@ public class MusicUtils {
             long album_id, boolean allowdefault) {
         if (context == null) {
             Log.d(TAG, "getArtwork failed because context is null");
+            return null;
+        }
+
+        if (BypassForAlbum(context, song_id)) {
             return null;
         }
 
