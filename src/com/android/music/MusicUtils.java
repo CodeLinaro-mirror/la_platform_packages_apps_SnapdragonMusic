@@ -52,8 +52,6 @@ import android.os.RemoteException;
 import android.provider.MediaStore;
 import android.provider.Settings;
 import androidx.drawerlayout.widget.DrawerLayout;
-import androidx.legacy.app.ActionBarDrawerToggle;
-import androidx.appcompat.widget.Toolbar;
 import android.telecom.PhoneAccountHandle;
 import android.telecom.TelecomManager;
 import android.telephony.SubscriptionInfo;
