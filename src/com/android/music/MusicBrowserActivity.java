@@ -97,6 +97,7 @@ public class MusicBrowserActivity extends MediaPlaybackActivity implements
     String mArtistID, mAlbumID;
     String mIntentAction;
     long mPlaylistId = DEFAULT_PLAYLIST;
+    PackageManager mPackageManager;
 
     public MusicBrowserActivity() {
     }
@@ -109,7 +110,10 @@ public class MusicBrowserActivity extends MediaPlaybackActivity implements
         if (PermissionActivity.checkAndRequestPermission(this, REQUIRED_PERMISSIONS)) {
             SysApplication.getInstance().exit();
         }
-        requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
+        mPackageManager = getPackageManager();
+        if (!mPackageManager.hasSystemFeature(PackageManager.FEATURE_WATCH)){
+            requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
+        }
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         super.onCreate(icicle);
         setVolumeControlStream(AudioManager.STREAM_MUSIC);
