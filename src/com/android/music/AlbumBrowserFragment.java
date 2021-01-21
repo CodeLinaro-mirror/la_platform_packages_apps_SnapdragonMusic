@@ -67,7 +67,9 @@ import android.widget.PopupMenu;
 import android.widget.PopupMenu.OnMenuItemClickListener;
 import android.widget.SectionIndexer;
 import android.widget.SimpleCursorAdapter;
+import android.widget.Toast;
 import android.widget.TextView;
+import android.util.Log;
 
 public class AlbumBrowserFragment extends Fragment implements MusicUtils.Defs,
         ServiceConnection {
@@ -90,6 +92,7 @@ public class AlbumBrowserFragment extends Fragment implements MusicUtils.Defs,
     private MediaPlaybackActivity mParentActivity;
     public PopupMenu mPopupMenu;
     private static SubMenu mSub = null;
+    private static final String LOGTAG = "AlbumBrowserFragment";
 
     public AlbumBrowserFragment() {
     }
@@ -736,7 +739,13 @@ public class AlbumBrowserFragment extends Fragment implements MusicUtils.Defs,
             view.setOnClickListener(new OnClickListener() {
                 @Override
                 public void onClick(View arg0) {
-                    mFragment.enterAlbum(Long.valueOf(vh.albumID));
+                    if(vh.albumID != null){
+                        mFragment.enterAlbum(Long.valueOf(vh.albumID));
+                    }else{
+                        Toast.makeText(context, R.string.no_music_found,
+                                Toast.LENGTH_SHORT).show();
+                        Log.w(LOGTAG, "bindView: albumID is null");
+                    }
                 }
             });
 
