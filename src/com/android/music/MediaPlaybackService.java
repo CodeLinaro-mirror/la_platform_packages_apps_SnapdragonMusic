@@ -68,7 +68,7 @@ import android.os.PowerManager;
 import android.os.SystemClock;
 import android.os.PowerManager.WakeLock;
 import android.provider.MediaStore;
-import android.support.v4.media.session.MediaSessionCompat;
+import android.media.session.MediaSession;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
@@ -292,7 +292,7 @@ public class MediaPlaybackService extends Service {
     private RemoteControlClient mRemoteControlClient;
 
     //hoffc fix media button delay receied issue
-    private MediaSessionCompat mSessionCompat;
+    private MediaSession mMediaSession;
     private static final int MSG_LONG_PRESS_TIMEOUT = 1;
     private static final int LONG_PRESS_DELAY = 1000;
     private boolean mLaunched = false;
@@ -595,7 +595,7 @@ public class MediaPlaybackService extends Service {
         Intent i = new Intent(Intent.ACTION_MEDIA_BUTTON);
         i.setComponent(componentName);
         PendingIntent pi = PendingIntent.getBroadcast(this /*context*/,
-                0 /*requestCode, ignored*/, i /*intent*/, 0 /*flags*/);
+                0 /*requestCode, ignored*/, i /*intent*/, PendingIntent.FLAG_IMMUTABLE);
         mRemoteControlClient = new RemoteControlClient(pi);
 
         int flags = RemoteControlClient.FLAG_KEY_MEDIA_PREVIOUS
@@ -609,12 +609,11 @@ public class MediaPlaybackService extends Service {
         mRemoteControlClient.setPlaybackPositionUpdateListener(mPosListener);
 
         //fix media button delay receied issue
-        mSessionCompat = new MediaSessionCompat(this, "MediaPlaybackService",
-                componentName, null);
-        mSessionCompat.setFlags(MediaSessionCompat.FLAG_HANDLES_MEDIA_BUTTONS
-                | MediaSessionCompat.FLAG_HANDLES_TRANSPORT_CONTROLS);
-        mSessionCompat.setCallback(new MediaSessionCallback());
-        mSessionCompat.setActive(true);
+        mMediaSession = new MediaSession(this, "MediaPlaybackService");
+        mMediaSession.setFlags(MediaSession.FLAG_HANDLES_MEDIA_BUTTONS
+                | MediaSession.FLAG_HANDLES_TRANSPORT_CONTROLS);
+        mMediaSession.setCallback(new MediaSessionCallback());
+        mMediaSession.setActive(true);
 
         mPreferences = getSharedPreferences("Music", MODE_PRIVATE);
         mRepeatMode = mPreferences.getInt("repeatmode", REPEAT_NONE);
@@ -702,9 +701,9 @@ public class MediaPlaybackService extends Service {
 
         mAudioManager.abandonAudioFocus(mAudioFocusListener);
 
-        if (mSessionCompat != null) {
-            mSessionCompat.release();
-            mSessionCompat = null;
+        if (mMediaSession != null) {
+            mMediaSession.release();
+            mMediaSession = null;
             mMediaButtonHandler.removeCallbacksAndMessages(null);
         }
 
@@ -1762,7 +1761,7 @@ public class MediaPlaybackService extends Service {
                             : R.drawable.notification_play);
             Intent pauseIntent = new Intent(PAUSE_ACTION);
             PendingIntent pausePendingIntent = PendingIntent.getBroadcast(this,
-                    0 /* no requestCode */, pauseIntent, 0 /* no flags */);
+                    0 /* no requestCode */, pauseIntent, PendingIntent.FLAG_IMMUTABLE);
             views.setOnClickPendingIntent(R.id.pause, pausePendingIntent);
             viewsLarge.setOnClickPendingIntent(R.id.pause, pausePendingIntent);
             status.flags = Notification.FLAG_ONGOING_EVENT;
@@ -1800,25 +1799,25 @@ public class MediaPlaybackService extends Service {
         if (MusicUtils.isForbidPlaybackInCall(getApplicationContext()) == false){
             Intent prevIntent = new Intent(PREVIOUS_ACTION);
             PendingIntent prevPendingIntent = PendingIntent.getBroadcast(this,
-                    0 /* no requestCode */, prevIntent, 0 /* no flags */);
+                    0 /* no requestCode */, prevIntent, PendingIntent.FLAG_IMMUTABLE);
             views.setOnClickPendingIntent(R.id.prev, prevPendingIntent);
             viewsLarge.setOnClickPendingIntent(R.id.prev, prevPendingIntent);
 
             Intent toggleIntent = new Intent(MediaPlaybackService.TOGGLEPAUSE_ACTION);
             PendingIntent togglePendingIntent = PendingIntent.getBroadcast(this,
-                    0 /* no requestCode */, toggleIntent, 0 /* no flags */);
+                    0 /* no requestCode */, toggleIntent, PendingIntent.FLAG_IMMUTABLE);
             views.setOnClickPendingIntent(R.id.pause, togglePendingIntent);
             viewsLarge.setOnClickPendingIntent(R.id.pause, togglePendingIntent);
 
             Intent nextIntent = new Intent(NEXT_ACTION);
             PendingIntent nextPendingIntent = PendingIntent.getBroadcast(this,
-                    0 /* no requestCode */, nextIntent, 0 /* no flags */);
+                    0 /* no requestCode */, nextIntent, PendingIntent.FLAG_IMMUTABLE);
             views.setOnClickPendingIntent(R.id.next, nextPendingIntent);
             viewsLarge.setOnClickPendingIntent(R.id.next, nextPendingIntent);
 
             Intent exitIntent = new Intent(EXIT_ACTION);
             PendingIntent exitPendingIntent = PendingIntent.getBroadcast(this,
-                    0 /* no requestCode */, exitIntent, 0 /* no flags */);
+                    0 /* no requestCode */, exitIntent, PendingIntent.FLAG_IMMUTABLE);
             views.setOnClickPendingIntent(R.id.exit, exitPendingIntent);
             viewsLarge.setOnClickPendingIntent(R.id.exit, exitPendingIntent);
         }
@@ -1863,7 +1862,7 @@ public class MediaPlaybackService extends Service {
         status1.setContent(views);
         status1.setContentIntent(PendingIntent.getActivity(this, 0, new Intent(
                 "com.android.music.PLAYBACK_VIEWER")
-                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK), 0));
+                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK), PendingIntent.FLAG_IMMUTABLE));
         status1.setSmallIcon(R.drawable.stat_notify_musicplayer);
 
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O){
@@ -1947,7 +1946,7 @@ public class MediaPlaybackService extends Service {
                 Intent playIntent = new Intent(TOGGLEPAUSE_ACTION);
                 PendingIntent playPendingIntent = PendingIntent
                         .getBroadcast(this, 0 /* no requestCode */, playIntent,
-                                0 /* no flags */);
+                                PendingIntent.FLAG_IMMUTABLE);
                 views.setOnClickPendingIntent(R.id.pause, playPendingIntent);
                 viewsLarge.setOnClickPendingIntent(R.id.pause, playPendingIntent);
                 status.flags = 0;
@@ -2141,7 +2140,7 @@ public class MediaPlaybackService extends Service {
                     viewsLarge.setImageViewResource(R.id.pause, R.drawable.notification_play);
                     Intent playIntent = new Intent(TOGGLEPAUSE_ACTION);
                     PendingIntent playPendingIntent = PendingIntent.getBroadcast(this,
-                            0 /* no requestCode */, playIntent, 0 /* no flags */);
+                            0 /* no requestCode */, playIntent, PendingIntent.FLAG_IMMUTABLE);
                     views.setOnClickPendingIntent(R.id.pause, playPendingIntent);
                     viewsLarge.setOnClickPendingIntent(R.id.pause, playPendingIntent);
                    // startForeground(PLAYBACKSERVICE_STATUS, status);
@@ -3390,7 +3389,7 @@ public class MediaPlaybackService extends Service {
         }
     };
 
-    private class MediaSessionCallback extends MediaSessionCompat.Callback {
+    private class MediaSessionCallback extends MediaSession.Callback {
         private long mLastClickTime = 0;
         private boolean mDown = false;
         private PowerManager.WakeLock mWakeLock = null;
