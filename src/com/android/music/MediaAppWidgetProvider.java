@@ -247,13 +247,13 @@ public class MediaAppWidgetProvider extends AppWidgetProvider {
         if (playerActive) {
             intent = new Intent(context, MusicBrowserActivity.class);
             pendingIntent = PendingIntent.getActivity(context,
-                    0 /* no requestCode */, intent, 0 /* no flags */);
+                    0 /* no requestCode */, intent, PendingIntent.FLAG_IMMUTABLE);
             views.setOnClickPendingIntent(R.id.music_info, pendingIntent);
             views.setOnClickPendingIntent(R.id.icon, pendingIntent);
         } else {
             intent = new Intent(context, MusicBrowserActivity.class);
             pendingIntent = PendingIntent.getActivity(context,
-                    0 /* no requestCode */, intent, 0 /* no flags */);
+                    0 /* no requestCode */, intent, PendingIntent.FLAG_IMMUTABLE);
             views.setOnClickPendingIntent(R.id.music_info, pendingIntent);
             views.setOnClickPendingIntent(R.id.icon, pendingIntent);
         }
@@ -261,19 +261,19 @@ public class MediaAppWidgetProvider extends AppWidgetProvider {
         intent = new Intent(MediaPlaybackService.PREVIOUS_ACTION);
         intent.setComponent(serviceName);
         pendingIntent = PendingIntent.getService(context,
-                0 /* no requestCode */, intent, 0 /* no flags */);
+                0 /* no requestCode */, intent, PendingIntent.FLAG_IMMUTABLE);
         views.setOnClickPendingIntent(R.id.prev, pendingIntent);
         
         intent = new Intent(MediaPlaybackService.TOGGLEPAUSE_ACTION);
         intent.setComponent(serviceName);
         pendingIntent = PendingIntent.getService(context,
-                0 /* no requestCode */, intent, 0 /* no flags */);
+                0 /* no requestCode */, intent, PendingIntent.FLAG_IMMUTABLE);
         views.setOnClickPendingIntent(R.id.pause, pendingIntent);
         
         intent = new Intent(MediaPlaybackService.NEXT_ACTION);
         intent.setComponent(serviceName);
         pendingIntent = PendingIntent.getService(context,
-                0 /* no requestCode */, intent, 0 /* no flags */);
+                0 /* no requestCode */, intent, PendingIntent.FLAG_IMMUTABLE);
         views.setOnClickPendingIntent(R.id.next, pendingIntent);
     }
 }
