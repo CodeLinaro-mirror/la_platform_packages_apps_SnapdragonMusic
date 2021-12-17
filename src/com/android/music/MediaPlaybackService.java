@@ -84,6 +84,7 @@ import java.util.List;
 import java.util.Random;
 import java.util.Vector;
 import java.util.HashMap;
+import android.bluetooth.BluetoothAdapter;
 
 /**
  * Provides "background" audio playback capabilities, allowing the
@@ -470,7 +471,34 @@ public class MediaPlaybackService extends Service {
         public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
             String cmd = intent.getStringExtra("command");
+            Log.v(LOGTAG, "mIntentReceiver.onReceive " + action + " / " + cmd);
             MusicUtils.debugLog("mIntentReceiver.onReceive " + action + " / " + cmd);
+
+            if (action.equals(BluetoothAdapter.ACTION_CONNECTION_STATE_CHANGED)) {
+                Log.v(LOGTAG, "BluetoothAdapter.ACTION_CONNECTION_STATE_CHANGED");
+
+                int bluetoothState = intent.getIntExtra(BluetoothAdapter.EXTRA_CONNECTION_STATE, BluetoothAdapter.ERROR);
+                switch (bluetoothState) {
+                    case BluetoothAdapter.STATE_CONNECTED:
+                        Log.v(LOGTAG, "STATE_CONNECTED");
+                        break;
+                    case BluetoothAdapter.STATE_CONNECTING:
+                        Log.v(LOGTAG, "STATE_CONNECTING");
+                        break;
+                    case BluetoothAdapter.STATE_DISCONNECTED:
+                        Log.v(LOGTAG, "STATE_DISCONNECTED");
+                        if (isPlaying()) {
+                            pause();
+                        }
+                        break;
+                    case BluetoothAdapter.STATE_DISCONNECTING:
+                        Log.v(LOGTAG, "STATE_DISCONNECTING");
+                        break;
+                    default:
+                        Log.v(LOGTAG, "DEFAULT");
+                        break;
+                }
+            }
 
             if (MusicUtils.isForbidPlaybackInCall(context)){
                 return;
@@ -524,6 +552,7 @@ public class MediaPlaybackService extends Service {
         commandFilter.addAction(NEXT_ACTION);
         commandFilter.addAction(PREVIOUS_ACTION);
         commandFilter.addAction(EXIT_ACTION);
+        commandFilter.addAction(BluetoothAdapter.ACTION_CONNECTION_STATE_CHANGED);
         registerReceiver(mIntentReceiver, commandFilter);
     }
 
@@ -643,6 +672,7 @@ public class MediaPlaybackService extends Service {
         commandFilter.addAction(NEXT_ACTION);
         commandFilter.addAction(PREVIOUS_ACTION);
         commandFilter.addAction(EXIT_ACTION);
+        commandFilter.addAction(BluetoothAdapter.ACTION_CONNECTION_STATE_CHANGED);
         registerReceiver(mIntentReceiver, commandFilter);
 
 
@@ -1011,6 +1041,7 @@ public class MediaPlaybackService extends Service {
         if (intent != null) {
             String action = intent.getAction();
             String cmd = intent.getStringExtra("command");
+            Log.v(LOGTAG, "onStartCommand " + action + " / " + cmd);
             MusicUtils.debugLog("onStartCommand " + action + " / " + cmd);
 
             if (CMDNEXT.equals(cmd) || NEXT_ACTION.equals(action)) {
@@ -1927,6 +1958,7 @@ public class MediaPlaybackService extends Service {
      * Pauses playback (based on input to decide idle or not)
      */
     public void pause(boolean idle) {
+        Log.v(LOGTAG,"pause");
         synchronized (this) {
             mMediaplayerHandler.removeMessages(FADEUP);
             if (isPlaying()) {
@@ -3419,6 +3451,7 @@ public class MediaPlaybackService extends Service {
             int keycode = event.getKeyCode();
             int action = event.getAction();
             long eventTime = event.getEventTime();
+            Log.v(LOGTAG, "onMediaButtonEvent " + action + " / " + keycode);
 
             // single quick press: pause/resume.
             // double press: next track
