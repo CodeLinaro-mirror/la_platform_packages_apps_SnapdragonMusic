@@ -1471,16 +1471,6 @@ public class MusicUtils {
         ContentResolver resolver = context.getContentResolver();
         // Set the flag in the database to mark this as a ringtone
         Uri ringUri = ContentUris.withAppendedId(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, id);
-        try {
-            ContentValues values = new ContentValues(2);
-            values.put(MediaStore.Audio.Media.IS_RINGTONE, "1");
-            values.put(MediaStore.Audio.Media.IS_ALARM, "1");
-            resolver.update(ringUri, values, null, null);
-        } catch (UnsupportedOperationException ex) {
-            // most likely the card just got unmounted
-            Log.e(TAG, "couldn't set ringtone flag for id " + id);
-            return;
-        }
 
         String[] cols = new String[] {
                 MediaStore.Audio.Media._ID,
