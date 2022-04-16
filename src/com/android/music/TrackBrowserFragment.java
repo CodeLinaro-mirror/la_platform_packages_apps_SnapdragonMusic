@@ -2006,7 +2006,7 @@ public class TrackBrowserFragment extends Fragment implements
             String trackSize = cursor.getString(cursor
                     .getColumnIndexOrThrow(MediaStore.Audio.Media.SIZE));
             if(trackSize != null){
-                vh.mCurrentTrackSize = getHumanReadableSize(context, Integer.parseInt(trackSize));
+                vh.mCurrentTrackSize = getHumanReadableSize(context, Long.parseLong(trackSize));
             }
             else{
                 vh.mCurrentTrackSize = "";
@@ -2105,7 +2105,7 @@ public class TrackBrowserFragment extends Fragment implements
             }
         }
 
-        private String getHumanReadableSize(Context context,int size) {
+        private String getHumanReadableSize(Context context, long size) {
             // TODO Auto-generated method stub
             Resources res = context.getResources();
             final int[] magnitude = {
