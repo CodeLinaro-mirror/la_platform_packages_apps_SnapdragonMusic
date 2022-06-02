@@ -2052,7 +2052,7 @@ public class TrackBrowserActivityFragment extends Fragment
 
             String trackSize = cursor.getString(cursor
                     .getColumnIndexOrThrow(MediaStore.Audio.Media.SIZE));
-            vh.mCurrentTrackSize = getHumanReadableSize(context, Integer.parseInt(trackSize));
+            vh.mCurrentTrackSize = getHumanReadableSize(context, Long.parseLong(trackSize));
 
             final StringBuilder builder = mBuilder;
             builder.delete(0, builder.length());
@@ -2113,7 +2113,7 @@ public class TrackBrowserActivityFragment extends Fragment
             }
         }
 
-        private String getHumanReadableSize(Context context, int size) {
+        private String getHumanReadableSize(Context context, long size) {
             // TODO Auto-generated method stub
             Resources res = context.getResources();
             final int[] magnitude = {

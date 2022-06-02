@@ -76,6 +76,7 @@ public class MusicBrowserActivity extends MediaPlaybackActivity implements
     private static final String[] REQUIRED_PERMISSIONS = {
             permission.READ_PHONE_STATE,
             permission.READ_EXTERNAL_STORAGE,
+            permission.POST_NOTIFICATIONS,
             permission.WRITE_EXTERNAL_STORAGE};
 
     private ServiceToken mToken;
