@@ -16,6 +16,7 @@
 
 package com.android.music;
 
+import android.Manifest;
 import android.app.ListActivity;
 import android.content.AsyncQueryHandler;
 import android.content.BroadcastReceiver;
@@ -24,6 +25,7 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.PackageManager;
 import android.database.CharArrayBuffer;
 import android.database.Cursor;
 //import android.drm.DrmManagerClientWrapper;
@@ -57,6 +59,7 @@ import android.widget.Toast;
 
 import java.io.IOException;
 import java.text.Collator;
+import java.util.ArrayList;
 import java.util.Formatter;
 import java.util.Locale;
 import android.view.KeyEvent;
@@ -109,6 +112,12 @@ public class MusicPicker extends ListActivity
             MediaStore.Audio.Media.DURATION,
             MediaStore.Audio.Media.TRACK
     };
+    private static final int REQUEST_CODE = 100;
+    private static final String[] REQUIRED_PERMISSIONS = {
+            Manifest.permission.READ_EXTERNAL_STORAGE };
+    private boolean mSync = false;
+    private String mFilterString;
+
 
     /** Formatting optimization to avoid creating many temporary objects. */
     static StringBuilder sFormatBuilder = new StringBuilder();
@@ -537,6 +546,43 @@ public class MusicPicker extends ListActivity
         setSortMode(sortMode);
     }
 
+    @Override
+    public void onRequestPermissionsResult(int requestCode,
+                                           String[] permissions, int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (hasPermissions()) {
+            doQuery(mSync, mFilterString);
+        } else {
+            Toast.makeText(this, R.string.dialog_content, Toast.LENGTH_SHORT).show();
+            setResult(RESULT_CANCELED);
+            finish();
+        }
+    }
+
+    private boolean hasPermissions() {
+        for (String permission : REQUIRED_PERMISSIONS) {
+            if (!hasPermission(permission)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private boolean hasPermission(String permission) {
+        return checkSelfPermission(permission)
+                == PackageManager.PERMISSION_GRANTED;
+    }
+
+    private String[] getRequireGrantPermissions(){
+        final ArrayList<String> unsatisfiedPermissions = new ArrayList<>();
+        for (String permission : REQUIRED_PERMISSIONS) {
+            if (!hasPermission(permission)) {
+                unsatisfiedPermissions.add(permission);
+            }
+        }
+        return unsatisfiedPermissions.toArray(new String[0]);
+    }
+
     private final BroadcastReceiver mScanListener = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -689,6 +735,13 @@ public class MusicPicker extends ListActivity
         Uri uri = mBaseUri;
         if (!TextUtils.isEmpty(filterstring)) {
             uri = uri.buildUpon().appendQueryParameter("filter", Uri.encode(filterstring)).build();
+        }
+        if (!hasPermissions()) {
+            mSync = sync;
+            mFilterString = filterstring;
+            String[] permissions = getRequireGrantPermissions();
+            requestPermissions(permissions, REQUEST_CODE);
+            return null;
         }
 
         if (sync) {
