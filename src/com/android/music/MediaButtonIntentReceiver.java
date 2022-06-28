@@ -24,6 +24,7 @@ import android.os.Handler;
 import android.os.Message;
 import android.os.PowerManager;
 import android.view.KeyEvent;
+import android.util.Log;
 
 /**
  * 
@@ -68,6 +69,7 @@ public class MediaButtonIntentReceiver extends BroadcastReceiver {
         mWakeLock.acquire(3000);
 
         String intentAction = intent.getAction();
+        Log.v("MediaButtonIntentReceiver", "MediaButtonIntentReceiver intentAction=" + intentAction);
         if (AudioManager.ACTION_AUDIO_BECOMING_NOISY.equals(intentAction)) {
             Intent i = new Intent(context, MediaPlaybackService.class);
             i.setAction(MediaPlaybackService.SERVICECMD);
