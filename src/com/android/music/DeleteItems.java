@@ -17,13 +17,12 @@
 package com.android.music;
 
 import android.app.Activity;
+import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.database.Cursor;
 import android.media.AudioManager;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.view.View;
@@ -35,6 +34,8 @@ import android.view.KeyEvent;
 import android.net.Uri;
 import android.widget.Toast;
 
+import java.util.ArrayList;
+
 public class DeleteItems extends Activity
 {
     private TextView mPrompt;
@@ -44,6 +45,8 @@ public class DeleteItems extends Activity
     private Uri mPlaylistUri;
     private Uri mVideoUri;
     private static String DELETE_VIDEO_ITEM = "delete.video.file";
+    private final static int REQUEST_DELETE = 100;
+    private Bundle mDeleteData = new Bundle();
 
     @Override
     public void onCreate(Bundle icicle) {
@@ -91,12 +94,6 @@ public class DeleteItems extends Activity
         unregisterReceiver(mLanguageChangeReceiver);
     }
 
-    @Override
-    public void onUserLeaveHint() {
-        finish();
-        super.onUserLeaveHint();
-    }
-
     // Broadcast receiver monitor system language change, if language changed
     // will finsh current activity, same as system alter dialog.
     private BroadcastReceiver mLanguageChangeReceiver = new BroadcastReceiver() {
@@ -129,33 +126,18 @@ public class DeleteItems extends Activity
                 mItemListHashCode = mItemList.hashCode();
                 // delete the selected item(s)
                 final String where = getItemListString(mItemList);
-                new AsyncTask<Void, Void, Void>() {
-                    private int mLength;
-                    private Cursor mCursor = null;
 
-                    @Override
-                    protected void onPreExecute() {
-                        super.onPreExecute();
-                        mCursor = MusicUtils.deleteTracksPre(DeleteItems.this, where);
-                        mLength = mItemList.length;
-                    }
-
-                    @Override
-                    protected Void doInBackground(Void... params) {
-                        MusicUtils.deleteTracks(DeleteItems.this, mCursor, where);
-                        if (mCursor != null) {
-                            mCursor.close();
-                        }
-                        return null;
-                    }
-
-                    @Override
-                    protected void onPostExecute(Void result) {
-                        super.onPostExecute(result);
-                        MusicUtils.deleteTracksPost(DeleteItems.this, mLength);
-                        DeleteItems.this.finish();
-                    }
-                }.execute();
+                mDeleteData = MusicUtils.getDeleteData(DeleteItems.this, where);
+                ArrayList<Uri> uris = mDeleteData.getParcelableArrayList(MusicUtils.URIS);
+                try {
+                    PendingIntent deletePendingIntent =
+                            MediaStore.createDeleteRequest(getContentResolver(), uris);
+                    startIntentSenderForResult(
+                            deletePendingIntent.getIntentSender(), REQUEST_DELETE, null, 0, 0, 0);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    finish();
+                }
                 return;
             }
             finish();
@@ -184,4 +166,15 @@ public class DeleteItems extends Activity
         }
         return super.dispatchKeyEvent(event);
     };
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == REQUEST_DELETE) {
+            if (resultCode == Activity.RESULT_OK) {
+                MusicUtils.deleteTracksSucceed(DeleteItems.this, mDeleteData);
+            }
+            finish();
+        }
+    }
 }
