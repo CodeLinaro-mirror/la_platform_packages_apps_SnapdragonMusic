@@ -578,7 +578,7 @@ public class MediaPlaybackService extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
-        if (checkSelfPermission(permission.READ_EXTERNAL_STORAGE) !=
+        if (checkSelfPermission(permission.READ_MEDIA_AUDIO) !=
                 PackageManager.PERMISSION_GRANTED) {
             stopSelf();
             return;
@@ -586,7 +586,7 @@ public class MediaPlaybackService extends Service {
             mIsReadGranted = true;
         }
         // add for clear the notification when the service restart
-        stopForeground(true);
+        stopForeground(STOP_FOREGROUND_REMOVE);
 
         mAudioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
         ComponentName componentName = new ComponentName(getPackageName(),
@@ -1904,7 +1904,7 @@ public class MediaPlaybackService extends Service {
             NotificationManager nm = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
             nm.cancel(PLAYBACKSERVICE_STATUS);
         } else {
-            stopForeground(false);
+            stopForeground(STOP_FOREGROUND_LEGACY);
         }
     }
 
@@ -2171,7 +2171,7 @@ public class MediaPlaybackService extends Service {
         Message msg = mDelayedStopHandler.obtainMessage();
         mDelayedStopHandler.sendMessageDelayed(msg, IDLE_DELAY);
         if (! mControlInStatusBar) {
-            stopForeground(false);
+            stopForeground(STOP_FOREGROUND_LEGACY);
         }
     }
 
@@ -3410,7 +3410,7 @@ public class MediaPlaybackService extends Service {
             mWakeLock.acquire(3000);
 
             KeyEvent event = (KeyEvent)
-                    mediaButtonEvent.getParcelableExtra(Intent.EXTRA_KEY_EVENT);
+                    mediaButtonEvent.getParcelableExtra(Intent.EXTRA_KEY_EVENT, KeyEvent.class);
             if (event == null) {
                 return super.onMediaButtonEvent(mediaButtonEvent);
             }
