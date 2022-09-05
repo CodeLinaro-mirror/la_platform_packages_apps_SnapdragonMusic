@@ -114,7 +114,7 @@ public class MusicPicker extends ListActivity
     };
     private static final int REQUEST_CODE = 100;
     private static final String[] REQUIRED_PERMISSIONS = {
-            Manifest.permission.READ_EXTERNAL_STORAGE };
+            Manifest.permission.READ_MEDIA_AUDIO };
     private boolean mSync = false;
     private String mFilterString;
 

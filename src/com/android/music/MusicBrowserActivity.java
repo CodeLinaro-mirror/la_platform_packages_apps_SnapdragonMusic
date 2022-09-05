@@ -75,9 +75,8 @@ public class MusicBrowserActivity extends MediaPlaybackActivity implements
     private static final String TAG = "MusicBrowserActivity";
     private static final String[] REQUIRED_PERMISSIONS = {
             permission.READ_PHONE_STATE,
-            permission.READ_EXTERNAL_STORAGE,
-            permission.POST_NOTIFICATIONS,
-            permission.WRITE_EXTERNAL_STORAGE};
+            permission.READ_MEDIA_AUDIO,
+            permission.POST_NOTIFICATIONS};
 
     private ServiceToken mToken;
     private ListView mDrawerListView;
@@ -141,7 +140,7 @@ public class MusicBrowserActivity extends MediaPlaybackActivity implements
     private Thread mFavoritePlaylistThread = new Thread() {
         @Override
         public void run() {
-            if (checkSelfPermission(permission.READ_EXTERNAL_STORAGE) ==
+            if (checkSelfPermission(permission.READ_MEDIA_AUDIO) ==
                     PackageManager.PERMISSION_GRANTED)
             createFavoritePlaylist();
         }
