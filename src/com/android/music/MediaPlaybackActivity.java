@@ -35,6 +35,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
+import android.content.pm.PackageManager.ResolveInfoFlags;
 import android.content.res.Configuration;
 import android.database.Cursor;
 import android.graphics.Bitmap;
@@ -839,7 +840,7 @@ public class MediaPlaybackActivity extends Activity implements MusicUtils.Defs,
             MusicUtils.makePlaylistMenu(MediaPlaybackActivity.this, sub);
             MusicUtils.addSetRingtonMenu(popup.getMenu());
             Intent i = new Intent(AudioEffect.ACTION_DISPLAY_AUDIO_EFFECT_CONTROL_PANEL);
-            if (getPackageManager().resolveActivity(i, 0) != null) {
+            if (getPackageManager().resolveActivity(i, ResolveInfoFlags.of(0)) != null) {
                 popup.getMenu().add(0, EFFECTS_PANEL, 0, R.string.effectspanel);
             }
             popup.getMenu()
