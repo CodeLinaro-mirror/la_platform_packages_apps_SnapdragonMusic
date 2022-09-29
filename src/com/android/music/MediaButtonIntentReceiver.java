@@ -75,7 +75,7 @@ public class MediaButtonIntentReceiver extends BroadcastReceiver {
             MusicUtils.startService(context, i);
         } else if (Intent.ACTION_MEDIA_BUTTON.equals(intentAction)) {
             KeyEvent event = (KeyEvent)
-                    intent.getParcelableExtra(Intent.EXTRA_KEY_EVENT);
+                    intent.getParcelableExtra(Intent.EXTRA_KEY_EVENT, KeyEvent.class);
             
             if (event == null) {
                 return;

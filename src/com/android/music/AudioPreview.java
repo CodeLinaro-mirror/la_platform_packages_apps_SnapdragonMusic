@@ -68,8 +68,7 @@ public class AudioPreview extends Activity implements OnPreparedListener, OnErro
     private final static String HOST_DOWNLOADS = "downloads";
     private static final String COLUMN_MEDIAPROVIDER_URI = "mediaprovider_uri";
     private static final String[] REQUIRED_PERMISSIONS = {
-            Manifest.permission.READ_EXTERNAL_STORAGE,
-            Manifest.permission.WRITE_EXTERNAL_STORAGE};
+            Manifest.permission.READ_MEDIA_AUDIO};
     private PreviewPlayer mPlayer;
     private TextView mTextLine1;
     private TextView mTextLine2;

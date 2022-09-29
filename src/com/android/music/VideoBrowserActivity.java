@@ -54,9 +54,8 @@ import java.lang.Integer;
 public class VideoBrowserActivity extends ListActivity implements MusicUtils.Defs
 {
     private static final String[] REQUIRED_PERMISSIONS = {
-            Manifest.permission.READ_EXTERNAL_STORAGE,
-            Manifest.permission.POST_NOTIFICATIONS,
-            Manifest.permission.WRITE_EXTERNAL_STORAGE};
+            Manifest.permission.READ_MEDIA_AUDIO,
+            Manifest.permission.POST_NOTIFICATIONS};
     private int mSelectedPosition; // Position of selected view
     private static final int SHARE = 0; // Menu to share video
     private static final int DELETE = 1; // Menu to delete video

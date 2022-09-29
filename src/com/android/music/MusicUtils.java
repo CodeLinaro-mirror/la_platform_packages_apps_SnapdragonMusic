@@ -89,6 +89,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Formatter;
 import java.util.HashMap;
@@ -126,6 +127,10 @@ public class MusicUtils {
 
     public static int navigatingTabPosition;
     public static boolean isLaunchedFromQueryBrowser = false;
+
+    public static String URIS = "uris";
+    private static String IDS = "ids";
+    private static String ALBUMS = "albums";
 
     public static long mPlayListId;
     // decoding and caching 20 bitmaps to overcome Out of memory exception.
@@ -2356,4 +2361,63 @@ public class MusicUtils {
         return;
     }
 
+    public static Bundle getDeleteData(Context context, String where) {
+        final String [] cols = new String [] { MediaStore.Audio.Media._ID,
+                MediaStore.Audio.Media.DATA, MediaStore.Audio.Media.ALBUM_ID };
+        Cursor c = query(context, MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, cols,
+                where, null, null);
+        Bundle data = new Bundle();
+        ArrayList<Uri> urisToDelete = new ArrayList<>();
+        ArrayList<Long> idsToDelete = new ArrayList<>();
+        ArrayList<Long> albumsToDelete = new ArrayList<>();
+        if (c != null) {
+            c.moveToFirst();
+            while (! c.isAfterLast()) {
+                // remove from current playlist
+                long id = c.getLong(0);
+                idsToDelete.add(id);
+                Uri uri = ContentUris.withAppendedId(
+                        MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, id);
+                urisToDelete.add(uri);
+                // remove from album art cache
+                long artIndex = c.getLong(2);
+                albumsToDelete.add(artIndex);
+                c.moveToNext();
+            }
+            c.close();
+        }
+        data.putParcelableArrayList(URIS, urisToDelete);
+        data.putSerializable(IDS, idsToDelete);
+        data.putSerializable(ALBUMS, albumsToDelete);
+        return data;
+    }
+
+    public static void deleteTracksSucceed(Context context, Bundle data) {
+        ArrayList<Long> ids = (ArrayList<Long>) data.getSerializable(IDS);
+        ArrayList<Long> albums = (ArrayList<Long>) data.getSerializable(ALBUMS);
+        if (ids != null) {
+            String message = context.getResources().getQuantityString(
+                    R.plurals.NNNtracksdeleted, ids.size(), Integer.valueOf(ids.size()));
+            // perform in the main thread
+            Toast.makeText(context, message, Toast.LENGTH_SHORT).show();
+            for (long id: ids) {
+                try {
+                    sService.removeTrack(id);
+                } catch (RemoteException e) {
+                }
+            }
+        }
+
+        if (albums != null) {
+            synchronized (sArtCache) {
+                for (long artIndex: albums) {
+                    sArtCache.remove(artIndex);
+                }
+            }
+        }
+
+        // We deleted a number of tracks, which could affect any number of things
+        // in the media content domain, so update everything.
+        context.getContentResolver().notifyChange(Uri.parse("content://media"), null);
+    }
 }
