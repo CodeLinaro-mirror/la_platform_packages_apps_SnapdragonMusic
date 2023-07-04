@@ -55,9 +55,6 @@ import android.media.AudioManager.OnAudioFocusChangeListener;
 import android.media.MediaMetadataRetriever;
 import android.media.MediaPlayer;
 import android.media.MediaPlayer.OnCompletionListener;
-import android.media.RemoteControlClient;
-import android.media.RemoteControlClient.OnPlaybackPositionUpdateListener;
-import android.media.RemoteControlClient.MetadataEditor;
 import android.net.Uri;
 import android.os.FileObserver;
 import android.os.Handler;
@@ -69,6 +66,8 @@ import android.os.SystemClock;
 import android.os.PowerManager.WakeLock;
 import android.provider.MediaStore;
 import android.media.session.MediaSession;
+import android.media.session.PlaybackState;
+import android.media.MediaMetadata;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
@@ -288,8 +287,6 @@ public class MediaPlaybackService extends Service {
 
     // interval after which we stop the service when idle
     private static final int IDLE_DELAY = 60000;
-
-    private RemoteControlClient mRemoteControlClient;
 
     //hoffc fix media button delay receied issue
     private MediaSession mMediaSession;
@@ -558,20 +555,6 @@ public class MediaPlaybackService extends Service {
         }
     };
 
-    private OnPlaybackPositionUpdateListener mPosListener = new OnPlaybackPositionUpdateListener() {
-        public void onPlaybackPositionUpdate(long newPositionMs) {
-            if (newPositionMs > duration()) {
-                boolean wasPlaying = isPlaying();
-                gotoNext(true);
-                if (!wasPlaying) {
-                    pause();
-                }
-            } else {
-                seek(newPositionMs);
-            }
-        }
-    };
-
     public MediaPlaybackService() {
     }
 
@@ -596,17 +579,6 @@ public class MediaPlaybackService extends Service {
         i.setComponent(componentName);
         PendingIntent pi = PendingIntent.getBroadcast(this /*context*/,
                 0 /*requestCode, ignored*/, i /*intent*/, PendingIntent.FLAG_IMMUTABLE);
-        mRemoteControlClient = new RemoteControlClient(pi);
-
-        int flags = RemoteControlClient.FLAG_KEY_MEDIA_PREVIOUS
-                | RemoteControlClient.FLAG_KEY_MEDIA_NEXT
-                | RemoteControlClient.FLAG_KEY_MEDIA_PLAY
-                | RemoteControlClient.FLAG_KEY_MEDIA_POSITION_UPDATE
-                | RemoteControlClient.FLAG_KEY_MEDIA_PAUSE
-                | RemoteControlClient.FLAG_KEY_MEDIA_PLAY_PAUSE
-                | RemoteControlClient.FLAG_KEY_MEDIA_STOP;
-        mRemoteControlClient.setTransportControlFlags(flags);
-        mRemoteControlClient.setPlaybackPositionUpdateListener(mPosListener);
 
         //fix media button delay receied issue
         mMediaSession = new MediaSession(this, "MediaPlaybackService");
@@ -1260,34 +1232,24 @@ public class MediaPlaybackService extends Service {
         if (what.equals(PLAYSTATE_CHANGED)) {
             updatePlaybackState(false);
         } else if (what.equals(META_CHANGED)) {
-            RemoteControlClient.MetadataEditor ed = mRemoteControlClient.editMetadata(true);
-            ed.putString(MediaMetadataRetriever.METADATA_KEY_TITLE, getTrackName());
-            ed.putString(MediaMetadataRetriever.METADATA_KEY_ALBUM, getAlbumName());
-            ed.putString(MediaMetadataRetriever.METADATA_KEY_ARTIST, getArtistName());
-            ed.putLong(MediaMetadataRetriever.METADATA_KEY_DURATION, duration());
+            long discNumber = INVALID_SONG_UID;
             if ((mPlayList != null) && (mPlayPos >= 0) && (mPlayPos < mPlayList.length)) {
-                ed.putLong(MediaMetadataRetriever.METADATA_KEY_DISC_NUMBER,
-                                                            mPlayList[mPlayPos]);
-            } else {
-                ed.putLong(MediaMetadataRetriever.METADATA_KEY_DISC_NUMBER,
-                                                                INVALID_SONG_UID);
+                discNumber = mPlayList[mPlayPos];
             }
-            ed.putLong(MediaMetadataRetriever.METADATA_KEY_CD_TRACK_NUMBER, mPlayPos);
-            try {
-                ed.putLong(MediaMetadataRetriever.METADATA_KEY_NUM_TRACKS, mPlayListLen);
-            } catch (IllegalArgumentException e) {
-                Log.e(LOGTAG, "METADATA_KEY_NUM_TRACKS: failed: " + e);
+            Bitmap artworkBitmap = MusicUtils.getArtwork(this, getAudioId(), getAlbumId(), false);
+            if (artworkBitmap == null) {
+                artworkBitmap = BitmapFactory.decodeResource(MediaPlaybackService.this.getResources()
+                        , R.drawable.album_cover);
             }
-            Bitmap b = MusicUtils.getArtwork(this, getAudioId(), getAlbumId(), false);
-            if (b != null) {
-                ed.putBitmap(MetadataEditor.BITMAP_KEY_ARTWORK, b);
-            } else {
-                Context context = MediaPlaybackService.this;
-                Resources r = context.getResources();
-                b = BitmapFactory.decodeResource(r, R.drawable.album_cover);
-                ed.putBitmap(MetadataEditor.BITMAP_KEY_ARTWORK, b);
-            }
-            ed.apply();
+            mMediaSession.setMetadata(new MediaMetadata.Builder()
+                    .putString(MediaMetadata.METADATA_KEY_ARTIST, getArtistName())
+                    .putString(MediaMetadata.METADATA_KEY_ALBUM, getAlbumName())
+                    .putString(MediaMetadata.METADATA_KEY_TITLE, getTrackName())
+                    .putLong(MediaMetadata.METADATA_KEY_DISC_NUMBER, discNumber)
+                    .putLong(MediaMetadata.METADATA_KEY_NUM_TRACKS, mPlayListLen)
+                    .putBitmap(MediaMetadata.METADATA_KEY_ALBUM_ART, artworkBitmap)
+                    .putLong(MediaMetadata.METADATA_KEY_DURATION, duration())
+                    .build());
         }
 
         if (what.equals(QUEUE_CHANGED)) {
@@ -2621,9 +2583,13 @@ public class MediaPlaybackService extends Service {
             if (pos < 0) pos = 0;
             if (pos > mPlayer.duration()) pos = mPlayer.duration();
 
-            mRemoteControlClient.setPlaybackState((isPlaying() ?
-                    RemoteControlClient.PLAYSTATE_PLAYING : RemoteControlClient.PLAYSTATE_PAUSED),
-                    pos, PLAYBACK_SPEED_1X);
+            int playState = isPlaying() ? PlaybackState.STATE_PLAYING : PlaybackState.STATE_PAUSED;
+            PlaybackState plybackState = new PlaybackState.Builder()
+                .setState(playState, pos, PLAYBACK_SPEED_1X)
+                .setActions(PlaybackState.ACTION_PLAY_PAUSE | PlaybackState.ACTION_SKIP_TO_NEXT
+                        | PlaybackState.ACTION_SKIP_TO_PREVIOUS)
+                .build();
+            mMediaSession.setPlaybackState(plybackState);
             return mPlayer.seek(pos);
         }
         return -1;
@@ -3359,15 +3325,18 @@ public class MediaPlaybackService extends Service {
         long pos = (mPlayer != null) ? position() : 0;
         if (pos < 0) pos = 0;
 
-        int state = RemoteControlClient.PLAYSTATE_PAUSED;
+        int state = PlaybackState.STATE_PAUSED;
         if (pause) {
-            state = RemoteControlClient.PLAYSTATE_PAUSED;
+            state = PlaybackState.STATE_PAUSED;
         } else {
-            state = isPlaying() ?
-                    RemoteControlClient.PLAYSTATE_PLAYING :
-                    RemoteControlClient.PLAYSTATE_PAUSED;
+            state = isPlaying() ? PlaybackState.STATE_PLAYING : PlaybackState.STATE_PAUSED;
         }
-        mRemoteControlClient.setPlaybackState(state, pos, PLAYBACK_SPEED_1X);
+        PlaybackState plybackState = new PlaybackState.Builder()
+            .setState(state, pos, PLAYBACK_SPEED_1X)
+            .setActions(PlaybackState.ACTION_PLAY_PAUSE | PlaybackState.ACTION_SKIP_TO_NEXT
+                    | PlaybackState.ACTION_SKIP_TO_PREVIOUS)
+            .build();
+        mMediaSession.setPlaybackState(plybackState);
     }
 
     private Handler mMediaButtonHandler = new Handler() {
