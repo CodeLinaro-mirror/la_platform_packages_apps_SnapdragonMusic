@@ -197,7 +197,7 @@ public class ArtistAlbumBrowserActivity extends ExpandableListActivity
         IntentFilter f = new IntentFilter();
         f.addAction(MediaPlaybackService.META_CHANGED);
         f.addAction(MediaPlaybackService.QUEUE_CHANGED);
-        registerReceiver(mTrackListListener, f);
+        registerReceiver(mTrackListListener, f, Context.RECEIVER_EXPORTED);
         mTrackListListener.onReceive(null, null);
         new Thread(new Runnable() {
             public void run() {

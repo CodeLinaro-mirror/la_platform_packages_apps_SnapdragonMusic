@@ -129,7 +129,7 @@ public class QueryBrowserActivity extends ListActivity implements
         f.addAction(Intent.ACTION_MEDIA_SCANNER_STARTED);
         f.addAction(Intent.ACTION_MEDIA_UNMOUNTED);
         f.addDataScheme("file");
-        registerReceiver(mScanListener, f);
+        registerReceiver(mScanListener, f, Context.RECEIVER_EXPORTED);
 
         Intent intent = getIntent();
         String action = intent != null ? intent.getAction() : null;

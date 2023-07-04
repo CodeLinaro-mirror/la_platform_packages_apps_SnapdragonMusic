@@ -219,7 +219,7 @@ public class TrackBrowserActivity extends ListActivity
         f.addAction(Intent.ACTION_MEDIA_SCANNER_FINISHED);
         f.addAction(Intent.ACTION_MEDIA_UNMOUNTED);
         f.addDataScheme("file");
-        registerReceiver(mScanListener, f);
+        registerReceiver(mScanListener, f, Context.RECEIVER_EXPORTED);
 
         if (mAdapter == null) {
             //Log.i("@@@", "starting query");
@@ -343,7 +343,7 @@ public class TrackBrowserActivity extends ListActivity
         }
         IntentFilter stateIntentfilter = new IntentFilter();
         stateIntentfilter.addAction(MediaPlaybackService.PLAYSTATE_CHANGED);
-        registerReceiver(mStatusListener, stateIntentfilter);
+        registerReceiver(mStatusListener, stateIntentfilter, Context.RECEIVER_EXPORTED);
     }
     @Override
     public void onPause() {
@@ -452,7 +452,8 @@ public class TrackBrowserActivity extends ListActivity
             try {
                 int cur = MusicUtils.sService.getQueuePosition();
                 setSelection(cur);
-                registerReceiver(mNowPlayingListener, new IntentFilter(f));
+                registerReceiver(mNowPlayingListener, new IntentFilter(f)
+                        , Context.RECEIVER_EXPORTED);
                 mNowPlayingListener.onReceive(this, new Intent(MediaPlaybackService.META_CHANGED));
             } catch (RemoteException ex) {
             }
@@ -470,7 +471,8 @@ public class TrackBrowserActivity extends ListActivity
                     mTrackCursor.moveToNext();
                 }
             }
-            registerReceiver(mTrackListListener, new IntentFilter(f));
+            registerReceiver(mTrackListListener, new IntentFilter(f)
+                    , Context.RECEIVER_EXPORTED);
             mTrackListListener.onReceive(this, new Intent(MediaPlaybackService.META_CHANGED));
         }
     }

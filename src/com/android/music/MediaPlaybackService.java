@@ -524,7 +524,7 @@ public class MediaPlaybackService extends Service {
         commandFilter.addAction(NEXT_ACTION);
         commandFilter.addAction(PREVIOUS_ACTION);
         commandFilter.addAction(EXIT_ACTION);
-        registerReceiver(mIntentReceiver, commandFilter);
+        registerReceiver(mIntentReceiver, commandFilter, Context.RECEIVER_EXPORTED);
     }
 
     private void sendEmptyMessageIfNo(int msgId) {
@@ -642,7 +642,7 @@ public class MediaPlaybackService extends Service {
         commandFilter.addAction(NEXT_ACTION);
         commandFilter.addAction(PREVIOUS_ACTION);
         commandFilter.addAction(EXIT_ACTION);
-        registerReceiver(mIntentReceiver, commandFilter);
+        registerReceiver(mIntentReceiver, commandFilter, Context.RECEIVER_EXPORTED);
 
 
         IntentFilter s = new IntentFilter();
@@ -1156,7 +1156,7 @@ public class MediaPlaybackService extends Service {
             iFilter.addAction(Intent.ACTION_MEDIA_MOUNTED);
             iFilter.addAction(ACTION_DELETE_MUSIC);
             iFilter.addDataScheme("file");
-            registerReceiver(mUnmountReceiver, iFilter);
+            registerReceiver(mUnmountReceiver, iFilter, Context.RECEIVER_EXPORTED);
         }
     }
 
@@ -1225,7 +1225,7 @@ public class MediaPlaybackService extends Service {
         iFilter.addAction(SET_ADDRESSED_PLAYER);
         iFilter.addAction(PLAYSTATUS_REQUEST);
         iFilter.addAction(PLAYERSETTINGS_REQUEST);
-        registerReceiver(mA2dpReceiver, iFilter);
+        registerReceiver(mA2dpReceiver, iFilter, Context.RECEIVER_EXPORTED);
     }
 
     /**
