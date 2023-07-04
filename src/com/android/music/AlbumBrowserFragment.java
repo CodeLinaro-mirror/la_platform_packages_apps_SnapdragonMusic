@@ -118,7 +118,7 @@ public class AlbumBrowserFragment extends Fragment implements MusicUtils.Defs,
         f.addAction(Intent.ACTION_MEDIA_SCANNER_FINISHED);
         f.addAction(Intent.ACTION_MEDIA_UNMOUNTED);
         f.addDataScheme("file");
-        mParentActivity.registerReceiver(mScanListener, f);
+        mParentActivity.registerReceiver(mScanListener, f, Context.RECEIVER_EXPORTED);
     }
 
     @Override
