@@ -158,7 +158,7 @@ public class PlaylistBrowserActivity extends Activity implements
         f.addAction(Intent.ACTION_MEDIA_SCANNER_FINISHED);
         f.addAction(Intent.ACTION_MEDIA_UNMOUNTED);
         f.addDataScheme("file");
-        registerReceiver(mScanListener, f);
+        registerReceiver(mScanListener, f, Context.RECEIVER_EXPORTED);
         setContentView(R.layout.media_picker_activity_album);
         mGridView = (GridView) findViewById(R.id.album_list);
         mGridView.setOnCreateContextMenuListener(this);
@@ -283,7 +283,7 @@ public class PlaylistBrowserActivity extends Activity implements
         IntentFilter f = new IntentFilter();
         f.addAction(MediaPlaybackService.META_CHANGED);
         f.addAction(MediaPlaybackService.QUEUE_CHANGED);
-        registerReceiver(mTrackListListener, f);
+        registerReceiver(mTrackListListener, f, Context.RECEIVER_EXPORTED);
         mTrackListListener.onReceive(null, null);
         MusicUtils.setSpinnerState(this);
         MusicUtils.updateNowPlaying(PlaylistBrowserActivity.this, false);
