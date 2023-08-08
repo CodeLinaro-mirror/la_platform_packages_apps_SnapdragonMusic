@@ -189,7 +189,7 @@ public class PlaylistBrowserFragment extends Fragment implements
         f.addAction(Intent.ACTION_MEDIA_SCANNER_FINISHED);
         f.addAction(Intent.ACTION_MEDIA_UNMOUNTED);
         f.addDataScheme("file");
-        parentActivity.registerReceiver(mScanListener, f);
+        parentActivity.registerReceiver(mScanListener, f, Context.RECEIVER_EXPORTED);
         Resources r = getResources();
         mDefaultAlbumIcon = (BitmapDrawable) r
                 .getDrawable(R.drawable.unknown_albums);
@@ -367,7 +367,7 @@ public class PlaylistBrowserFragment extends Fragment implements
         IntentFilter f = new IntentFilter();
         f.addAction(MediaPlaybackService.META_CHANGED);
         f.addAction(MediaPlaybackService.QUEUE_CHANGED);
-        parentActivity.registerReceiver(mTrackListListener, f);
+        parentActivity.registerReceiver(mTrackListListener, f, Context.RECEIVER_EXPORTED);
         mTrackListListener.onReceive(null, null);
         MusicUtils.setSpinnerState(parentActivity);
         // When system language is changed, the name of "Recently added" is also

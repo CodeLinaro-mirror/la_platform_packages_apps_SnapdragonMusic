@@ -350,7 +350,7 @@ public class TrackBrowserFragment extends Fragment implements
         f.addAction(Intent.ACTION_MEDIA_SCANNER_FINISHED);
         f.addAction(Intent.ACTION_MEDIA_UNMOUNTED);
         f.addDataScheme("file");
-        mParentActivity.registerReceiver(mScanListener, f);
+        mParentActivity.registerReceiver(mScanListener, f, Context.RECEIVER_EXPORTED);
 
         if (mAdapter == null) {
             mAdapter = new TrackListAdapter(
@@ -479,7 +479,8 @@ public class TrackBrowserFragment extends Fragment implements
         MusicUtils.setSpinnerState(mParentActivity);
         IntentFilter stateIntentfilter = new IntentFilter();
         stateIntentfilter.addAction(MediaPlaybackService.PLAYSTATE_CHANGED);
-        mParentActivity.registerReceiver(mStatusListener, stateIntentfilter);
+        mParentActivity.registerReceiver(mStatusListener, stateIntentfilter
+                , Context.RECEIVER_EXPORTED);
         mParentActivity.updateNowPlaying(mParentActivity);
 
         if (mAdapter != null) {

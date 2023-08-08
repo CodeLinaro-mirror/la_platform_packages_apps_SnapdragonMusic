@@ -443,7 +443,7 @@ public class TrackBrowserActivityFragment extends Fragment
         f.addAction(Intent.ACTION_MEDIA_SCANNER_FINISHED);
         f.addAction(Intent.ACTION_MEDIA_UNMOUNTED);
         f.addDataScheme("file");
-        mParentActivity.registerReceiver(mScanListener, f);
+        mParentActivity.registerReceiver(mScanListener, f, Context.RECEIVER_EXPORTED);
 
         if (mAdapter == null) {
             //Log.i("@@@", "starting query");
@@ -584,7 +584,8 @@ public class TrackBrowserActivityFragment extends Fragment
         }
         IntentFilter stateIntentfilter = new IntentFilter();
         stateIntentfilter.addAction(MediaPlaybackService.PLAYSTATE_CHANGED);
-        mParentActivity.registerReceiver(mStatusListener, stateIntentfilter);
+        mParentActivity.registerReceiver(mStatusListener, stateIntentfilter
+                , Context.RECEIVER_EXPORTED);
         mParentActivity.updateNowPlaying(mParentActivity);
     }
     @Override
@@ -693,7 +694,8 @@ public class TrackBrowserActivityFragment extends Fragment
             try {
                 int cur = MusicUtils.sService.getQueuePosition();
                 getListView().setSelection(cur);
-                mParentActivity.registerReceiver(mNowPlayingListener, new IntentFilter(f));
+                mParentActivity.registerReceiver(mNowPlayingListener, new IntentFilter(f)
+                        , Context.RECEIVER_EXPORTED);
                 mNowPlayingListener.onReceive(mParentActivity,
                                         new Intent(MediaPlaybackService.META_CHANGED));
             } catch (RemoteException ex) {

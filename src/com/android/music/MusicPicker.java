@@ -542,7 +542,7 @@ public class MusicPicker extends ListActivity
         f.addAction(Intent.ACTION_MEDIA_SCANNER_STARTED);
         f.addAction(Intent.ACTION_MEDIA_SCANNER_FINISHED);
         f.addDataScheme("file");
-        registerReceiver(mScanListener, f);
+        registerReceiver(mScanListener, f, Context.RECEIVER_EXPORTED);
         setSortMode(sortMode);
     }
 

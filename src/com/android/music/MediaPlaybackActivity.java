@@ -195,12 +195,12 @@ public class MediaPlaybackActivity extends Activity implements MusicUtils.Defs,
         metaChangeFilter.addAction(MediaPlaybackService.META_CHANGED);
         metaChangeFilter.addAction(MediaPlaybackService.QUEUE_CHANGED);
         metaChangeFilter.addAction(MediaPlaybackService.PLAYSTATE_CHANGED);
-        registerReceiver(mTrackListListener, metaChangeFilter);
+        registerReceiver(mTrackListListener, metaChangeFilter, Context.RECEIVER_EXPORTED);
 
         IntentFilter f = new IntentFilter();
         f.addAction(AudioManager.ACTION_AUDIO_BECOMING_NOISY);
         f.addAction(Intent.ACTION_MEDIA_BUTTON);
-        registerReceiver(mMediaButtonIntentReceiver, f);
+        registerReceiver(mMediaButtonIntentReceiver, f, Context.RECEIVER_EXPORTED);
 
         new MusicUtils.BitmapDownloadThread(this, null, 0, 20).start();
     }
@@ -914,7 +914,7 @@ public class MediaPlaybackActivity extends Activity implements MusicUtils.Defs,
         f.addAction(MediaPlaybackService.META_CHANGED);
         f.addAction(MediaPlaybackService.SHUFFLE_CHANGED);
         f.addAction(MediaPlaybackService.REPEAT_CHANGED);
-        registerReceiver(mStatusListener, f);
+        registerReceiver(mStatusListener, f, Context.RECEIVER_EXPORTED);
         mReceiverUnregistered = false;
 
         IntentFilter s = new IntentFilter();
@@ -2005,7 +2005,7 @@ public class MediaPlaybackActivity extends Activity implements MusicUtils.Defs,
                     f.addAction(MediaPlaybackService.META_CHANGED);
                     f.addAction(MediaPlaybackService.SHUFFLE_CHANGED);
                     f.addAction(MediaPlaybackService.REPEAT_CHANGED);
-                    registerReceiver(mStatusListener, f);
+                    registerReceiver(mStatusListener, f, Context.RECEIVER_EXPORTED);
                     mReceiverUnregistered = false;
                 }
                 paused = false;

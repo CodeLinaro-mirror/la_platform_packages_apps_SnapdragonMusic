@@ -174,7 +174,7 @@ public class FolderBrowserFragment extends Fragment
         IntentFilter f = new IntentFilter();
         f.addAction(MediaPlaybackService.META_CHANGED);
         f.addAction(MediaPlaybackService.QUEUE_CHANGED);
-        mActivity.registerReceiver(mTrackListListener, f);
+        mActivity.registerReceiver(mTrackListListener, f, Context.RECEIVER_EXPORTED);
         mTrackListListener.onReceive(null, null);
 
        // MusicUtils.setSpinnerState(this);
