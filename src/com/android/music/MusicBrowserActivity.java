@@ -26,6 +26,7 @@ import com.codeaurora.music.custom.MusicPanelLayout.BoardState;
 import com.codeaurora.music.custom.PermissionActivity;
 
 import android.Manifest.permission;
+import android.app.AppOpsManager;
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.content.BroadcastReceiver;
@@ -47,6 +48,7 @@ import android.media.AudioManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.os.Process;
 import android.os.RemoteException;
 import android.provider.MediaStore;
 import androidx.drawerlayout.widget.DrawerLayout;
@@ -134,6 +136,15 @@ public class MusicBrowserActivity extends MediaPlaybackActivity implements
         String shuf = getIntent().getStringExtra("autoshuffle");
         if ("true".equals(shuf)) {
             mToken = MusicUtils.bindToService(this, autoshuffle);
+        }
+        AppOpsManager appOpsManager = (AppOpsManager) getSystemService(AppOpsManager.class);
+        int uid = Process.myUid();
+        if (appOpsManager != null && appOpsManager.noteOpNoThrow(
+                AppOpsManager.OPSTR_WRITE_MEDIA_AUDIO, uid, "com.android.music", null, null)
+                != AppOpsManager.MODE_ALLOWED) {
+            Log.d(TAG, "modify app op for music app");
+            appOpsManager.setUidMode(AppOpsManager.OPSTR_WRITE_MEDIA_AUDIO
+                    , uid, AppOpsManager.MODE_ALLOWED);
         }
     }
 
