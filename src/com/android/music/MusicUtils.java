@@ -572,12 +572,12 @@ public class MusicUtils {
     public static boolean BypassForAlbum(Context context, long id) {
         String name = getSongNameById(context, id);
         if (name == null) {
-            Log.e(TAG, "BypassForAlbum name is null");
+            Log.d(TAG, "BypassForAlbum name is null");
             return true;
         }
         name = name.toUpperCase();
         if (name.endsWith(".MID")) {
-            Log.e(TAG, "BypassForAlbum name="+ name);
+            Log.d(TAG, "BypassForAlbum name="+ name);
             return true;
         }
         return false;
