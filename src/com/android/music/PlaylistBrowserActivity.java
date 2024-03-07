@@ -216,7 +216,7 @@ public class PlaylistBrowserActivity extends Activity implements
 
         mAdapter = (PlaylistListAdapter) getLastNonConfigurationInstance();
         if (mAdapter == null) {
-            mAdapter = new PlaylistListAdapter(getApplication(), this,
+            mAdapter = new PlaylistListAdapter(this, this,
                     R.layout.track_list_common_playlist, mPlaylistCursor,
                     new String[] { MediaStore.Audio.Playlists.NAME },
                     new int[] { android.R.id.text1 });

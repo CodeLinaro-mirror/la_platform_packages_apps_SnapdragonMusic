@@ -141,7 +141,7 @@ public class AlbumBrowserFragment extends Fragment implements MusicUtils.Defs,
             }
         });
         mAlbumList.setTextFilterEnabled(true);
-        mAdapter = new AlbumListAdapter(mParentActivity.getApplication(), this,
+        mAdapter = new AlbumListAdapter(mParentActivity, this,
                 R.layout.track_list_item_album, mAlbumCursor, new String[] {},
                 new int[] {});
         mAlbumList.setAdapter(mAdapter);

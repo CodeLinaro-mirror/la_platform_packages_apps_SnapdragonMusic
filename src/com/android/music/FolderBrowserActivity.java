@@ -111,7 +111,7 @@ public class FolderBrowserActivity extends ListActivity
         mAdapter = (FolderListAdapter) getLastNonConfigurationInstance();
         if (mAdapter == null) {
             mAdapter = new FolderListAdapter(
-                    getApplication(),
+                    this,
                     this,
                     R.layout.track_list_item,
                     mFilesCursor,

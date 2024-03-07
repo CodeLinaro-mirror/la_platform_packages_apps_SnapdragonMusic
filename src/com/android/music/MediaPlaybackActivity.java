@@ -208,7 +208,7 @@ public class MediaPlaybackActivity extends Activity implements MusicUtils.Defs,
     public void init() {
         mToolbar = (Toolbar) findViewById(R.id.music_tool_bar);
         mNowPlayingView = findViewById(R.id.dragLayout);
-        mSlidingPanelLayout = (MusicPanelLayout) findViewById(R.id.sliding_layout);
+        mSlidingPanelLayout = (MusicPanelLayout) this.findViewById(R.id.sliding_layout);
         mNowPlayingIcon = (ImageView) findViewById(R.id.nowplay_icon);
         mNowPlayingIcon.setOnClickListener(mPauseListener);
         setTouchDelegate(mNowPlayingIcon);

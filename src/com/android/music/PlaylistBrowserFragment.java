@@ -306,7 +306,7 @@ public class PlaylistBrowserFragment extends Fragment implements
             }
         });
         if (mAdapter == null) {
-            mAdapter = new PlaylistListAdapter(parentActivity.getApplication(),
+            mAdapter = new PlaylistListAdapter(parentActivity,
                     this, R.layout.track_list_common_playlist, mPlaylistCursor,
                     new String[] { MediaStore.Audio.Playlists.NAME },
                     new int[] { android.R.id.text1 });

@@ -224,7 +224,7 @@ public class TrackBrowserActivity extends ListActivity
         if (mAdapter == null) {
             //Log.i("@@@", "starting query");
             mAdapter = new TrackListAdapter(
-                    getApplication(), // need to use application context to avoid leaks
+                    this,
                     this,
                     mEditMode ? R.layout.edit_track_list_item : R.layout.track_list_item,
                     null, // cursor
