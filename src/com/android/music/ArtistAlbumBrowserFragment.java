@@ -200,7 +200,7 @@ public class ArtistAlbumBrowserFragment extends Fragment implements
         mExpandableListView.setOnChildClickListener(this);
         mExpandableListView.setDividerHeight(0);
         mExpandableListView.setOnGroupClickListener(onGroupClickListener);
-        mAdapter = new ArtistAlbumListAdapter(mActivity.getApplication(),
+        mAdapter = new ArtistAlbumListAdapter(mActivity,
                 this,
                 null, // cursor
                 R.layout.track_list_item_group, new String[] {}, new int[] {},

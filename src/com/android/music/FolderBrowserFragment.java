@@ -110,7 +110,7 @@ public class FolderBrowserFragment extends Fragment
         mFolderList.setDividerHeight(0);
 
         mAdapter = new FolderListAdapter(
-                mActivity.getApplicationContext(),
+                mActivity,
                 this,
                 R.layout.track_list_item,
                 mFilesCursor,

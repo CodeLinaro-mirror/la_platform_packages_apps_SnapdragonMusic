@@ -354,8 +354,7 @@ public class TrackBrowserFragment extends Fragment implements
 
         if (mAdapter == null) {
             mAdapter = new TrackListAdapter(
-                    mParentActivity.getApplication(), // need to use application
-                                                      // context to avoid leaks
+                    mParentActivity,
                     this,
                     mEditMode ? R.layout.edit_track_list_item
                             : R.layout.track_list_item,

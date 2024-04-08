@@ -448,7 +448,7 @@ public class TrackBrowserActivityFragment extends Fragment
         if (mAdapter == null) {
             //Log.i("@@@", "starting query");
              mAdapter = new TrackListAdapter(
-                    mParentActivity.getApplication(), // need to use application context to avoid leaks
+                    mParentActivity,
                     this,
                     R.layout.track_list_item_common1,
                     null, // cursor

@@ -134,7 +134,7 @@ public class AlbumBrowserActivity extends Activity implements
 
         mAdapter = (AlbumListAdapter) getLastNonConfigurationInstance();
         if (mAdapter == null) {
-            mAdapter = new AlbumListAdapter(getApplication(), this,
+            mAdapter = new AlbumListAdapter(this, this,
                     R.layout.track_list_item_album, mAlbumCursor,
                     new String[] {}, new int[] {});
             mAlbumList.setAdapter(mAdapter);
