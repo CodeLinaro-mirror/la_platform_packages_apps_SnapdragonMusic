@@ -14,6 +14,12 @@
  * limitations under the License.
  */
 
+/*
+ * Changes from Qualcomm Innovation Center, Inc. are provided under the following license:
+ * Copyright (c) 2024 Qualcomm Innovation Center, Inc. All rights reserved.
+ * SPDX-License-Identifier: BSD-3-Clause-Clear
+ */
+
 package com.android.music;
 
 import android.Manifest.permission;
@@ -63,6 +69,7 @@ import android.os.IBinder;
 import android.os.Message;
 import android.os.PowerManager;
 import android.os.SystemClock;
+import android.os.SystemProperties;
 import android.os.PowerManager.WakeLock;
 import android.provider.MediaStore;
 import android.media.session.MediaSession;
@@ -394,7 +401,11 @@ public class MediaPlaybackService extends Service {
                                 mPausedByTransientLossOfFocus = false;
                             }
                             // Don't idle to avoid being killed by LMK
-                            pause(false);
+                            // Continue music when I2S is enabled
+                            if (!SystemProperties
+                                    .getBoolean(MusicUtils.I2S_FEATURE_ENABLED, false)) {
+                                pause(false);
+                            }
                             break;
                         case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK:
                             mMediaplayerHandler.removeMessages(FADEUP);
@@ -406,7 +417,10 @@ public class MediaPlaybackService extends Service {
                                 mPausedByTransientLossOfFocus = true;
                             }
                             // Don't idle to avoid being killed by LMK
-                            pause(false);
+                            if (!SystemProperties
+                                    .getBoolean(MusicUtils.I2S_FEATURE_ENABLED, false)) {
+                                pause(false);
+                            }
                             break;
                         case AudioManager.AUDIOFOCUS_GAIN:
                             Log.v(LOGTAG, "AudioFocus: received AUDIOFOCUS_GAIN");

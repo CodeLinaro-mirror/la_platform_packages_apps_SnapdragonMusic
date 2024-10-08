@@ -14,6 +14,12 @@
  * limitations under the License.
  */
 
+/*
+ * Changes from Qualcomm Innovation Center, Inc. are provided under the following license:
+ * Copyright (c) 2024 Qualcomm Innovation Center, Inc. All rights reserved.
+ * SPDX-License-Identifier: BSD-3-Clause-Clear
+ */
+
 package com.android.music;
 
 import android.app.Activity;
@@ -49,6 +55,7 @@ import android.os.Environment;
 import android.os.Handler;
 import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
+import android.os.SystemProperties;
 import android.provider.MediaStore;
 import android.provider.Settings;
 import androidx.drawerlayout.widget.DrawerLayout;
@@ -131,6 +138,7 @@ public class MusicUtils {
     public static String URIS = "uris";
     private static String IDS = "ids";
     private static String ALBUMS = "albums";
+    public static final String I2S_FEATURE_ENABLED = "vendor.i2s.enable";
 
     public static long mPlayListId;
     // decoding and caching 20 bitmaps to overcome Out of memory exception.
@@ -2319,9 +2327,15 @@ public class MusicUtils {
 
         if (isTelephonyCallInProgress(context)) {
             Log.d("MusicUtils", "playAll  in a call");
-            // Don't try to play music in a call begin from android Q.
-            Toast.makeText(context, R.string.cant_play_music_in_call, Toast.LENGTH_SHORT).show();
-            return true;
+            // play music in a call begin when I2S is enabled
+            if (SystemProperties.getBoolean(I2S_FEATURE_ENABLED, false)) {
+                return false;
+            } else {
+                // Don't try to play music in a call begin from android Q.
+                Toast.makeText(context, R.string.cant_play_music_in_call, Toast.LENGTH_SHORT)
+                        .show();
+                return true;
+            }
         }
 
         return false;

@@ -14,6 +14,12 @@
  * limitations under the License.
  */
 
+/*
+ * Changes from Qualcomm Innovation Center, Inc. are provided under the following license:
+ * Copyright (c) 2024 Qualcomm Innovation Center, Inc. All rights reserved.
+ * SPDX-License-Identifier: BSD-3-Clause-Clear
+ */
+
 package com.android.music;
 
 import android.Manifest;
@@ -33,6 +39,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.SystemClock;
+import android.os.SystemProperties;
 import android.provider.MediaStore;
 import android.provider.OpenableColumns;
 import android.text.TextUtils;
@@ -263,13 +270,20 @@ public class AudioPreview extends Activity implements OnPreparedListener, OnErro
             switch (focusChange) {
                 case AudioManager.AUDIOFOCUS_LOSS:
                     mPausedByTransientLossOfFocus = false;
-                    mPlayer.pause();
+                    if (!SystemProperties
+                            .getBoolean(MusicUtils.I2S_FEATURE_ENABLED, false)) {
+                        mPlayer.pause();
+                    }
                     break;
                 case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT:
                 case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK:
                     if (mPlayer.isPlaying()) {
                         mPausedByTransientLossOfFocus = true;
-                        mPlayer.pause();
+                        // Continue music when I2Sis enable
+                        if (!SystemProperties
+                                .getBoolean(MusicUtils.I2S_FEATURE_ENABLED, false)) {
+                            mPlayer.pause();
+                        }
                     }
                     break;
                 case AudioManager.AUDIOFOCUS_GAIN:
