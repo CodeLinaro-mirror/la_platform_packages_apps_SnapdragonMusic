@@ -90,6 +90,8 @@ import java.util.List;
 import java.util.Random;
 import java.util.Vector;
 import java.util.HashMap;
+import android.provider.Settings;
+import android.provider.Settings.Global;
 
 /**
  * Provides "background" audio playback capabilities, allowing the
@@ -405,6 +407,16 @@ public class MediaPlaybackService extends Service {
                             if (!SystemProperties
                                     .getBoolean(MusicUtils.I2S_FEATURE_ENABLED, false)) {
                                 pause(false);
+                            } else {
+                                /* In SKU2, if no device is connected we will pause to
+                                   avoid mixing in speaker */
+                                boolean noDevConnectedThroughSecondaryBT =
+                                        Boolean.parseBoolean(Settings.Global.getString(
+                                        getApplicationContext().getContentResolver(),
+                                        MusicUtils.PROP_NO_DEV_CONNECTED));
+                                if (noDevConnectedThroughSecondaryBT) {
+                                    pause(false);
+                                }
                             }
                             break;
                         case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK:
@@ -420,6 +432,16 @@ public class MediaPlaybackService extends Service {
                             if (!SystemProperties
                                     .getBoolean(MusicUtils.I2S_FEATURE_ENABLED, false)) {
                                 pause(false);
+                            } else {
+                                /* In SKU2, if no device is connected we will pause to
+                                   avoid mixing in speaker */
+                                boolean noDevConnectedThroughSecondaryBT =
+                                        Boolean.parseBoolean(Settings.Global.getString(
+                                        getApplicationContext().getContentResolver(),
+                                        MusicUtils.PROP_NO_DEV_CONNECTED));
+                                if (noDevConnectedThroughSecondaryBT) {
+                                    pause(false);
+                                }
                             }
                             break;
                         case AudioManager.AUDIOFOCUS_GAIN:

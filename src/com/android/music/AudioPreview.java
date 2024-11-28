@@ -61,6 +61,8 @@ import android.view.KeyEvent;
 import android.content.BroadcastReceiver;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.provider.Settings;
+import android.provider.Settings.Global;
 
 import com.codeaurora.music.custom.PermissionActivity;
 
@@ -273,6 +275,16 @@ public class AudioPreview extends Activity implements OnPreparedListener, OnErro
                     if (!SystemProperties
                             .getBoolean(MusicUtils.I2S_FEATURE_ENABLED, false)) {
                         mPlayer.pause();
+                    } else {
+                        /* In SKU2, if no device is connected we will pause to
+                           avoid mixing in speaker */
+                        boolean noDevConnectedThroughSecondaryBT =
+                                Boolean.parseBoolean(Settings.Global.getString(
+                                getApplicationContext().getContentResolver(),
+                                MusicUtils.PROP_NO_DEV_CONNECTED));
+                        if (noDevConnectedThroughSecondaryBT) {
+                            mPlayer.pause();
+                        }
                     }
                     break;
                 case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT:
@@ -283,6 +295,16 @@ public class AudioPreview extends Activity implements OnPreparedListener, OnErro
                         if (!SystemProperties
                                 .getBoolean(MusicUtils.I2S_FEATURE_ENABLED, false)) {
                             mPlayer.pause();
+                        } else {
+                            /* In SKU2, if no device is connected we will pause to
+                               avoid mixing in speaker*/
+                            boolean noDevConnectedThroughSecondaryBT =
+                                    Boolean.parseBoolean(Settings.Global.getString(
+                                    getApplicationContext().getContentResolver(),
+                                    MusicUtils.PROP_NO_DEV_CONNECTED));
+                            if (noDevConnectedThroughSecondaryBT) {
+                                mPlayer.pause();
+                            }
                         }
                     }
                     break;

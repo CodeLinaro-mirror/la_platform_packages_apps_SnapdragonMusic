@@ -58,6 +58,7 @@ import android.os.RemoteException;
 import android.os.SystemProperties;
 import android.provider.MediaStore;
 import android.provider.Settings;
+import android.provider.Settings.Global;
 import androidx.drawerlayout.widget.DrawerLayout;
 import android.telecom.PhoneAccountHandle;
 import android.telecom.TelecomManager;
@@ -139,6 +140,7 @@ public class MusicUtils {
     private static String IDS = "ids";
     private static String ALBUMS = "albums";
     public static final String I2S_FEATURE_ENABLED = "vendor.i2s.enable";
+    public static final String PROP_NO_DEV_CONNECTED = "secondaryBT_no_dev_connected";
 
     public static long mPlayListId;
     // decoding and caching 20 bitmaps to overcome Out of memory exception.
@@ -2326,9 +2328,13 @@ public class MusicUtils {
             return false;
 
         if (isTelephonyCallInProgress(context)) {
-            Log.d("MusicUtils", "playAll  in a call");
             // play music in a call begin when I2S is enabled
-            if (SystemProperties.getBoolean(I2S_FEATURE_ENABLED, false)) {
+            boolean noDevConnectedThroughSecondaryBT = Boolean.parseBoolean(
+                Settings.Global.getString(context.getContentResolver(),
+                PROP_NO_DEV_CONNECTED));
+
+            if (SystemProperties.getBoolean(I2S_FEATURE_ENABLED, false) &&
+                !noDevConnectedThroughSecondaryBT) {
                 return false;
             } else {
                 // Don't try to play music in a call begin from android Q.
