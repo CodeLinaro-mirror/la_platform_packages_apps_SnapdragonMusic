@@ -38,6 +38,7 @@ import android.content.BroadcastReceiver;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.content.pm.PackageManager;
+import android.content.pm.ServiceInfo;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 
@@ -638,7 +639,8 @@ public class MediaPlaybackService extends Service {
         mControlInStatusBar = getApplicationContext().getResources().getBoolean(R.bool.control_in_statusbar);
 
         updateNotification(false);
-        startForeground(PLAYBACKSERVICE_STATUS, status);
+        startForeground(PLAYBACKSERVICE_STATUS, status,
+                ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PLAYBACK);
 
     }
 
@@ -974,7 +976,8 @@ public class MediaPlaybackService extends Service {
         }
 
         updateNotification(false);
-        startForeground(PLAYBACKSERVICE_STATUS, status);
+        startForeground(PLAYBACKSERVICE_STATUS, status,
+                ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PLAYBACK);
 
         mServiceStartId = startId;
         mDelayedStopHandler.removeCallbacksAndMessages(null);
@@ -1727,7 +1730,8 @@ public class MediaPlaybackService extends Service {
             views.setOnClickPendingIntent(R.id.pause, pausePendingIntent);
             viewsLarge.setOnClickPendingIntent(R.id.pause, pausePendingIntent);
             status.flags = Notification.FLAG_ONGOING_EVENT;
-            startForeground(PLAYBACKSERVICE_STATUS, status);
+            startForeground(PLAYBACKSERVICE_STATUS, status,
+                    ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PLAYBACK);
 
         }
     }
