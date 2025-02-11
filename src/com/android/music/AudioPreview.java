@@ -533,6 +533,7 @@ public class AudioPreview extends Activity implements OnPreparedListener, OnErro
         public void setDataSourceAndPrepare(Uri uri) throws IllegalArgumentException,
                         SecurityException, IllegalStateException, IOException {
             setDataSource(mActivity,uri);
+            setAudioStreamType(AudioManager.STREAM_MUSIC);
             prepareAsync();
         }
 
