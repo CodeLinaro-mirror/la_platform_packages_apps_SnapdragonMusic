@@ -639,9 +639,13 @@ public class MediaPlaybackService extends Service {
         mControlInStatusBar = getApplicationContext().getResources().getBoolean(R.bool.control_in_statusbar);
 
         updateNotification(false);
-        startForeground(PLAYBACKSERVICE_STATUS, status,
-                ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PLAYBACK);
-
+        try {
+            startForeground(PLAYBACKSERVICE_STATUS, status,
+                    ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PLAYBACK);
+        } catch (Exception e) {
+            Log.w(LOGTAG, "Failed during MediaPlaybackService startForeground", e);
+            stopSelf();
+        }
     }
 
     private BroadcastReceiver mScreenTimeoutListener = new BroadcastReceiver() {
