@@ -69,7 +69,6 @@ import android.os.IBinder;
 import android.os.Message;
 import android.os.PowerManager;
 import android.os.SystemClock;
-import android.os.SystemProperties;
 import android.os.PowerManager.WakeLock;
 import android.provider.MediaStore;
 import android.media.session.MediaSession;
@@ -403,21 +402,7 @@ public class MediaPlaybackService extends Service {
                                 mPausedByTransientLossOfFocus = false;
                             }
                             // Don't idle to avoid being killed by LMK
-                            // Continue music when I2S is enabled
-                            if (!SystemProperties
-                                    .getBoolean(MusicUtils.I2S_FEATURE_ENABLED, false)) {
-                                pause(false);
-                            } else {
-                                /* In SKU2, if no device is connected we will pause to
-                                   avoid mixing in speaker */
-                                boolean noDevConnectedThroughSecondaryBT =
-                                        Boolean.parseBoolean(Settings.Global.getString(
-                                        getApplicationContext().getContentResolver(),
-                                        MusicUtils.PROP_NO_DEV_CONNECTED));
-                                if (noDevConnectedThroughSecondaryBT) {
-                                    pause(false);
-                                }
-                            }
+                            pause(false);
                             break;
                         case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK:
                             mMediaplayerHandler.removeMessages(FADEUP);
@@ -429,20 +414,7 @@ public class MediaPlaybackService extends Service {
                                 mPausedByTransientLossOfFocus = true;
                             }
                             // Don't idle to avoid being killed by LMK
-                            if (!SystemProperties
-                                    .getBoolean(MusicUtils.I2S_FEATURE_ENABLED, false)) {
-                                pause(false);
-                            } else {
-                                /* In SKU2, if no device is connected we will pause to
-                                   avoid mixing in speaker */
-                                boolean noDevConnectedThroughSecondaryBT =
-                                        Boolean.parseBoolean(Settings.Global.getString(
-                                        getApplicationContext().getContentResolver(),
-                                        MusicUtils.PROP_NO_DEV_CONNECTED));
-                                if (noDevConnectedThroughSecondaryBT) {
-                                    pause(false);
-                                }
-                            }
+                            pause(false);
                             break;
                         case AudioManager.AUDIOFOCUS_GAIN:
                             Log.v(LOGTAG, "AudioFocus: received AUDIOFOCUS_GAIN");

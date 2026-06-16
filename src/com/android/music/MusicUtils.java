@@ -55,7 +55,6 @@ import android.os.Environment;
 import android.os.Handler;
 import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
-import android.os.SystemProperties;
 import android.provider.MediaStore;
 import android.provider.Settings;
 import android.provider.Settings.Global;
@@ -139,8 +138,6 @@ public class MusicUtils {
     public static String URIS = "uris";
     private static String IDS = "ids";
     private static String ALBUMS = "albums";
-    public static final String I2S_FEATURE_ENABLED = "vendor.i2s.enable";
-    public static final String PROP_NO_DEV_CONNECTED = "secondaryBT_no_dev_connected";
 
     public static long mPlayListId;
     // decoding and caching 20 bitmaps to overcome Out of memory exception.
@@ -2328,20 +2325,11 @@ public class MusicUtils {
             return false;
 
         if (isTelephonyCallInProgress(context)) {
-            // play music in a call begin when I2S is enabled
-            boolean noDevConnectedThroughSecondaryBT = Boolean.parseBoolean(
-                Settings.Global.getString(context.getContentResolver(),
-                PROP_NO_DEV_CONNECTED));
-
-            if (SystemProperties.getBoolean(I2S_FEATURE_ENABLED, false) &&
-                !noDevConnectedThroughSecondaryBT) {
-                return false;
-            } else {
-                // Don't try to play music in a call begin from android Q.
-                Toast.makeText(context, R.string.cant_play_music_in_call, Toast.LENGTH_SHORT)
-                        .show();
-                return true;
-            }
+            Log.d("MusicUtils", "playAll  in a call");
+            // Don't try to play music in a call begin from android Q.
+            Toast.makeText(context, R.string.cant_play_music_in_call, Toast.LENGTH_SHORT)
+                    .show();
+            return true;
         }
 
         return false;

@@ -39,7 +39,6 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.SystemClock;
-import android.os.SystemProperties;
 import android.provider.MediaStore;
 import android.provider.OpenableColumns;
 import android.text.TextUtils;
@@ -61,8 +60,6 @@ import android.view.KeyEvent;
 import android.content.BroadcastReceiver;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.provider.Settings;
-import android.provider.Settings.Global;
 
 import com.codeaurora.music.custom.PermissionActivity;
 
@@ -272,40 +269,13 @@ public class AudioPreview extends Activity implements OnPreparedListener, OnErro
             switch (focusChange) {
                 case AudioManager.AUDIOFOCUS_LOSS:
                     mPausedByTransientLossOfFocus = false;
-                    if (!SystemProperties
-                            .getBoolean(MusicUtils.I2S_FEATURE_ENABLED, false)) {
                         mPlayer.pause();
-                    } else {
-                        /* In SKU2, if no device is connected we will pause to
-                           avoid mixing in speaker */
-                        boolean noDevConnectedThroughSecondaryBT =
-                                Boolean.parseBoolean(Settings.Global.getString(
-                                getApplicationContext().getContentResolver(),
-                                MusicUtils.PROP_NO_DEV_CONNECTED));
-                        if (noDevConnectedThroughSecondaryBT) {
-                            mPlayer.pause();
-                        }
-                    }
                     break;
                 case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT:
                 case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK:
                     if (mPlayer.isPlaying()) {
                         mPausedByTransientLossOfFocus = true;
-                        // Continue music when I2Sis enable
-                        if (!SystemProperties
-                                .getBoolean(MusicUtils.I2S_FEATURE_ENABLED, false)) {
-                            mPlayer.pause();
-                        } else {
-                            /* In SKU2, if no device is connected we will pause to
-                               avoid mixing in speaker*/
-                            boolean noDevConnectedThroughSecondaryBT =
-                                    Boolean.parseBoolean(Settings.Global.getString(
-                                    getApplicationContext().getContentResolver(),
-                                    MusicUtils.PROP_NO_DEV_CONNECTED));
-                            if (noDevConnectedThroughSecondaryBT) {
-                                mPlayer.pause();
-                            }
-                        }
+                        mPlayer.pause();
                     }
                     break;
                 case AudioManager.AUDIOFOCUS_GAIN:
